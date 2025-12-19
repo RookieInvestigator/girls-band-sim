@@ -7,9 +7,11 @@ declare var process: { env: { API_KEY: string } };
 
 // Initialize lazily to prevent app crash on load if key is missing/invalid
 const getAiClient = () => {
-  const apiKey = process.env.API_KEY;
-  // If key is missing, this might still throw later, but allows app to render first
-  return new GoogleGenAI({ apiKey: apiKey || '' });
+  // Priority: 
+  // 1. Environment Variable (Development/Build time injection)
+  // 2. LocalStorage (Runtime user input for static hosting like GitHub Pages)
+  const apiKey = process.env.API_KEY || localStorage.getItem('gemini_api_key') || '';
+  return new GoogleGenAI({ apiKey: apiKey });
 };
 
 // Priority list of models to try. 

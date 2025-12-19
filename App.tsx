@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Music, Users, Calendar, MessageCircle, Layout, Disc, Ticket, Star, Mic as MicIcon, Guitar, Zap, PenTool, Coins, Activity
+  Music, Users, Calendar, MessageCircle, Layout, Disc, Ticket, Star, Mic as MicIcon, Guitar, Zap, PenTool, Coins, Activity, Key
 } from 'lucide-react';
 import { useGameEngine } from './logic/game_engine';
 import { Role } from './types';
@@ -18,10 +18,33 @@ import { ScoutModal } from './components/ScoutModal';
 import { EventModal } from './components/EventModal';
 import { AiLoadingModal } from './components/AiLoadingModal';
 
+declare var process: { env: { API_KEY: string } };
+
 const App = () => {
   const engine = useGameEngine();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'schedule' | 'members' | 'songs' | 'sns' | 'gigs'>('dashboard');
   const [playerNameInput, setPlayerNameInput] = useState('');
+  
+  // API Key handling for static hosting
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [hasEnvKey, setHasEnvKey] = useState(false);
+
+  useEffect(() => {
+      // Check if env key is present and not empty
+      if (process.env.API_KEY && process.env.API_KEY.length > 0) {
+          setHasEnvKey(true);
+      } else {
+          // Pre-fill from local storage if available
+          const stored = localStorage.getItem('gemini_api_key');
+          if (stored) setApiKeyInput(stored);
+      }
+  }, []);
+
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const val = e.target.value;
+      setApiKeyInput(val);
+      localStorage.setItem('gemini_api_key', val);
+  };
 
   // HACK: Expose nextRound to window for LiveStage
   useEffect(() => { (window as any).handleNextRound = engine.nextRound; }, [engine.nextRound]);
@@ -55,14 +78,30 @@ const App = () => {
             <p className="text-slate-400 font-bold tracking-[0.4em] uppercase text-xs md:text-sm">通往武道馆之路 // 都市传说</p>
           </div>
 
-          <div className="w-full max-w-md bg-white p-2 rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/50 flex items-center transition-all focus-within:ring-2 focus-within:ring-pink-500/50">
-             <input 
-               type="text" 
-               value={playerNameInput}
-               onChange={(e) => setPlayerNameInput(e.target.value)}
-               placeholder="请输入你的名字" 
-               className="w-full bg-transparent border-none outline-none text-center font-black text-lg md:text-xl text-slate-800 placeholder-slate-300 py-3 tracking-widest"
-             />
+          <div className="w-full max-w-md space-y-4">
+              <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/50 flex items-center transition-all focus-within:ring-2 focus-within:ring-pink-500/50">
+                <input 
+                type="text" 
+                value={playerNameInput}
+                onChange={(e) => setPlayerNameInput(e.target.value)}
+                placeholder="请输入你的名字" 
+                className="w-full bg-transparent border-none outline-none text-center font-black text-lg md:text-xl text-slate-800 placeholder-slate-300 py-3 tracking-widest"
+                />
+              </div>
+
+              {/* API Key Input (Only if Env Key is missing) */}
+              {!hasEnvKey && (
+                  <div className="bg-slate-100 p-2 rounded-xl border border-slate-200 flex items-center transition-all focus-within:ring-2 focus-within:ring-slate-300">
+                      <div className="pl-3 text-slate-400"><Key size={16}/></div>
+                      <input 
+                          type="password" 
+                          value={apiKeyInput}
+                          onChange={handleApiKeyChange}
+                          placeholder="设置 Gemini API Key (推荐)" 
+                          className="w-full bg-transparent border-none outline-none text-center font-bold text-xs md:text-sm text-slate-600 placeholder-slate-400 py-2 tracking-wide"
+                      />
+                  </div>
+              )}
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
