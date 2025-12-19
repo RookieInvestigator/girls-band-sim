@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { Search, Heart, Frown, Battery, Music, Guitar, Star, Brain, PenTool, FileText, Disc, Palette, Sparkles, X } from 'lucide-react';
+import { Search, Heart, Frown, Battery, Music, Guitar, Star, Brain, PenTool, FileText, Disc, Palette, Sparkles, X, ChevronRight } from 'lucide-react';
 import { Member, InteractionType, SelfActionType, ActionResult } from '../types';
 import { INTERACTION_DATA } from '../data/interactions';
 import { StatBar } from './Shared';
@@ -144,68 +144,84 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                     </div>
                 </div>
 
-                {/* 3. Interactions - Improved Button Layout */}
+                {/* 3. Interactions - Replaced Floating Overlay with Inline Result View */}
                 <div className="flex-1 bg-slate-900 text-white p-5 md:p-6 rounded-[2rem] shadow-lg relative overflow-hidden flex flex-col min-h-[220px]">
                     <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950"/>
                     
-                    <div className="relative z-10 flex justify-between items-center mb-4">
+                    <div className="relative z-10 flex justify-between items-center mb-4 shrink-0">
                         <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                            <Sparkles size={14} className="text-pink-500"/> 互动菜单
+                            <Sparkles size={14} className="text-pink-500"/> 
+                            {engine.lastInteraction ? '互动结果' : '互动菜单'}
                         </h4>
-                        <div className="text-[10px] font-bold bg-white/10 px-3 py-1 rounded-full text-white/80 border border-white/10">
-                            体力: {selectedMember?.interactionsLeft}
-                        </div>
+                        {!engine.lastInteraction && (
+                            <div className="text-[10px] font-bold bg-white/10 px-3 py-1 rounded-full text-white/80 border border-white/10">
+                                体力: {selectedMember?.interactionsLeft}
+                            </div>
+                        )}
                     </div>
                     
                     <div className="relative z-10 flex-1 overflow-y-auto scrollbar-hide pb-safe">
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                            {selectedMember?.isLeader ? (
-                                Object.values(SelfActionType).map(t => (
-                                    <button key={t} onClick={() => engine.performSelfAction(t)} className="h-14 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold text-slate-300 hover:text-white hover:border-white/30 shadow-sm active:scale-95 transition-all truncate px-2 flex items-center justify-center">
-                                        {t}
-                                    </button>
-                                ))
-                            ) : (
-                                Object.values(InteractionType).map(t => {
-                                    const cost = INTERACTION_DATA[t].cost;
-                                    const canAfford = engine.gameState.money >= cost;
-                                    return (
-                                        <button 
-                                        key={t} 
-                                        disabled={!canAfford}
-                                        onClick={() => engine.performInteraction(selectedMember!, t, cost)} 
-                                        className={`h-14 border rounded-xl text-[10px] font-bold shadow-sm active:scale-95 transition-all px-2 flex flex-col items-center justify-center gap-1
-                                            ${canAfford 
-                                            ? 'bg-white/5 border-white/10 hover:bg-pink-600 hover:border-pink-500 text-white' 
-                                            : 'bg-black/20 border-white/5 text-white/20 cursor-not-allowed'}
-                                        `}
-                                        >
-                                            <span>{t}</span>
-                                            {cost > 0 && <span className="text-[9px] opacity-60 bg-black/20 px-1.5 rounded">¥{cost}</span>}
-                                        </button>
-                                    )
-                                })
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Interaction Log Overlay */}
-                    {engine.lastInteraction && (
-                        <div className="mt-4 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 shrink-0 relative z-20">
-                            <div className={`mt-1 w-3 h-3 rounded-full shrink-0 ${engine.lastInteraction.result === ActionResult.Failure ? 'bg-slate-500' : 'bg-pink-500 shadow-[0_0_10px_#ec4899]'}`}/>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${engine.lastInteraction.result === ActionResult.GreatSuccess ? 'text-amber-400' : 'text-slate-400'}`}>
-                                        {engine.lastInteraction.result}
-                                    </span>
-                                    <button onClick={() => engine.setLastInteraction(null)}><X size={14} className="text-white/40 hover:text-white"/></button>
+                        {engine.lastInteraction ? (
+                            // INLINE RESULT VIEW
+                            <div className="h-full flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 px-4 py-2 text-center">
+                                <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 shadow-xl ${
+                                    engine.lastInteraction.result === ActionResult.Failure ? 'bg-slate-700 text-slate-300' : 
+                                    (engine.lastInteraction.result === ActionResult.GreatSuccess ? 'bg-amber-400 text-white shadow-amber-400/50' : 'bg-pink-500 text-white shadow-pink-500/50')
+                                }`}>
+                                    {engine.lastInteraction.result === ActionResult.GreatSuccess ? <Sparkles size={28}/> : (engine.lastInteraction.result === ActionResult.Failure ? <Frown size={28}/> : <Heart size={28}/>)}
                                 </div>
-                                <p className="text-sm text-white font-medium leading-relaxed">{engine.lastInteraction.log}</p>
+                                <div className={`text-base font-black uppercase tracking-[0.2em] mb-3 ${
+                                    engine.lastInteraction.result === ActionResult.GreatSuccess ? 'text-amber-400' : 
+                                    (engine.lastInteraction.result === ActionResult.Failure ? 'text-slate-400' : 'text-pink-400')
+                                }`}>
+                                    {engine.lastInteraction.result}
+                                </div>
+                                <p className="text-sm md:text-base text-white/90 font-medium leading-relaxed max-w-md">
+                                    “{engine.lastInteraction.log}”
+                                </p>
+                                <button 
+                                    onClick={() => engine.setLastInteraction(null)}
+                                    className="mt-6 px-8 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-xs font-bold text-white transition-all flex items-center gap-2 group"
+                                >
+                                    继续 <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform"/>
+                                </button>
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            // INTERACTION BUTTONS
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-in fade-in duration-300">
+                                {selectedMember?.isLeader ? (
+                                    Object.values(SelfActionType).map(t => (
+                                        <button key={t} onClick={() => engine.performSelfAction(t)} className="h-14 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold text-slate-300 hover:text-white hover:border-white/30 shadow-sm active:scale-95 transition-all truncate px-2 flex items-center justify-center">
+                                            {t}
+                                        </button>
+                                    ))
+                                ) : (
+                                    Object.values(InteractionType).map(t => {
+                                        const cost = INTERACTION_DATA[t].cost;
+                                        const canAfford = engine.gameState.money >= cost;
+                                        return (
+                                            <button 
+                                            key={t} 
+                                            disabled={!canAfford}
+                                            onClick={() => engine.performInteraction(selectedMember!, t, cost)} 
+                                            className={`h-14 border rounded-xl text-[10px] font-bold shadow-sm active:scale-95 transition-all px-2 flex flex-col items-center justify-center gap-1
+                                                ${canAfford 
+                                                ? 'bg-white/5 border-white/10 hover:bg-pink-600 hover:border-pink-500 text-white' 
+                                                : 'bg-black/20 border-white/5 text-white/20 cursor-not-allowed'}
+                                            `}
+                                            >
+                                                <span>{t}</span>
+                                                {cost > 0 && <span className="text-[9px] opacity-60 bg-black/20 px-1.5 rounded">¥{cost}</span>}
+                                            </button>
+                                        )
+                                    })
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
+    
