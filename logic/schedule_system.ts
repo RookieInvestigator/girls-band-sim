@@ -483,7 +483,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
 
     if (activeMemberForFlavor) {
         currentLog.flavorText = getFlavorText(action, activeMemberForFlavor, res);
-        currentLog.memberId = activeMemberForFlavor.id;
+        currentLog.memberId = (activeMemberForFlavor as Member).id;
     }
 
     // Format Stat Log
