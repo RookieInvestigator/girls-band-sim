@@ -10,7 +10,8 @@ permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,7 +21,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # Removed cache: 'npm' because package-lock.json is not committed
+          # Cache is intentionally removed to avoid "lock file not found" errors
 
       - name: Install Dependencies
         run: npm install
@@ -31,8 +32,33 @@ jobs:
           # Inject the API Key from GitHub Secrets during build time
           API_KEY: ${{ secrets.API_KEY }}
 
-      - name: Deploy
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+
+      - name: Show Deployment URL
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🌍 Your app is live at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
