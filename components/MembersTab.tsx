@@ -70,7 +70,7 @@ export const MembersTab = ({ engine }: { engine: any }) => {
     return (
         <div className="h-full flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* LEFT COLUMN: LIST */}
-            <div className="lg:col-span-3 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto scrollbar-hide shrink-0 pb-2 lg:pb-0 h-auto lg:h-full snap-x">
+            <div className="lg:col-span-3 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto scrollbar-hide shrink-0 pb-2 lg:pb-2 h-auto lg:h-full snap-x p-1">
                 {engine.gameState.members.map((m: Member) => (
                     <button 
                         key={m.id} 
