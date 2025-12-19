@@ -3,13 +3,16 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { GameState, Role, Song, MusicGenre, LyricTheme, RivalState, Member } from "./types";
 import { ActionLog } from "./logic/schedule_system";
 
-declare var process: { env: any };
+declare var process: { env: { API_KEY: string } };
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize lazily to prevent app crash on load if key is missing/invalid
+const getAiClient = () => {
+  const apiKey = process.env.API_KEY;
+  // If key is missing, this might still throw later, but allows app to render first
+  return new GoogleGenAI({ apiKey: apiKey || '' });
+};
 
 // Priority list of models to try. 
-// Optimized for Cost & Speed: Prioritizing Flash models as requested.
-// Removed Pro models to prevent accidental high quota usage.
 const MODELS_TO_TRY = [
   "gemini-2.5-flash",
   "gemini-3-flash-preview",
@@ -23,6 +26,7 @@ async function generateWithFallback(
   prompt: string, 
   responseSchema: any
 ): Promise<any> {
+  const ai = getAiClient();
   let lastError: any;
 
   for (const model of MODELS_TO_TRY) {

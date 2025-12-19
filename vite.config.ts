@@ -11,8 +11,8 @@ export default defineConfig(({ mode }) => {
     base: './', // Use relative base path for GitHub Pages compatibility
     define: {
       // Polyfill process.env.API_KEY for the bundled app
-      // Prioritize process.env.API_KEY (from CI) over env.API_KEY (from .env file)
-      'process.env.API_KEY': JSON.stringify(process.env.API_KEY || env.API_KEY),
+      // Ensure it is always a string, even if empty, to prevent runtime crashes
+      'process.env.API_KEY': JSON.stringify(process.env.API_KEY || env.API_KEY || ""),
     }
   }
 })
