@@ -1,3 +1,4 @@
+
 import { ScheduleAction, ScheduleCategory } from './types';
 
 export const MAX_MEMBERS = 5;
@@ -58,7 +59,9 @@ export const SCHEDULE_COSTS: Partial<Record<ScheduleAction, number>> = {
   [ScheduleAction.StyleMakeover]: 2000,
 };
 
-export const ACTION_UNLOCKS: Record<ScheduleAction, { week?: number, fans?: number, members?: number, money?: number }> = {
+// Actions moved to Skill Tree are removed from here or have their basic requirements kept as fallback (but skill check takes priority in logic)
+// In this implementation, we will remove the `week` requirement for skill-locked actions to ensure they are ONLY unlocked via skill.
+export const ACTION_UNLOCKS: Partial<Record<ScheduleAction, { week?: number, fans?: number, members?: number, money?: number }>> = {
   [ScheduleAction.SoloTechnical]: { week: 1 },
   [ScheduleAction.SoloVocal]: { week: 1 },
   [ScheduleAction.SoloExpression]: { week: 1 },
@@ -74,15 +77,16 @@ export const ACTION_UNLOCKS: Record<ScheduleAction, { week?: number, fans?: numb
   
   [ScheduleAction.BandEnsemble]: { members: 2 },
   [ScheduleAction.BandRehearsal]: { week: 3, members: 3 },
-  [ScheduleAction.RentStudio]: { week: 6, members: 3, fans: 500 },
-  [ScheduleAction.TrainingCamp]: { week: 8, members: 3, money: 5000 },
+  
+  // Skill Locked: RentStudio
+  // Skill Locked: TrainingCamp
   
   [ScheduleAction.EquipmentCare]: { week: 4 },
   [ScheduleAction.VocalLesson]: { week: 3 },
   [ScheduleAction.ListenAnalysis]: { week: 3 },
   
-  [ScheduleAction.StreetLive]: { week: 3, members: 2 },
-  [ScheduleAction.SocialMediaLive]: { fans: 500, members: 2 },
+  // Skill Locked: StreetLive
+  // Skill Locked: SocialMediaLive
   [ScheduleAction.LiveStream]: { fans: 2000, members: 3 },
   [ScheduleAction.PhotoSession]: { fans: 5000, members: 3 },
   

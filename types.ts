@@ -162,6 +162,7 @@ export interface Impact {
   rivalFans?: number;
   rivalRelation?: number;
   unlockRival?: boolean;
+  skillPoints?: number; // New: Gain Skill Points (PP)
 }
 
 export interface Member {
@@ -325,6 +326,30 @@ export interface RivalState {
   style: string;
 }
 
+export enum BandState {
+    Normal = 'Normal',
+    Serious = 'Serious',
+    Relaxed = 'Relaxed'
+}
+
+export interface SkillNode {
+    id: string;
+    name: string;
+    description: string;
+    cost: number;
+    x: number;
+    y: number;
+    parents: string[];
+    category: 'friendship' | 'passion' | 'technique' | 'commercial';
+    effect?: {
+        statMult?: Partial<Record<string, number>>;
+        unlockAction?: ScheduleAction[];
+        unlockInteraction?: InteractionType[];
+        unlockState?: BandState;
+        passive?: string;
+    };
+}
+
 export interface GameState {
   currentWeek: number;
   money: number;
@@ -342,7 +367,12 @@ export interface GameState {
   eventQueue: QueuedEvent[];
   activeGig: ActiveGigState | null;
   rival: RivalState;
-  completedGigs: string[]; 
+  completedGigs: string[];
+  
+  // NEW SKILL SYSTEM
+  skillPoints: number;
+  unlockedSkills: string[];
+  bandState: BandState;
 }
 
 export interface EventOption {

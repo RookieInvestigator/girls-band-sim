@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { GameState, Member, Role, ScheduleAction, InteractionType, SelfActionType, ActionResult, GameEvent, EventOption, Impact, InteractionOutcome, SNSPost, Song, MusicGenre, QueuedEvent, ActiveGigState, GigCard, GigResultData, LyricTheme } from '../types';
+import { GameState, Member, Role, ScheduleAction, InteractionType, SelfActionType, ActionResult, GameEvent, EventOption, Impact, InteractionOutcome, SNSPost, Song, MusicGenre, QueuedEvent, ActiveGigState, GigCard, GigResultData, LyricTheme, BandState } from '../types';
 import { MEMBER_POOL } from '../data/members';
 import { EVENT_LIBRARY } from '../data/events';
 import { calculateInteractionOutcome } from './interaction_system';
@@ -21,6 +21,7 @@ import { generateAiSnsPosts, generateSongIdea, generateAiRivalBand } from '../ge
 import { GIG_DEFINITIONS } from '../data/gigs';
 import { generateRivalBand } from '../data/rival_generators';
 import { initializeGigState, generateRoundOptions, resolveOption } from './card_system';
+import { SKILL_TREE } from '../data/skills';
 
 export const useGameEngine = () => {
   const [isStarted, setIsStarted] = useState(false);
@@ -35,9 +36,11 @@ export const useGameEngine = () => {
     actionLogs: ActionLog[];
     week: number;
     newSong?: Song;
+    ppEarned: number;
   } | null>(null);
 
   const [showScoutModal, setShowScoutModal] = useState(false);
+  const [showSkillTree, setShowSkillTree] = useState(false);
   
   const [showGigResult, setShowGigResult] = useState(false);
   const [gigResultData, setGigResultData] = useState<GigResultData | null>(null);
@@ -60,7 +63,11 @@ export const useGameEngine = () => {
       relation: 50,
       isUnlocked: false,
       style: '???'
-    }
+    },
+    // Skill System Init
+    skillPoints: 5,
+    unlockedSkills: ['friend_1'], // Updated to match new Friend track
+    bandState: BandState.Normal
   });
 
   const [isEventOpen, setIsEventOpen] = useState(false);
@@ -78,6 +85,7 @@ export const useGameEngine = () => {
   };
 
   const generateFallbackSNS = (state: GameState): SNSPost[] => {
+     // ... (Existing implementation preserved) ...
      const newPosts: SNSPost[] = [];
      const weekStr = `Week ${state.currentWeek}`;
      
@@ -156,7 +164,27 @@ export const useGameEngine = () => {
      return newPosts;
   };
 
+  const unlockSkill = (skillId: string) => {
+      const skill = SKILL_TREE.find(s => s.id === skillId);
+      if (!skill) return;
+      if (gameState.skillPoints < skill.cost) return;
+      if (gameState.unlockedSkills.includes(skillId)) return;
+
+      setGameState(prev => ({
+          ...prev,
+          skillPoints: prev.skillPoints - skill.cost,
+          unlockedSkills: [...prev.unlockedSkills, skillId]
+      }));
+  };
+
   const isActionUnlocked = (action: ScheduleAction) => {
+    // 1. Check Skill Tree locks
+    const skillLock = SKILL_TREE.find(node => node.effect?.unlockAction?.includes(action));
+    if (skillLock) {
+        return gameState.unlockedSkills.includes(skillLock.id);
+    }
+
+    // 2. Fallback to basic requirements
     const condition = ACTION_UNLOCKS[action];
     if (!condition) return true;
     if (condition.week && gameState.currentWeek < condition.week) return false;
@@ -164,6 +192,15 @@ export const useGameEngine = () => {
     if (condition.members && gameState.members.length < condition.members) return false;
     if (condition.money && gameState.money < condition.money) return false;
     return true;
+  };
+
+  const isInteractionUnlocked = (type: InteractionType) => {
+      const skillLock = SKILL_TREE.find(node => node.effect?.unlockInteraction?.includes(type));
+      if (skillLock) {
+          return gameState.unlockedSkills.includes(skillLock.id);
+      }
+      // Reprimand and IntensivePractice are unlocked by default if not in tree
+      return true;
   };
 
   const initGame = (role: Role, playerName: string) => {
@@ -214,7 +251,6 @@ export const useGameEngine = () => {
           const isFinished = gig.currentRound >= gig.maxRounds;
           const nextRoundNum = gig.currentRound + 1;
           
-          // GENERATE NEXT ROUND OPTIONS (Including Phase Logic)
           const nextState = isFinished 
             ? { options: [], phaseName: 'Finished' } 
             : generateRoundOptions(prev.members, prev.songs, nextRoundNum, gig.maxRounds);
@@ -247,6 +283,18 @@ export const useGameEngine = () => {
         const { newState: tempState, actionLogs } = processTurn(gameState);
         let finalState = { ...tempState };
         let newSongCreated: Song | undefined = undefined;
+        let earnedPP = 0;
+
+        // PP Gain Logic: +1 for each Great Success
+        actionLogs.forEach(log => {
+            if (log.result === ActionResult.GreatSuccess) earnedPP += 1;
+        });
+        
+        // Passive PP gain from high fans (Weekly)
+        if (finalState.fans > 5000) earnedPP += 1;
+        if (finalState.fans > 50000) earnedPP += 2;
+
+        finalState.skillPoints += earnedPP;
 
         if (finalState.rival.isUnlocked) {
             const growthBase = 400 + (finalState.currentWeek * 100);
@@ -335,7 +383,14 @@ export const useGameEngine = () => {
         finalState.refreshCountThisWeek = 0;
 
         setGameState(finalState);
-        setTurnResultData({ moneyDelta: finalState.money - gameState.money, fansDelta: finalState.fans - gameState.fans, actionLogs, week: gameState.currentWeek, newSong: newSongCreated });
+        setTurnResultData({ 
+            moneyDelta: finalState.money - gameState.money, 
+            fansDelta: finalState.fans - gameState.fans, 
+            actionLogs, 
+            week: gameState.currentWeek, 
+            newSong: newSongCreated,
+            ppEarned: earnedPP
+        });
         setShowTurnResult(true);
         setIsProcessing(false);
 
@@ -361,6 +416,12 @@ export const useGameEngine = () => {
      const moneyEarned = Math.floor(gig.definition.rewards.money * scale);
      const fansEarned = Math.floor(gig.definition.rewards.fans * scale);
      
+     // PP Rewards for Gigs
+     let ppReward = 1;
+     if (rank === 'S') ppReward = 5;
+     else if (rank === 'A') ppReward = 3;
+     else if (rank === 'B') ppReward = 2;
+
      const resultData: GigResultData = {
          gigTitle: gig.definition.title,
          venue: gig.definition.venue,
@@ -394,7 +455,8 @@ export const useGameEngine = () => {
           members: members,
           weeklySchedule: Array(SLOTS_PER_WEEK).fill(null),
           snsPosts: [...newPosts, ...prev.snsPosts].slice(0, 30),
-          completedGigs: rank === 'S' || rank === 'A' ? [...prev.completedGigs, prev.activeGig.definition.id] : prev.completedGigs
+          completedGigs: rank === 'S' || rank === 'A' ? [...prev.completedGigs, prev.activeGig.definition.id] : prev.completedGigs,
+          skillPoints: prev.skillPoints + ppReward
         };
      });
      
@@ -553,7 +615,8 @@ export const useGameEngine = () => {
                 currentProject,
                 teamStats: newTeamStats,
                 rival: newRival,
-                completedGigs: prev.completedGigs
+                completedGigs: prev.completedGigs,
+                skillPoints: prev.skillPoints + (impact.skillPoints || 0)
             };
         });
   };
@@ -576,6 +639,7 @@ export const useGameEngine = () => {
   const finishTurnResult = () => {
     setShowTurnResult(false);
     
+    // ... (rest of logic unchanged)
     const criticalMember = gameState.members.find(m => m.stress >= 100 || m.fatigue >= 100);
     if (criticalMember) {
         const isStress = criticalMember.stress >= 100;
@@ -649,18 +713,24 @@ export const useGameEngine = () => {
     }
   };
 
+  const setBandState = (newState: BandState) => {
+      setGameState(prev => ({ ...prev, bandState: newState }));
+  };
+
   return { 
     gameState, setGameState, isStarted, initGame, isProcessing, isRefreshingScout,
     executeTurn, showTurnResult, turnResultData, finishTurnResult, 
     performInteraction, performSelfAction, recruitMember, refreshScout, 
     refreshCost, isEventOpen, setIsEventOpen, activeEvent, eventMember, 
-    isActionUnlocked, setScheduleSlot, handleEventChoice, showScoutModal, 
+    isActionUnlocked, isInteractionUnlocked, setScheduleSlot, handleEventChoice, showScoutModal, 
     setShowScoutModal, lastInteraction, setLastInteraction,
     eventResult, closeEvent,
     playCard: selectGigOption,
     finishGigAndContinueTurn, formatText, startGig,
     showGigResult, gigResultData, closeGigResult,
     isGeneratingSong,
-    nextRound
+    nextRound,
+    unlockSkill, showSkillTree, setShowSkillTree,
+    setBandState
   };
 };

@@ -31,7 +31,7 @@ export const EventModal = ({ engine }: { engine: any }) => {
 
     return (
         <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl z-[60] flex items-center justify-center p-6 animate-in fade-in duration-500">
-            <div className="bg-white rounded-[3rem] p-10 md:p-12 max-w-3xl w-full text-center shadow-2xl relative overflow-hidden animate-in slide-in-from-bottom-8 duration-700 max-h-[90vh] overflow-y-auto border border-white/20">
+            <div className="bg-white rounded-[2.5rem] p-10 md:p-12 max-w-3xl w-full text-center shadow-2xl relative overflow-hidden animate-in slide-in-from-bottom-8 duration-700 max-h-[90vh] overflow-y-auto border border-white/20">
                 
                 {/* Result View */}
                 {engine.eventResult ? (
@@ -64,7 +64,7 @@ export const EventModal = ({ engine }: { engine: any }) => {
                             )}
                         </div>
 
-                        <button onClick={engine.closeEvent} className="px-12 py-4 bg-slate-900 text-white rounded-full font-black uppercase tracking-[0.2em] hover:bg-pink-500 transition-colors shadow-xl active:scale-95 text-sm">
+                        <button onClick={engine.closeEvent} className="px-12 py-4 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] hover:bg-pink-500 transition-colors shadow-xl active:scale-95 text-sm">
                             Continue
                         </button>
                     </div>
@@ -73,7 +73,7 @@ export const EventModal = ({ engine }: { engine: any }) => {
                         <div className="w-16 h-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full mb-8"/>
                         <div className="uppercase text-xs font-black text-slate-400 tracking-[0.4em] mb-4">Event Triggered</div>
                         <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight leading-tight">{engine.activeEvent.title}</h3>
-                        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 mb-10 w-full">
+                        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 mb-10 w-full">
                             <p className="text-lg md:text-xl text-slate-600 font-medium italic leading-relaxed">
                                 "{engine.formatText(engine.activeEvent.description, engine.eventMember?.name || 'Everyone')}"
                             </p>
@@ -85,7 +85,7 @@ export const EventModal = ({ engine }: { engine: any }) => {
                                 value={customNameInput} 
                                 onChange={(e) => setCustomNameInput(e.target.value)} 
                                 placeholder="输入乐队名称..." 
-                                className="w-full py-4 px-6 rounded-2xl border-2 border-slate-200 text-center font-black text-xl mb-8 focus:border-pink-500 outline-none focus:ring-4 focus:ring-pink-100 transition-all" 
+                                className="w-full py-4 px-6 rounded-[2rem] border-2 border-slate-200 text-center font-black text-xl mb-8 focus:border-pink-500 outline-none focus:ring-4 focus:ring-pink-100 transition-all" 
                             />
                         )}
 
@@ -98,7 +98,7 @@ export const EventModal = ({ engine }: { engine: any }) => {
                                         key={i} 
                                         disabled={isDisabled} 
                                         onClick={() => engine.handleEventChoice(o, customNameInput.trim())} 
-                                        className={`w-full p-5 rounded-2xl border-2 text-left transition-all flex items-center justify-between group 
+                                        className={`w-full p-5 rounded-[2rem] border-2 text-left transition-all flex items-center justify-between group 
                                             ${isDisabled 
                                                 ? 'border-slate-100 text-slate-300 bg-slate-50 cursor-not-allowed' 
                                                 : 'border-slate-200 hover:border-pink-500 hover:bg-pink-50/50 hover:shadow-md'

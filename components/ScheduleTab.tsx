@@ -2,30 +2,30 @@
 import { useState, useMemo } from 'react';
 import { 
   PenTool, Mic2, Calendar, MessageCircle, Users, Coffee, Play, Zap, Trash2, 
-  Ticket, BookOpen, Briefcase, Music2, Lock, Star, Sparkles, Filter, AlertCircle
+  Ticket, BookOpen, Briefcase, Music2, Lock, Star, AlertCircle, Plus, ChevronRight
 } from 'lucide-react';
 import { ScheduleAction, ScheduleCategory } from '../types';
 import { ACTION_TO_CATEGORY, ACTION_UNLOCKS, SCHEDULE_COSTS } from '../constants';
 
-// UI Helper for modern colors
+// Theme Helpers
 const getCategoryTheme = (cat: ScheduleCategory) => {
   switch(cat) {
     case ScheduleCategory.Performance: 
-      return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800', iconBg: 'bg-amber-100', iconColor: 'text-amber-600' };
+      return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800', iconBg: 'bg-amber-100', iconColor: 'text-amber-600', gradient: 'from-amber-100 to-amber-50' };
     case ScheduleCategory.Creation: 
-      return { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', iconBg: 'bg-purple-100', iconColor: 'text-purple-600' };
+      return { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', iconBg: 'bg-purple-100', iconColor: 'text-purple-600', gradient: 'from-purple-100 to-purple-50' };
     case ScheduleCategory.Promotion: 
-      return { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800', iconBg: 'bg-pink-100', iconColor: 'text-pink-600' };
+      return { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800', iconBg: 'bg-pink-100', iconColor: 'text-pink-600', gradient: 'from-pink-100 to-pink-50' };
     case ScheduleCategory.Band: 
-      return { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-800', iconBg: 'bg-sky-100', iconColor: 'text-sky-600' };
+      return { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-800', iconBg: 'bg-sky-100', iconColor: 'text-sky-600', gradient: 'from-sky-100 to-sky-50' };
     case ScheduleCategory.Solo: 
-      return { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', iconBg: 'bg-white', iconColor: 'text-slate-500' };
+      return { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', iconBg: 'bg-white', iconColor: 'text-slate-500', gradient: 'from-slate-100 to-slate-50' };
     case ScheduleCategory.Leisure: 
-      return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', iconBg: 'bg-emerald-100', iconColor: 'text-emerald-600' };
+      return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', iconBg: 'bg-emerald-100', iconColor: 'text-emerald-600', gradient: 'from-emerald-100 to-emerald-50' };
     case ScheduleCategory.Study: 
-      return { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-800', iconBg: 'bg-indigo-100', iconColor: 'text-indigo-600' };
+      return { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-800', iconBg: 'bg-indigo-100', iconColor: 'text-indigo-600', gradient: 'from-indigo-100 to-indigo-50' };
     default: 
-      return { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-800', iconBg: 'bg-gray-100', iconColor: 'text-gray-500' };
+      return { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-800', iconBg: 'bg-gray-100', iconColor: 'text-gray-500', gradient: 'from-gray-100 to-gray-50' };
   }
 };
 
@@ -42,56 +42,33 @@ const getCategoryIcon = (cat: ScheduleCategory, size = 16) => {
   }
 };
 
-const ActionButton = ({ action, category, unlocked, onClick, unlockInfo }: any) => {
+// --- COMPONENTS ---
+
+const ActionIconBtn = ({ action, category, unlocked, onClick }: any) => {
   const theme = getCategoryTheme(category);
   const cost = SCHEDULE_COSTS[action as ScheduleAction];
   
-  if (category === ScheduleCategory.Performance) {
-    return (
-      <button 
-        disabled={!unlocked}
-        onClick={onClick}
-        className={`w-full relative group transition-all duration-300 ${!unlocked ? 'opacity-50 grayscale cursor-not-allowed' : 'hover:-translate-y-1'}`}
-      >
-        <div className={`relative overflow-hidden rounded-2xl border-2 ${unlocked ? theme.border : 'border-slate-200'} ${unlocked ? theme.bg : 'bg-slate-50'} p-4 flex items-center gap-4 shadow-sm group-hover:shadow-md`}>
-           <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${theme.iconBg} ${theme.iconColor}`}>
-              <Star fill="currentColor" size={20}/>
-           </div>
-           <div className="text-left min-w-0 flex-1">
-              <div className="flex justify-between items-center">
-                 <div className={`font-black text-sm ${theme.text} uppercase tracking-wide truncate`}>{action}</div>
-                 {cost && <span className="text-[10px] font-bold text-slate-500 bg-white/50 px-2 py-1 rounded-md">¥{cost}</span>}
-              </div>
-              <div className="text-[10px] font-bold text-slate-400 mt-1 truncate uppercase tracking-wider">
-                {unlocked ? '特殊事件' : `需: ${unlockInfo?.fans || 0} 粉丝`}
-              </div>
-           </div>
-        </div>
-      </button>
-    );
-  }
-
   return (
     <button 
       disabled={!unlocked}
       onClick={onClick}
-      className={`relative p-4 rounded-2xl border text-left transition-all duration-200 group flex items-center gap-3 h-[64px]
+      className={`
+        group flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-200 w-full h-auto min-h-[90px] justify-between
         ${unlocked 
-          ? `bg-white border-slate-100 hover:border-pink-300 hover:shadow-md hover:bg-slate-50` 
-          : 'bg-slate-50 border-transparent opacity-40 cursor-not-allowed'
-        }`}
+          ? 'bg-white border-2 border-slate-100 hover:border-pink-300 hover:shadow-lg hover:-translate-y-1 active:scale-95' 
+          : 'bg-slate-50 border-2 border-transparent opacity-50 cursor-not-allowed grayscale'
+        }
+      `}
     >
-       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${unlocked ? theme.iconBg : 'bg-slate-200'} ${unlocked ? theme.iconColor : 'text-slate-400'}`}>
-          {getCategoryIcon(category, 16)}
+       <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm transition-transform group-hover:scale-110 ${unlocked ? theme.iconBg : 'bg-slate-200'} ${unlocked ? theme.iconColor : 'text-slate-400'}`}>
+          {getCategoryIcon(category, 20)}
        </div>
-       <div className="min-w-0 flex-1">
-          <div className="flex justify-between items-start">
-              <div className={`text-xs font-bold leading-tight truncate ${unlocked ? 'text-slate-700' : 'text-slate-400'}`}>
-                 {action}
-              </div>
-              {cost && unlocked && <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-1">¥{cost}</span>}
-          </div>
-          {!unlocked && <div className="text-[9px] text-slate-400 flex items-center gap-1 mt-1 font-bold uppercase tracking-wider"><Lock size={8}/> 未解锁</div>}
+       
+       <div className="flex flex-col items-center gap-1 w-full">
+          <span className={`text-[10px] font-bold text-center leading-tight line-clamp-2 w-full ${unlocked ? 'text-slate-700 group-hover:text-pink-600' : 'text-slate-400'}`}>
+             {action}
+          </span>
+          {unlocked && cost && <span className="text-[9px] font-black text-slate-400 bg-slate-100 px-1.5 rounded">¥{cost}</span>}
        </div>
     </button>
   );
@@ -122,111 +99,120 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
     : categorizedActions[activeCategory] || [];
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 lg:h-full h-auto">
+    <div className="flex flex-col gap-4 h-full animate-in fade-in duration-500 pb-24 lg:pb-0">
       
-      {/* TOP: Timeline */}
-      <div className="bg-white p-6 lg:p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 shrink-0">
-         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <h3 className="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
-               <div className="p-2 bg-pink-100 text-pink-500 rounded-xl"><Calendar size={20}/></div>
-               本周日程 
-               <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full ml-2 uppercase tracking-widest">Week {engine.gameState.currentWeek}</span>
-            </h3>
-            
-            <div className="flex flex-col items-end gap-1 w-full md:w-auto">
+      {/* 1. PLANNER HEADER */}
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 shrink-0 relative overflow-hidden">
+         {/* Decorative Right Shape avoiding overlap */}
+         <div className="absolute top-0 right-0 w-48 h-48 bg-slate-50 rounded-bl-[4rem] -mr-8 -mt-8 pointer-events-none"/>
+
+         <div className="relative z-10 flex flex-col md:flex-row gap-6 md:gap-10">
+            <div className="flex-1 max-w-md">
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black text-white bg-slate-900 px-3 py-1 rounded-full uppercase tracking-widest">Planner</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Schedule Management</span>
+                </div>
+                <h3 className="text-3xl font-black text-slate-900 tracking-tighter leading-tight mb-4">
+                    本周行程安排
+                </h3>
+                
+                {/* Start Button Moved Here */}
                 <button 
                     onClick={engine.executeTurn} 
                     disabled={engine.isProcessing || !isMemberEnough}
-                    className="w-full md:w-auto bg-slate-900 text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-pink-500 hover:shadow-lg hover:shadow-pink-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95 disabled:bg-slate-300"
+                    className="bg-slate-900 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-pink-500 hover:shadow-lg hover:shadow-pink-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 active:scale-95 disabled:bg-slate-300 group w-full md:w-auto justify-center md:justify-start"
                 >
-                    {engine.isProcessing ? <Zap className="animate-spin" size={14}/> : <Play size={14} fill="currentColor"/>}
+                    {engine.isProcessing ? <Zap className="animate-spin" size={16}/> : <Play size={16} fill="currentColor" className="group-hover:translate-x-0.5 transition-transform"/>}
                     {engine.isProcessing ? '执行中...' : '开始本周'}
                 </button>
+                
                 {!isMemberEnough && (
-                    <div className="text-[10px] font-bold text-amber-500 flex items-center gap-1 animate-pulse uppercase tracking-wider">
-                        <AlertCircle size={10}/> 成员不足 ({memberCount}/4)
+                    <div className="mt-3 text-[10px] font-bold text-amber-500 flex items-center gap-1.5">
+                        <AlertCircle size={12}/> 需要至少4名成员才能开始。
                     </div>
                 )}
             </div>
-         </div>
 
-         {/* Timeline Slots - Super Compact (h-24) */}
-         <div className="grid grid-cols-3 gap-3 md:gap-4 h-24">
-            {engine.gameState.weeklySchedule.map((action: ScheduleAction | null, i: number) => {
-                const category = action ? ACTION_TO_CATEGORY[action] : null;
-                const theme = category ? getCategoryTheme(category) : null;
-                
-                return (
-                  <div key={i} className={`relative h-full rounded-[1.5rem] border-2 transition-all duration-300 group flex flex-col items-center justify-center
-                      ${action && theme 
-                          ? `${theme.bg} ${theme.border}` 
-                          : 'bg-slate-50 border-dashed border-slate-200 hover:border-pink-300 hover:bg-white'
-                      }`}
-                  >
-                      <div className="absolute top-2 left-3">
-                          <span className={`text-[9px] font-black uppercase tracking-[0.1em] ${action ? theme?.text + ' opacity-60' : 'text-slate-300'}`}>
-                              第 {i+1} 天
-                          </span>
-                      </div>
+            {/* Timeline Slots */}
+            <div className="flex-1 grid grid-cols-3 gap-3 md:gap-4 relative z-10">
+                {engine.gameState.weeklySchedule.map((action: ScheduleAction | null, i: number) => {
+                    const category = action ? ACTION_TO_CATEGORY[action] : null;
+                    const theme = category ? getCategoryTheme(category) : null;
+                    
+                    return (
+                    <div key={i} className="relative group h-24 md:h-28 flex flex-col">
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20">
+                            <span className="inline-block bg-slate-100/90 text-slate-400 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border border-slate-200/50 backdrop-blur-sm shadow-sm">
+                                Day 0{i+1}
+                            </span>
+                        </div>
 
-                      {action && theme ? (
-                          <>
-                              <div className={`w-8 h-8 rounded-lg ${theme.iconBg} ${theme.iconColor} flex items-center justify-center mb-1 shadow-sm`}>
-                                  {getCategoryIcon(category!, 16)}
-                              </div>
-                              <div className={`font-bold text-[10px] ${theme.text} text-center leading-tight px-2 line-clamp-1`}>{action}</div>
-                              {SCHEDULE_COSTS[action] && <div className="mt-0.5 text-[8px] font-bold text-slate-500 bg-white/40 px-1.5 rounded-full">¥{SCHEDULE_COSTS[action]}</div>}
-                              
-                              <button 
-                                  onClick={() => engine.setScheduleSlot(i, null)} 
-                                  className="absolute top-2 right-2 p-1 text-slate-400 hover:text-pink-500 hover:bg-white rounded-full transition-all opacity-0 group-hover:opacity-100"
-                              >
-                                  <Trash2 size={12}/>
-                              </button>
-                          </>
-                      ) : (
-                          <div className="flex flex-col items-center justify-center opacity-30">
-                              <div className="w-6 h-6 rounded-full border-2 border-slate-400 flex items-center justify-center mb-1">
-                                  <span className="font-black text-slate-400 text-sm">+</span>
-                              </div>
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">空闲</span>
-                          </div>
-                      )}
-                  </div>
-                );
-            })}
+                        <div className={`
+                            flex-1 rounded-[2rem] border-2 transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden p-2
+                            ${action && theme 
+                                ? `${theme.bg} ${theme.border}` 
+                                : 'bg-white border-dashed border-slate-200 hover:border-pink-300 hover:bg-pink-50 cursor-pointer'}
+                        `}
+                        onClick={() => !action && document.getElementById('action-drawer')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            {action && theme ? (
+                                <>
+                                    <div className={`absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-bl ${theme.gradient} opacity-50 rounded-full blur-xl`}/>
+                                    <div className={`w-8 h-8 rounded-xl ${theme.iconBg} ${theme.iconColor} flex items-center justify-center mb-1 shadow-sm relative z-10 mt-3`}>
+                                        {getCategoryIcon(category!, 16)}
+                                    </div>
+                                    <div className={`font-black text-[10px] ${theme.text} text-center leading-tight relative z-10 line-clamp-2 px-1`}>{action}</div>
+                                    
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); engine.setScheduleSlot(i, null); }} 
+                                        className="absolute top-2 right-2 p-1 text-slate-400 hover:text-rose-500 hover:bg-white rounded-full transition-all opacity-0 group-hover:opacity-100 shadow-sm z-20"
+                                    >
+                                        <Trash2 size={12}/>
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center opacity-30 group-hover:opacity-100 transition-all group-hover:scale-110">
+                                    <Plus size={20} className="text-slate-400 group-hover:text-pink-500 mb-1"/>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    );
+                })}
+            </div>
          </div>
       </div>
 
-      {/* BOTTOM: Action Drawer */}
-      <div className="lg:flex-1 bg-white p-6 lg:p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col lg:min-h-0 min-h-[500px]">
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide mb-4 pb-2 border-b border-slate-50 shrink-0">
+      {/* 2. ACTION DRAWER (App Grid) */}
+      <div id="action-drawer" className="flex-1 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col overflow-hidden min-h-[400px]">
+          {/* Tabs */}
+          <div className="px-6 pt-4 pb-2 overflow-x-auto scrollbar-hide flex items-center gap-2 border-b border-slate-50 shrink-0 sticky top-0 bg-white z-20">
               <button 
                  onClick={() => setActiveCategory('ALL')}
-                 className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${activeCategory === 'ALL' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                 className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${activeCategory === 'ALL' ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
               >
-                 全部
+                 All
               </button>
               {Object.values(ScheduleCategory).map(cat => (
                   <button 
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`px-3 py-2 rounded-full text-xs font-bold flex items-center gap-1 whitespace-nowrap transition-all ${activeCategory === cat ? getCategoryTheme(cat).bg + ' ' + getCategoryTheme(cat).text + ' border border-' + getCategoryTheme(cat).text.split('-')[1] + '-200 shadow-sm' : 'bg-white text-slate-500 hover:bg-slate-50 border border-transparent'}`}
+                      className={`px-3 py-2 rounded-full text-[10px] font-bold flex items-center gap-1 whitespace-nowrap transition-all ${activeCategory === cat ? getCategoryTheme(cat).bg + ' ' + getCategoryTheme(cat).text + ' border border-' + getCategoryTheme(cat).text.split('-')[1] + '-200 shadow-sm' : 'bg-white text-slate-500 hover:bg-slate-50 border border-transparent'}`}
                   >
                       {getCategoryIcon(cat, 12)} {cat}
                   </button>
               ))}
           </div>
 
-          <div className="lg:flex-1 lg:overflow-y-auto scrollbar-hide lg:min-h-0 pb-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {/* Grid */}
+          <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+              <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 pb-20">
                   {currentActions.map(action => (
-                      <ActionButton 
+                      <ActionIconBtn 
                           key={action}
                           action={action}
                           category={ACTION_TO_CATEGORY[action]}
                           unlocked={engine.isActionUnlocked(action)}
-                          unlockInfo={ACTION_UNLOCKS[action]}
                           onClick={() => handleSelectAction(action)}
                       />
                   ))}

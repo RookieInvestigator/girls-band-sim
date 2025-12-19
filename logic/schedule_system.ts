@@ -1,5 +1,5 @@
 
-import { GameState, Member, ScheduleAction, ActionResult, TeamStats, ScheduleCategory } from '../types';
+import { GameState, Member, ScheduleAction, ActionResult, TeamStats, ScheduleCategory, BandState } from '../types';
 import { ACTION_TO_CATEGORY, SCHEDULE_COSTS } from '../constants';
 
 export interface ActionLog {
@@ -259,6 +259,25 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
   }
   // -------------------------------------------
 
+  // --- CAPTAIN COMMAND EFFECT ---
+  let globalGrowthMult = 1.0;
+  let globalStressMult = 1.0;
+  let globalFatigueMult = 1.0;
+  let globalAffectionBonus = 0;
+
+  if (state.bandState === BandState.Serious) {
+      globalGrowthMult = 1.2;
+      globalStressMult = 1.5;
+      globalFatigueMult = 1.5;
+  } else if (state.bandState === BandState.Relaxed) {
+      globalGrowthMult = 0.8;
+      globalStressMult = 0.5;
+      globalFatigueMult = 0.5;
+      globalAffectionBonus = 2;
+      chemistryDelta += 1;
+  }
+  // ------------------------------
+
   let currentProject = state.currentProject ? { ...state.currentProject } : null;
   let songs = [...state.songs];
 
@@ -266,10 +285,12 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
     const action = state.weeklySchedule[i];
 
     if (!action) {
+        // Resting recovers more in Relaxed mode
+        const restBonus = state.bandState === BandState.Relaxed ? 1.5 : 1.0;
         currentMembers = currentMembers.map(m => ({
             ...m,
-            fatigue: Math.max(0, m.fatigue - 45), 
-            stress: Math.max(0, m.stress - 30)
+            fatigue: Math.max(0, m.fatigue - 45 * restBonus), 
+            stress: Math.max(0, m.stress - 30 * restBonus)
         }));
         actionLogs.push({ action: '休息' as any, result: ActionResult.Success, details: ['全员休息，大幅恢复了状态。'], flavorText: '大家度过了无所事事的一天。' });
         continue;
@@ -277,7 +298,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
 
     const roll = Math.random();
     const res = roll > 0.9 ? ActionResult.GreatSuccess : (roll < 0.2 ? ActionResult.Failure : ActionResult.Success); 
-    const actionMultiplier = res === ActionResult.GreatSuccess ? 1.5 : (res === ActionResult.Failure ? 0.3 : 1.0); 
+    const actionMultiplier = (res === ActionResult.GreatSuccess ? 1.5 : (res === ActionResult.Failure ? 0.3 : 1.0)) * globalGrowthMult; 
 
     const currentLog: ActionLog = { 
         action, 
@@ -448,8 +469,8 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
       const arrG = calculateGrowth(m.arrangement, stats.arr, actionMultiplier * tagGrowthMult);
       const dsgG = calculateGrowth(m.design, stats.dsg, actionMultiplier * tagGrowthMult);
 
-      const fA = Math.floor(stats.fat * tagFatigueMult);
-      const sA = Math.floor(stats.str * tagStressMult);
+      const fA = Math.floor(stats.fat * tagFatigueMult * globalFatigueMult);
+      const sA = Math.floor(stats.str * tagStressMult * globalStressMult);
 
       // Accumulate Stats
       if (musG > 0) statSum['musicality'] = (statSum['musicality'] || 0) + musG;
@@ -477,6 +498,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         design: m.design + dsgG,
         fatigue: Math.max(0, Math.min(100, m.fatigue + fA)), 
         stress: Math.max(0, Math.min(100, m.stress + sA)),
+        affection: Math.min(100, m.affection + globalAffectionBonus),
         interactionsLeft: 2 
       };
     });

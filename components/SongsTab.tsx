@@ -1,86 +1,142 @@
 
-import { Disc, PenTool, Star, Heart, Flame, Music2, Activity } from 'lucide-react';
+import { Disc, PenTool, Star, Heart, Flame, Music2, Activity, Play, ListMusic } from 'lucide-react';
 import { SongCard, StatBar } from './Shared';
 
 export const SongsTab = ({ engine }: { engine: any }) => {
     return (
-        <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 lg:h-full h-auto">
-            {/* LEFT: DISCOGRAPHY */}
-            <div className="lg:col-span-8 space-y-6 flex flex-col lg:overflow-hidden h-auto lg:h-full">
-                <div className="bg-white p-6 lg:p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100 flex flex-col lg:h-full h-auto">
-                        <h3 className="text-2xl font-black text-slate-900 mb-8 px-2 flex items-center gap-3">
-                            <div className="p-2 bg-slate-900 text-white rounded-xl"><Disc size={20}/></div>
-                            DISCOGRAPHY
-                        </h3>
-                        <div className="space-y-4 lg:flex-1 lg:overflow-y-auto scrollbar-hide pr-2">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full pb-20 lg:pb-0">
+            {/* LEFT: DISCOGRAPHY LIST */}
+            <div className="lg:col-span-8 flex flex-col h-full overflow-hidden">
+                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl flex flex-col h-full overflow-hidden">
+                        
+                        {/* Header - Moved Stats to left/bottom to avoid top right */}
+                        <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start md:items-end bg-white z-10 relative gap-4">
+                            <div>
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                                    <ListMusic size={14}/> Discography
+                                </div>
+                                <h3 className="text-3xl font-black text-slate-900 tracking-tighter">
+                                    Released Tracks
+                                </h3>
+                            </div>
+                            <div className="text-left md:text-right flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl">
+                                <div className="text-3xl font-black text-slate-900 leading-none">{engine.gameState.songs.length}</div>
+                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Total<br/>Songs</div>
+                            </div>
+                        </div>
+
+                        {/* Song List */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
                         {engine.gameState.songs.length > 0 ? (
-                            engine.gameState.songs.map((song: any) => (
-                                <SongCard key={song.id} song={song} isLatest={song.id === engine.gameState.songs[engine.gameState.songs.length-1].id} />
+                            engine.gameState.songs.slice().reverse().map((song: any, i: number) => (
+                                <div key={song.id} className="group relative bg-white p-4 rounded-3xl border border-slate-100 hover:border-pink-200 hover:shadow-lg transition-all duration-300 flex items-center gap-5">
+                                    {/* Cover Art Placeholder */}
+                                    <div className={`w-20 h-20 rounded-2xl shrink-0 shadow-md flex items-center justify-center relative overflow-hidden ${song.isViral ? 'bg-gradient-to-br from-rose-500 to-orange-500' : 'bg-slate-900'}`}>
+                                        <Disc size={32} className={`text-white/80 ${song.isViral ? 'animate-spin-slow' : ''}`}/>
+                                        <div className="absolute inset-0 bg-black/10 rounded-2xl ring-1 ring-inset ring-white/10"/>
+                                    </div>
+
+                                    <div className="flex-1 min-w-0 py-1">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="font-black text-lg text-slate-900 truncate tracking-tight group-hover:text-pink-600 transition-colors">{song.title}</h4>
+                                                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mt-0.5">
+                                                    <span className="uppercase tracking-wider">{song.genre}</span>
+                                                    <span>•</span>
+                                                    <span>{song.credits?.composer} & {song.credits?.lyricist}</span>
+                                                </div>
+                                            </div>
+                                            {song.isViral && (
+                                                <span className="bg-rose-50 text-rose-600 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 border border-rose-100">
+                                                    <Flame size={10}/> Viral
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="mt-3 flex items-center gap-4">
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                                <Star size={10} className="text-amber-400 fill-amber-400"/>
+                                                Quality: {Math.floor(song.quality)}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                                <Heart size={10} className="text-pink-400 fill-pink-400"/>
+                                                Pop: {song.popularity}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="hidden md:flex w-10 h-10 rounded-full bg-slate-50 items-center justify-center text-slate-300 group-hover:bg-pink-500 group-hover:text-white transition-all cursor-pointer">
+                                        <Play size={16} fill="currentColor" className="ml-0.5"/>
+                                    </div>
+                                </div>
                             ))
                         ) : (
-                            <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-300 bg-slate-50/50">
-                                <Music2 size={32} className="mx-auto mb-4 opacity-50"/>
-                                <p className="font-bold text-sm uppercase tracking-widest">No Releases Yet</p>
+                            <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-60">
+                                <Music2 size={48} className="mb-4"/>
+                                <p className="font-black text-sm uppercase tracking-widest">No Releases Yet</p>
                             </div>
                         )}
                         </div>
                 </div>
             </div>
 
-            {/* RIGHT: CURRENT PROJECT */}
+            {/* RIGHT: CURRENT PROJECT CARD */}
             <div className="lg:col-span-4 flex flex-col gap-6">
-                <div className="bg-slate-900 text-white p-6 lg:p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden shrink-0 min-h-[400px] flex flex-col">
+                <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden shrink-0 min-h-[350px] flex flex-col ring-8 ring-slate-100">
                         {/* Background */}
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+                        <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full blur-3xl opacity-40 pointer-events-none animate-pulse" />
                         
-                        <div className="relative z-10 flex-1 flex flex-col">
-                        <h4 className="font-black text-xs text-pink-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-                            <Activity size={14}/> Current Project
-                        </h4>
+                        <div className="relative z-10 flex-1 flex flex-col h-full">
+                            <div className="flex items-center justify-between mb-8">
+                                <h4 className="font-black text-xs text-pink-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <Activity size={14} className="animate-pulse"/> Studio Status
+                                </h4>
+                                <div className="w-2 h-2 rounded-full bg-pink-500 animate-ping"/>
+                            </div>
                         
-                        {engine.gameState.currentProject ? (
-                            <div className="space-y-8 flex-1 flex flex-col">
-                                <div>
-                                    <div className="text-3xl font-black leading-tight tracking-tight mb-2">{engine.gameState.currentProject.title}</div>
-                                    <div className="text-sm text-slate-400 font-medium">{engine.gameState.currentProject.description}</div>
-                                </div>
-                                
-                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-4 backdrop-blur-sm">
-                                    <div className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                        <span>Progress</span>
-                                        <span className="text-white">{Math.floor(engine.gameState.currentProject.completeness)}%</span>
+                            {engine.gameState.currentProject ? (
+                                <div className="flex-1 flex flex-col justify-between">
+                                    <div className="space-y-2">
+                                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-800 inline-block px-2 py-1 rounded mb-2">Work In Progress</div>
+                                        <div className="text-3xl font-black leading-tight tracking-tight">{engine.gameState.currentProject.title}</div>
+                                        <div className="text-sm text-slate-400 font-medium italic">"{engine.gameState.currentProject.description}"</div>
                                     </div>
-                                    <div className="h-3 bg-slate-800 rounded-full overflow-hidden border border-white/5">
-                                        <div 
-                                            className="h-full bg-gradient-to-r from-pink-600 to-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.5)] transition-all duration-700 ease-out relative" 
-                                            style={{width: `${engine.gameState.currentProject.completeness}%`}}
-                                        >
-                                            <div className="absolute top-0 right-0 h-full w-1 bg-white/50 animate-pulse"/>
+                                    
+                                    <div className="space-y-6 mt-8">
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                                <span>Completion</span>
+                                                <span className="text-white">{Math.floor(engine.gameState.currentProject.completeness)}%</span>
+                                            </div>
+                                            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-gradient-to-r from-pink-500 to-rose-500 shadow-[0_0_10px_#ec4899]" 
+                                                    style={{width: `${engine.gameState.currentProject.completeness}%`}}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div className="mt-auto">
-                                    <div className="flex gap-2">
-                                        <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                                            {engine.gameState.currentProject.genre}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                                                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Genre</div>
+                                                <div className="text-xs font-black text-slate-200 truncate">{engine.gameState.currentProject.genre}</div>
+                                            </div>
+                                            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                                                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Theme</div>
+                                                <div className="text-xs font-black text-slate-200 truncate">{engine.gameState.currentProject.lyricTheme}</div>
+                                            </div>
                                         </div>
-                                        <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                                            {engine.gameState.currentProject.lyricTheme}
-                                        </div>
-                                    </div>
-                                    <div className="mt-4 p-4 bg-pink-500/10 border border-pink-500/20 rounded-xl text-[10px] font-bold text-pink-200 leading-relaxed">
-                                        TIP: Schedule "Creation" activities to progress.
                                     </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center py-10 opacity-30">
-                                <PenTool size={48} className="mb-4 text-slate-500"/>
-                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-center">No Active Project</span>
-                            </div>
-                        )}
+                            ) : (
+                                <div className="flex-1 flex flex-col items-center justify-center opacity-40">
+                                    <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-700 flex items-center justify-center mb-4">
+                                        <PenTool size={32} className="text-slate-500"/>
+                                    </div>
+                                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-center text-slate-500">No Active Project</span>
+                                </div>
+                            )}
                         </div>
                 </div>
             </div>
