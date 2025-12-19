@@ -1,9 +1,46 @@
 
 import { useState, useMemo } from 'react';
-import { Search, Heart, Frown, Battery, Music, Guitar, Star, Brain, PenTool, FileText, Disc, Palette, Sparkles, X, ChevronRight } from 'lucide-react';
+import { 
+    Search, Heart, Frown, Battery, Music, Guitar, Star, Brain, PenTool, FileText, Disc, Palette, 
+    Sparkles, X, ChevronRight, Zap, Coffee, MessageCircle, Gift, AlertCircle, ArrowUp, ArrowDown 
+} from 'lucide-react';
 import { Member, InteractionType, SelfActionType, ActionResult } from '../types';
 import { INTERACTION_DATA } from '../data/interactions';
 import { StatBar } from './Shared';
+
+const ActionBtn = ({ icon: Icon, label, cost, onClick, disabled }: any) => (
+    <button 
+        onClick={onClick}
+        disabled={disabled}
+        className={`
+            relative group flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all duration-200 h-full
+            ${disabled 
+                ? 'bg-slate-800/50 border-white/5 text-slate-600 cursor-not-allowed' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-pink-500/50 hover:shadow-lg hover:shadow-pink-500/10 active:scale-95'
+            }
+        `}
+    >
+        <div className={`p-2 rounded-full transition-colors ${disabled ? 'bg-slate-800 text-slate-600' : 'bg-slate-800 group-hover:bg-pink-500 group-hover:text-white text-pink-400'}`}>
+            <Icon size={20} />
+        </div>
+        <div className="text-center">
+            <div className={`text-[10px] font-bold uppercase tracking-wider ${disabled ? 'text-slate-600' : 'text-slate-200 group-hover:text-white'}`}>{label}</div>
+            {cost > 0 && (
+                <div className={`text-[9px] font-black mt-0.5 ${disabled ? 'text-slate-700' : 'text-slate-400'}`}>¥{cost}</div>
+            )}
+        </div>
+    </button>
+);
+
+const ImpactBadge = ({ label, value }: { label: string, value: number }) => {
+    if (!value || value === 0) return null;
+    const isGood = label === '压力' || label === '疲劳' ? value < 0 : value > 0;
+    return (
+        <span className={`text-[10px] font-bold px-2 py-1 rounded bg-white/10 border border-white/5 flex items-center gap-1 ${isGood ? 'text-emerald-400' : 'text-rose-400'}`}>
+            {label} {value > 0 ? '+' : ''}{value}
+        </span>
+    );
+};
 
 export const MembersTab = ({ engine }: { engine: any }) => {
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -11,6 +48,24 @@ export const MembersTab = ({ engine }: { engine: any }) => {
     const selectedMember = useMemo(() => 
         engine.gameState.members.find((m: Member) => m.id === (selectedMemberId || 'leader')) || engine.gameState.members[0]
     , [engine.gameState.members, selectedMemberId]);
+
+    const getIconForType = (type: string) => {
+        switch(type) {
+            // Self
+            case SelfActionType.SoloPractice: return Music;
+            case SelfActionType.Meditation: return Brain;
+            case SelfActionType.Songwriting: return PenTool;
+            case SelfActionType.AdminWork: return FileText;
+            case SelfActionType.QuickNap: return Battery;
+            // Interaction
+            case InteractionType.IntensivePractice: return Zap;
+            case InteractionType.CafeDate: return Coffee;
+            case InteractionType.DeepTalk: return MessageCircle;
+            case InteractionType.Gift: return Gift;
+            case InteractionType.Reprimand: return AlertCircle;
+            default: return Star;
+        }
+    };
 
     return (
         <div className="h-full flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -84,7 +139,7 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                         </div>
                     </div>
                     
-                    {/* Status Bar - Optimized for visibility */}
+                    {/* Status Bar */}
                     <div className="w-full md:w-auto flex flex-row md:flex-col gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 min-w-[180px]">
                         <div className="flex-1 flex flex-col gap-1">
                              <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
@@ -116,7 +171,7 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                     </div>
                 </div>
 
-                {/* 2. Stats Grid - Mobile Optimized */}
+                {/* 2. Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 shrink-0 relative z-10">
                     <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100">
                         <div className="flex items-center gap-2 mb-2">
@@ -144,84 +199,105 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                     </div>
                 </div>
 
-                {/* 3. Interactions - Replaced Floating Overlay with Inline Result View */}
-                <div className="flex-1 bg-slate-900 text-white p-5 md:p-6 rounded-[2rem] shadow-lg relative overflow-hidden flex flex-col min-h-[220px]">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950"/>
+                {/* 3. Interactions - Redesigned Command Center */}
+                <div className="flex-1 bg-slate-900 text-white p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col min-h-[260px] border border-slate-800">
                     
-                    <div className="relative z-10 flex justify-between items-center mb-4 shrink-0">
-                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                            <Sparkles size={14} className="text-pink-500"/> 
-                            {engine.lastInteraction ? '互动结果' : '互动菜单'}
-                        </h4>
-                        {!engine.lastInteraction && (
-                            <div className="text-[10px] font-bold bg-white/10 px-3 py-1 rounded-full text-white/80 border border-white/10">
-                                体力: {selectedMember?.interactionsLeft}
-                            </div>
-                        )}
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
+                        <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-pink-500/20 rounded-lg text-pink-400"><Sparkles size={14}/></div>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-300">Command</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full border border-white/5">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase mr-1 tracking-wider">AP</span>
+                            {[1, 2].map(i => (
+                                <div key={i} className={`w-1.5 h-4 rounded-sm transform skew-x-[-15deg] transition-all ${i <= (selectedMember?.interactionsLeft || 0) ? 'bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.6)]' : 'bg-slate-700'}`}/>
+                            ))}
+                        </div>
                     </div>
-                    
-                    <div className="relative z-10 flex-1 overflow-y-auto scrollbar-hide pb-safe">
+
+                    {/* Content Area */}
+                    <div className="flex-1 relative z-10 overflow-hidden">
                         {engine.lastInteraction ? (
-                            // INLINE RESULT VIEW
-                            <div className="h-full flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 px-4 py-2 text-center">
-                                <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 shadow-xl ${
-                                    engine.lastInteraction.result === ActionResult.Failure ? 'bg-slate-700 text-slate-300' : 
-                                    (engine.lastInteraction.result === ActionResult.GreatSuccess ? 'bg-amber-400 text-white shadow-amber-400/50' : 'bg-pink-500 text-white shadow-pink-500/50')
+                            // RESULT VIEW
+                            <div className="absolute inset-0 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 text-center px-4">
+                                <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-2xl ring-4 ${
+                                    engine.lastInteraction.result === ActionResult.Failure ? 'bg-slate-700 text-slate-400 ring-slate-800' : 
+                                    (engine.lastInteraction.result === ActionResult.GreatSuccess ? 'bg-amber-400 text-white ring-amber-500/30' : 'bg-pink-500 text-white ring-pink-500/30')
                                 }`}>
-                                    {engine.lastInteraction.result === ActionResult.GreatSuccess ? <Sparkles size={28}/> : (engine.lastInteraction.result === ActionResult.Failure ? <Frown size={28}/> : <Heart size={28}/>)}
+                                    {engine.lastInteraction.result === ActionResult.GreatSuccess ? <Sparkles size={32}/> : (engine.lastInteraction.result === ActionResult.Failure ? <Frown size={32}/> : <Heart size={32}/>)}
                                 </div>
-                                <div className={`text-base font-black uppercase tracking-[0.2em] mb-3 ${
+                                
+                                <div className={`text-lg font-black uppercase tracking-[0.2em] mb-2 ${
                                     engine.lastInteraction.result === ActionResult.GreatSuccess ? 'text-amber-400' : 
                                     (engine.lastInteraction.result === ActionResult.Failure ? 'text-slate-400' : 'text-pink-400')
                                 }`}>
                                     {engine.lastInteraction.result}
                                 </div>
-                                <p className="text-sm md:text-base text-white/90 font-medium leading-relaxed max-w-md">
+                                
+                                <p className="text-sm md:text-base text-slate-200 font-medium leading-relaxed max-w-lg mb-6">
                                     “{engine.lastInteraction.log}”
                                 </p>
+
+                                {/* Stat Impacts */}
+                                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                                    {engine.lastInteraction.impact && Object.entries(engine.lastInteraction.impact).map(([key, val]) => {
+                                        const labelMap: Record<string, string> = {
+                                            stressChange: '压力', fatigue: '疲劳', affectionChange: '羁绊', technique: '技巧', techniqueChange: '技巧',
+                                            mental: '心态', creativity: '想象', composing: '作曲', money: '资金'
+                                        };
+                                        return <ImpactBadge key={key} label={labelMap[key] || key} value={Number(val)} />;
+                                    })}
+                                </div>
+
                                 <button 
                                     onClick={() => engine.setLastInteraction(null)}
-                                    className="mt-6 px-8 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-xs font-bold text-white transition-all flex items-center gap-2 group"
+                                    className="px-8 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-xs font-bold text-white transition-all flex items-center gap-2 group"
                                 >
                                     继续 <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform"/>
                                 </button>
                             </div>
                         ) : (
-                            // INTERACTION BUTTONS
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-in fade-in duration-300">
+                            // ACTION GRID
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 h-full content-start overflow-y-auto scrollbar-hide pb-2">
                                 {selectedMember?.isLeader ? (
                                     Object.values(SelfActionType).map(t => (
-                                        <button key={t} onClick={() => engine.performSelfAction(t)} className="h-14 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold text-slate-300 hover:text-white hover:border-white/30 shadow-sm active:scale-95 transition-all truncate px-2 flex items-center justify-center">
-                                            {t}
-                                        </button>
+                                        <ActionBtn 
+                                            key={t}
+                                            label={t}
+                                            icon={getIconForType(t)}
+                                            cost={0}
+                                            onClick={() => engine.performSelfAction(t)}
+                                            disabled={selectedMember.interactionsLeft <= 0}
+                                        />
                                     ))
                                 ) : (
                                     Object.values(InteractionType).map(t => {
                                         const cost = INTERACTION_DATA[t].cost;
                                         const canAfford = engine.gameState.money >= cost;
+                                        const hasEnergy = selectedMember.interactionsLeft > 0;
                                         return (
-                                            <button 
-                                            key={t} 
-                                            disabled={!canAfford}
-                                            onClick={() => engine.performInteraction(selectedMember!, t, cost)} 
-                                            className={`h-14 border rounded-xl text-[10px] font-bold shadow-sm active:scale-95 transition-all px-2 flex flex-col items-center justify-center gap-1
-                                                ${canAfford 
-                                                ? 'bg-white/5 border-white/10 hover:bg-pink-600 hover:border-pink-500 text-white' 
-                                                : 'bg-black/20 border-white/5 text-white/20 cursor-not-allowed'}
-                                            `}
-                                            >
-                                                <span>{t}</span>
-                                                {cost > 0 && <span className="text-[9px] opacity-60 bg-black/20 px-1.5 rounded">¥{cost}</span>}
-                                            </button>
+                                            <ActionBtn 
+                                                key={t}
+                                                label={t}
+                                                icon={getIconForType(t)}
+                                                cost={cost}
+                                                onClick={() => engine.performInteraction(selectedMember!, t, cost)}
+                                                disabled={!canAfford || !hasEnergy}
+                                            />
                                         )
                                     })
                                 )}
                             </div>
                         )}
                     </div>
+                    
+                    {/* Background Decorations */}
+                    <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                        <Sparkles size={120}/>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
-    
