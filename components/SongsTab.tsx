@@ -4,15 +4,15 @@ import { SongCard, StatBar } from './Shared';
 
 export const SongsTab = ({ engine }: { engine: any }) => {
     return (
-        <div className="h-full flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 lg:h-full h-auto">
             {/* LEFT: DISCOGRAPHY */}
-            <div className="lg:col-span-8 space-y-6 overflow-hidden flex flex-col">
-                <div className="bg-white p-6 lg:p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100 h-full flex flex-col">
+            <div className="lg:col-span-8 space-y-6 flex flex-col lg:overflow-hidden h-auto lg:h-full">
+                <div className="bg-white p-6 lg:p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100 flex flex-col lg:h-full h-auto">
                         <h3 className="text-2xl font-black text-slate-900 mb-8 px-2 flex items-center gap-3">
                             <div className="p-2 bg-slate-900 text-white rounded-xl"><Disc size={20}/></div>
                             DISCOGRAPHY
                         </h3>
-                        <div className="space-y-4 flex-1 overflow-y-auto scrollbar-hide pr-2">
+                        <div className="space-y-4 lg:flex-1 lg:overflow-y-auto scrollbar-hide pr-2">
                         {engine.gameState.songs.length > 0 ? (
                             engine.gameState.songs.map((song: any) => (
                                 <SongCard key={song.id} song={song} isLatest={song.id === engine.gameState.songs[engine.gameState.songs.length-1].id} />

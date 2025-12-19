@@ -8,7 +8,7 @@ export const GigTab = ({ engine }: { engine: any }) => {
   const isMemberEnough = memberCount > 3;
 
   return (
-    <div className="h-full flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 lg:h-full h-auto">
       
       {/* Header Banner - Super Compact Version */}
       <div className="bg-slate-900 text-white p-5 md:p-6 rounded-[2rem] shadow-lg relative overflow-hidden shrink-0 min-h-[120px] flex items-center">
@@ -44,7 +44,7 @@ export const GigTab = ({ engine }: { engine: any }) => {
       )}
 
       {/* Gigs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1 overflow-y-auto scrollbar-hide pb-32 p-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:flex-1 lg:overflow-y-auto scrollbar-hide pb-32 lg:pb-0 p-1">
           {Object.values(GIG_DEFINITIONS).map((gig: any) => {
               const currentFans = gameState.fans;
               const currentWeek = gameState.currentWeek;

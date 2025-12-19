@@ -13,7 +13,7 @@ const ActionBtn = ({ icon: Icon, label, cost, onClick, disabled }: any) => (
         onClick={onClick}
         disabled={disabled}
         className={`
-            relative group flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all duration-200 h-full
+            relative group flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all duration-200 h-full w-full
             ${disabled 
                 ? 'bg-slate-800/50 border-white/5 text-slate-600 cursor-not-allowed' 
                 : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-pink-500/50 hover:shadow-lg hover:shadow-pink-500/10 active:scale-95'
@@ -68,9 +68,9 @@ export const MembersTab = ({ engine }: { engine: any }) => {
     };
 
     return (
-        <div className="h-full flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 lg:h-full">
             {/* LEFT COLUMN: LIST */}
-            <div className="lg:col-span-3 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto scrollbar-hide shrink-0 pb-2 lg:pb-2 h-auto lg:h-full snap-x p-1">
+            <div className="lg:col-span-3 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto scrollbar-hide shrink-0 pb-2 lg:pb-2 min-h-[100px] lg:h-full snap-x p-1">
                 {engine.gameState.members.map((m: Member) => (
                     <button 
                         key={m.id} 
@@ -110,7 +110,8 @@ export const MembersTab = ({ engine }: { engine: any }) => {
             </div>
 
             {/* RIGHT COLUMN: DETAIL DASHBOARD */}
-            <div className="lg:col-span-9 flex-1 bg-white p-5 lg:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col gap-6 min-h-0 overflow-hidden relative">
+            {/* Added lg:overflow-y-auto to allow internal scrolling on desktop, removed overflow-hidden for mobile flow */}
+            <div className="lg:col-span-9 bg-white p-5 lg:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col gap-6 lg:h-full lg:overflow-y-auto relative">
                 
                 {/* 1. Header Section */}
                 <div className="flex flex-col md:flex-row gap-6 items-start shrink-0 relative z-10">
@@ -200,7 +201,7 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                 </div>
 
                 {/* 3. Interactions - Redesigned Command Center */}
-                <div className="flex-1 bg-slate-900 text-white p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col min-h-[260px] border border-slate-800">
+                <div className="lg:flex-1 shrink-0 bg-slate-900 text-white p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col min-h-[280px] border border-slate-800">
                     
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
@@ -259,7 +260,7 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                             </div>
                         ) : (
                             // ACTION GRID
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 h-full content-start overflow-y-auto scrollbar-hide pb-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 content-start lg:h-full lg:overflow-y-auto scrollbar-hide pb-2">
                                 {selectedMember?.isLeader ? (
                                     Object.values(SelfActionType).map(t => (
                                         <ActionBtn 

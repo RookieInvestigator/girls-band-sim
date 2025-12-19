@@ -122,7 +122,7 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
     : categorizedActions[activeCategory] || [];
 
   return (
-    <div className="h-full flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 lg:h-full h-auto">
       
       {/* TOP: Timeline */}
       <div className="bg-white p-6 lg:p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 shrink-0">
@@ -199,7 +199,7 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
       </div>
 
       {/* BOTTOM: Action Drawer */}
-      <div className="flex-1 bg-white p-6 lg:p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col min-h-0">
+      <div className="lg:flex-1 bg-white p-6 lg:p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col lg:min-h-0 min-h-[500px]">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide mb-4 pb-2 border-b border-slate-50 shrink-0">
               <button 
                  onClick={() => setActiveCategory('ALL')}
@@ -218,7 +218,7 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
               ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0 pb-4">
+          <div className="lg:flex-1 lg:overflow-y-auto scrollbar-hide lg:min-h-0 pb-4">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                   {currentActions.map(action => (
                       <ActionButton 

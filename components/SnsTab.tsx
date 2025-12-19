@@ -4,8 +4,8 @@ import { SNSPost } from '../types';
 
 export const SnsTab = ({ engine }: { engine: any }) => {
     return (
-        <div className="max-w-2xl mx-auto h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 flex flex-col h-full overflow-hidden relative">
+        <div className="max-w-2xl mx-auto lg:h-full h-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 flex flex-col lg:h-full h-auto lg:overflow-hidden relative min-h-[80vh]">
                 {/* Header */}
                 <div className="p-6 border-b border-slate-50 bg-white/80 backdrop-blur sticky top-0 z-10 flex items-center justify-between">
                     <h3 className="font-black text-xl text-slate-900 flex items-center gap-3 tracking-tight">
@@ -20,7 +20,7 @@ export const SnsTab = ({ engine }: { engine: any }) => {
                 </div>
 
                 {/* Feed */}
-                <div className="flex-1 overflow-y-auto p-0 scrollbar-hide bg-slate-50">
+                <div className="lg:flex-1 lg:overflow-y-auto p-0 scrollbar-hide bg-slate-50">
                         {engine.gameState.snsPosts.map((p: SNSPost) => (
                             <div key={p.id} className={`p-6 border-b border-slate-100 bg-white hover:bg-slate-50/50 transition-colors ${p.type === 'rival' ? 'bg-slate-900 text-white hover:bg-slate-800' : ''}`}>
                                 <div className="flex gap-4">
