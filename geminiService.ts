@@ -3,6 +3,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { GameState, Role, Song, MusicGenre, LyricTheme, RivalState, Member } from "./types";
 import { ActionLog } from "./logic/schedule_system";
 
+declare var process: { env: any };
+
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Priority list of models to try. 

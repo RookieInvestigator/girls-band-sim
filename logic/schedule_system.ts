@@ -296,7 +296,8 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         actionMoney -= cost;
     }
 
-    let activeMemberForFlavor: Member | null = null;
+    // Fix: Explicitly type as any to avoid TS closure analysis 'never' issue
+    let activeMemberForFlavor: any = null; 
     let highestRelevantStat = -1;
     
     // Track stats for reporting
