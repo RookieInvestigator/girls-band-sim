@@ -6,12 +6,11 @@ import { ActionLog } from "./logic/schedule_system";
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Priority list of models to try. 
-// Added 2.5 series as requested to help with Rate Limits and variety.
+// Optimized for Cost & Speed: Prioritizing Flash models as requested.
+// Removed Pro models to prevent accidental high quota usage.
 const MODELS_TO_TRY = [
+  "gemini-2.5-flash",
   "gemini-3-flash-preview",
-  "gemini-3-pro-preview", 
-  "gemini-2.5-pro", 
-  "gemini-2.5-flash", 
   "gemini-flash-latest"
 ];
 
