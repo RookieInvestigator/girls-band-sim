@@ -22,8 +22,15 @@
                             pinkHover: '#DB2777',
                         }
                     },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        }
+                    },
                     animation: {
                         'spin-slow': 'spin 12s linear infinite',
+                        'marquee': 'marquee 45s linear infinite',
                     }
                 }
             }
@@ -92,7 +99,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="./assets/index-CaeYZFmH.js"></script>
+  <script type="module" crossorigin src="./assets/index-D5yubKEd.js"></script>
 </head>
 <body class="bg-slate-50 font-sans">
     <div id="root"></div>
