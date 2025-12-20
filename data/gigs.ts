@@ -52,6 +52,19 @@ export const GIG_DEFINITIONS: Record<string, GigDefinition> = {
     targetVoltage: 10000,
     rewards: { money: 100000, fans: 50000, fame: 100 }
   },
+  'graduation_live': {
+    id: 'graduation_live',
+    title: '樱花纷飞时·毕业公演',
+    description: '最后的校服，最后的校园Live。向着名为未来的天空，奏响青春的终章吧。',
+    venue: '学校体育馆',
+    capacity: 1000,
+    requiredFans: 10000,
+    unlockWeek: 48,
+    endWeek: 52, // Limited time
+    rounds: 12,
+    targetVoltage: 8000,
+    rewards: { money: 0, fans: 20000, fame: 50 }
+  },
   'budokan_final': {
     id: 'budokan_final',
     title: '日本武道馆·最终公演',

@@ -1,5 +1,5 @@
 
-import { GameState, Member, ScheduleAction, ActionResult, TeamStats, ScheduleCategory, BandState } from '../types';
+import { GameState, Member, ScheduleAction, ActionResult, TeamStats, ScheduleCategory, BandState, Role } from '../types';
 import { ACTION_TO_CATEGORY, SCHEDULE_COSTS } from '../constants';
 
 export interface ActionLog {
@@ -28,12 +28,12 @@ const STAT_LABELS: Record<string, string> = {
 
 // Randomized Flavor Text Database
 const FLAVOR_DB: Record<string, { success: string[], great: string[], fail: string[] }> = {
-    [ScheduleAction.SoloTechnical]: {
+    [ScheduleAction.InstrumentPractice]: {
         success: ["[NAME] 对着节拍器反复练习基本功。", "[NAME] 尝试了新的指法，感觉还不错。", "[NAME] 专注地打磨着每一个音符的颗粒感。"],
         great: ["[NAME] 突破了速度瓶颈，手指快得出现了残影！", "[NAME] 感觉乐器变成了身体的一部分，随心所欲！", "[NAME] 状态神勇，连续弹奏了一小时没有失误。"],
         fail: ["[NAME] 手指打结了，怎么练都不顺手。", "[NAME] 练着练着开始发呆，效率不高。", "[NAME] 琴弦突然断了，吓了一跳，中断了练习。"]
     },
-    [ScheduleAction.SoloVocal]: {
+    [ScheduleAction.VocalPractice]: {
         success: ["[NAME] 在练习气息控制。", "[NAME] 尝试拓宽音域，发声很稳。", "[NAME] 对着镜子练习演唱时的表情管理。"],
         great: ["[NAME] 唱出了令人起鸡皮疙瘩的高音！", "[NAME] 找到了共鸣的感觉，声音穿透力极强。", "隔壁的邻居都忍不住为 [NAME] 的歌声鼓掌。"],
         fail: ["[NAME] 嗓子有点哑，完全唱不上去。", "[NAME] 总是跑调，越练越烦躁。", "[NAME] 喝水呛到了，咳了半天。"]
@@ -47,6 +47,11 @@ const FLAVOR_DB: Record<string, { success: string[], great: string[], fail: stri
         success: ["[NAME] 认真听取了老师关于发声位置的建议。", "[NAME] 反复练习枯燥的音阶，基础更扎实了。", "老师纠正了 [NAME] 的坏习惯。"],
         great: ["[NAME] 顿悟了！高音变得轻松自如。", "老师惊讶于 [NAME] 的进步速度，甚至想收徒。", "仿佛打通了任督二脉，声音质感大幅提升。"],
         fail: ["[NAME] 被老师严厉批评了，心情低落。", "这节课完全找不到状态，钱白花了。", "[NAME] 练得太猛，嗓子有点充血。"]
+    },
+    [ScheduleAction.InstrumentLesson]: {
+        success: ["[NAME] 在老师的指导下纠正了手型。", "学习了新的演奏技巧。", "[NAME] 感觉以前卡住的地方变顺畅了。"],
+        great: ["[NAME] 像海绵一样吸收着知识，老师赞不绝口！", "攻克了超高难度的练习曲！", "[NAME] 的演奏技巧突飞猛进，仿佛换了一双手。"],
+        fail: ["[NAME] 被老师指出基本功不扎实，大受打击。", "谱子太难了，完全跟不上。", "[NAME] 上课时一直在走神。"]
     },
     [ScheduleAction.BandEnsemble]: {
         success: ["[NAME] 仔细聆听着其他声部的旋律。", "虽然有小瑕疵，但大家都在努力配合。", "[NAME] 找到了切入的最佳时机。"],
@@ -133,6 +138,11 @@ const FLAVOR_DB: Record<string, { success: string[], great: string[], fail: stri
         great: ["茶话会变成了真心话大会，大家哭着抱在一起。", "[NAME] 的笑话把大家逗得在地上打滚。", "度过了一段无可替代的温馨时光。"],
         fail: ["聊到了关于未来的沉重话题，气氛凝固了。", "茶打翻了，弄脏了地毯。", "[NAME] 一个人在一边玩手机，没融入进去。"]
     },
+    [ScheduleAction.GameCenter]: {
+        success: ["[NAME] 在抓娃娃机前奋斗了很久，抓到了一个小挂件。", "大家一起拍了搞怪的大头贴。", "玩赛车游戏时大呼小叫。"],
+        great: ["[NAME] 在跳舞机上展现了惊人的身法，围观群众都在鼓掌！", "大家一起通关了高难度的射击游戏，默契度爆表！", "用剩下的硬币抓到了超大的限定玩偶！"],
+        fail: ["花光了零花钱也没抓到一个娃娃，[NAME] 很沮丧。", "太吵了，[NAME] 觉得头疼。", "因为游戏输了，大家起了小争执。"]
+    },
     [ScheduleAction.GroupTrip]: {
         success: ["[NAME] 在海边捡到了漂亮的贝壳。", "大家一起拍了纪念合影。", "虽然迷路了，但也算是一种冒险。"],
         great: ["这是一次完美的旅行！所有的烦恼都抛在脑后！", "[NAME] 在旅途中写出了一段绝美的旋律。", "看着夕阳，大家许下了要永远在一起的誓言。"],
@@ -162,6 +172,37 @@ const FLAVOR_DB: Record<string, { success: string[], great: string[], fail: stri
         success: ["[NAME] 戴着耳机认真听了推荐的专辑。", "分析了这首歌的配器层次。", "[NAME] 发现了一些有趣的细节。"],
         great: ["[NAME] 从这首歌里获得了巨大的灵感！", "听到了以前从未注意到的精妙处理。", "审美水平提升了一个档次。"],
         fail: ["听着听着就走神了。", "这首歌太难听了，[NAME] 摘下了耳机。", "只顾着抖腿，完全没思考。"]
+    },
+    // --- SPECIAL ACTIONS ---
+    [ScheduleAction.SchoolFestival]: {
+        success: ["[NAME] 在教室改造成的LiveHouse里尽情演奏。", "虽然设备简陋，但同学们的欢呼声是最棒的。", "班主任也来看了，还比了赞。"],
+        great: ["[NAME] 的吉他Solo让全校沸腾了！成为了传说！", "演出结束后被要签名的同学围得水泄不通。", "这一刻，我们就是校园里的摇滚明星！"],
+        fail: ["音响突然没声了，场面一度非常尴尬。", "太过紧张，[NAME] 在台上摔了一跤。", "台下全是来看笑话的隔壁班男生。"]
+    },
+    [ScheduleAction.FireworksDate]: {
+        success: ["[NAME] 穿着浴衣，手里拿着苹果糖。", "烟花绽放的瞬间，大家的脸被照亮了。", "许下了“明年也要一起来”的愿望。"],
+        great: ["烟花太美了，[NAME] 感动得流下了眼泪。", "在绚烂的夜空下，大家的心紧紧连在了一起。", "这绝对是高中生活最美好的回忆之一。"],
+        fail: ["人太多了，[NAME] 和大家走散了，哭着找人。", "刚铺好野餐垫就下暴雨了，全身湿透。", "浴衣带子松了，手忙脚乱。"]
+    },
+    [ScheduleAction.ThemePark]: {
+        success: ["[NAME] 戴着可爱的发箍，吃着吉事果。", "一起坐了旋转木马，拍了很多傻气的照片。", "排队的时候聊了很多八卦。"],
+        great: ["坐过山车时 [NAME] 的尖叫声突破天际，压力全消！", "看巡游时，[NAME] 兴奋得像个小孩子。", "在城堡前合影，大家的笑容比阳光还灿烂。"],
+        fail: ["[NAME] 坐海盗船吐了，脸色发白。", "因为想玩的项目不同，大家吵了一架。", "票买错了日期，在门口吹了一小时风。"]
+    },
+    [ScheduleAction.ChristmasParty]: {
+        success: ["[NAME] 准备了惊喜礼物，大家都惊呆了。", "练习室被装饰成了圣诞风格。", "一起吃了炸鸡和草莓蛋糕。"],
+        great: ["[NAME] 提议的不插电演出非常成功，气氛温馨到极点。", "交换礼物环节笑料百出，大家都笑出了腹肌。", "窗外飘起了雪花，简直像是电影场景。"],
+        fail: ["蛋糕被 [NAME] 不小心坐扁了。", "暖气坏了，大家裹着大衣瑟瑟发抖。", "准备的礼物和别人撞了，有点尴尬。"]
+    },
+    [ScheduleAction.GraduationTrip]: {
+        success: ["[NAME] 穿着制服，在樱花树下拍了最后一张合影。", "回忆起这三年的点点滴滴，既不舍又充满希望。", "把第二颗纽扣送给了队长。"],
+        great: ["大家在天台上大声喊出了自己的梦想！", "这是一场没有遗憾的青春谢幕礼。", "即便毕业了，我们的乐队也永远不会解散！"],
+        fail: ["因为太伤感，大家哭成了一团，没心情玩。", "想去的地方关门了，只能在车站发呆。", "[NAME] 丢了学生证，引起了一阵骚乱。"]
+    },
+    [ScheduleAction.CharityLive]: {
+        success: ["[NAME] 在养老院的慰问演出很顺利，老人们笑得很开心。", "虽然没有报酬，但心里暖暖的。", "收到了孩子们送的花。"],
+        great: ["[NAME] 的歌声治愈了在场的所有人，被称赞为“天使”。", "社区报纸报道了这次演出，声望提升了！", "一位老爷爷感动得落泪，握着 [NAME] 的手不放。"],
+        fail: ["选曲太吵了，被投诉了。", "设备简陋，麦克风一直有杂音。", "没什么人来看，冷场了。"]
     }
 };
 
@@ -241,6 +282,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
   const actionLogs: ActionLog[] = [];
   
   let chemistryDelta = 0;
+  let actionCounts = { ...state.actionCounts };
   
   // --- NEW: Passive Fan Growth Calculation ---
   const appealFactor = (state.teamStats.appeal || 0) * 3;
@@ -296,6 +338,9 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         continue;
     }
 
+    // Increment Action Count
+    actionCounts[action] = (actionCounts[action] || 0) + 1;
+
     const roll = Math.random();
     const res = roll > 0.9 ? ActionResult.GreatSuccess : (roll < 0.2 ? ActionResult.Failure : ActionResult.Success); 
     const actionMultiplier = (res === ActionResult.GreatSuccess ? 1.5 : (res === ActionResult.Failure ? 0.3 : 1.0)) * globalGrowthMult; 
@@ -341,7 +386,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
           }
       });
 
-      if (m.tags.includes('社恐') && [ScheduleCategory.Performance, ScheduleCategory.Promotion].includes(ACTION_TO_CATEGORY[action])) {
+      if (m.tags.includes('社恐') && [ScheduleCategory.Promotion].includes(ACTION_TO_CATEGORY[action])) {
           tagStressMult *= 1.5;
           tagGrowthMult *= 0.5; 
       } else if (m.tags.includes('社恐') && ACTION_TO_CATEGORY[action] === ScheduleCategory.Solo) {
@@ -349,14 +394,22 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
       }
 
       switch(action) {
-        case ScheduleAction.SoloTechnical: 
+        case ScheduleAction.InstrumentPractice: 
           stats.tec += 1.2; stats.fat += 5; stats.str += 3; break; 
-        case ScheduleAction.SoloVocal: 
-          stats.mus += 1.0; stats.sta += 0.5; stats.fat += 8; stats.str += 4; break; 
+        case ScheduleAction.VocalPractice:
+          if (m.roles.includes(Role.Vocal)) {
+              stats.mus += 1.2; stats.sta += 0.8; 
+          } else {
+              stats.mus += 0.5; stats.sta += 0.2; 
+          }
+          stats.fat += 8; stats.str += 4; 
+          break;
         case ScheduleAction.SoloExpression:
             stats.sta += 1.0; stats.dsg += 0.5; stats.fat += 5; stats.str += 2; break; 
         case ScheduleAction.VocalLesson:
             stats.mus += 2.0; stats.tec += 1.0; stats.fat += 10; stats.str += 5; break;
+        case ScheduleAction.InstrumentLesson:
+            stats.tec += 2.0; stats.mus += 1.0; stats.fat += 10; stats.str += 5; break;
 
         case ScheduleAction.BandEnsemble: 
           stats.mus += 0.5; stats.tec += 0.5; stats.arr += 0.8; stats.fat += 10; stats.str += 6; 
@@ -379,13 +432,18 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
 
         case ScheduleAction.Songwriting:
           stats.cre += 1.5; stats.cmp += 0.8; stats.lyr += 0.8; stats.men -= 1; stats.fat += 8; stats.str += 8; 
-          songProgress += (m.creativity * 0.12 + m.composing * 0.08 + m.lyrics * 0.08) * actionMultiplier;
+          // Buffed formula: added arrangement impact
+          songProgress += (m.creativity * 0.12 + m.composing * 0.08 + m.lyrics * 0.08 + m.arrangement * 0.05) * actionMultiplier;
           break;
         case ScheduleAction.LyricsWorkshop:
             stats.lyr += 2.0; stats.cre += 0.5; stats.men += 0.5; stats.fat += 5; break;
         case ScheduleAction.ComposeJam:
             stats.cmp += 1.5; stats.arr += 1.5; stats.cre += 1.0; stats.fat += 15; stats.str += 5;
             chemistryDelta += 1.2 * actionMultiplier;
+            // Added Quality Boost to Jam
+            if (currentProject) {
+                songQualityBoost += (m.composing * 0.05 + m.arrangement * 0.05) * actionMultiplier;
+            }
             break;
         case ScheduleAction.DesignWork:
             stats.dsg += 1.5; stats.cre += 0.5; stats.fat += 8; stats.str += 3; 
@@ -395,7 +453,8 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         case ScheduleAction.Recording:
           stats.tec += 0.5; stats.mus += 0.5; stats.fat += 15; stats.str += 15; 
           if (currentProject) {
-              songQualityBoost += (m.technique * 0.08 + m.arrangement * 0.1) * actionMultiplier;
+              // Buffed arrangement multiplier from 0.1 to 0.15
+              songQualityBoost += (m.technique * 0.08 + m.arrangement * 0.15) * actionMultiplier;
               songProgress += 10 * actionMultiplier; 
           }
           break;
@@ -418,6 +477,13 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         case ScheduleAction.PhotoSession:
             actionFans += 800 * actionMultiplier;
             stats.sta += 1.5; stats.dsg += 1.0; stats.fat += 25; stats.str += 15; break;
+        
+        // --- NEW PROMOTION ---
+        case ScheduleAction.CharityLive:
+            actionFans += 300 * actionMultiplier;
+            stats.men += 1.5; stats.sta += 0.5; stats.fat += 15; stats.str -= 5; // Good karma reduces stress slightly
+            chemistryDelta += 0.5 * actionMultiplier;
+            break;
 
         case ScheduleAction.MusicVideoShoot:
           actionFans += 3500 * actionMultiplier;
@@ -428,6 +494,10 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
           stats.fat -= 50; stats.str -= 60; m.affection = Math.min(100, m.affection + 4); 
           chemistryDelta += 0.8 * actionMultiplier; 
           break;
+        case ScheduleAction.GameCenter:
+            stats.fat -= 30; stats.str -= 50; m.affection = Math.min(100, m.affection + 3);
+            chemistryDelta += 1.0 * actionMultiplier;
+            break;
         case ScheduleAction.GroupTrip:
             stats.fat -= 80; stats.str -= 80; m.affection = Math.min(100, m.affection + 10);
             chemistryDelta += 3.0 * actionMultiplier; break;
@@ -443,6 +513,31 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
             actionMoney += 1500; stats.fat += 10; stats.str += 8; break; 
         case ScheduleAction.EquipmentCare:
              stats.tec += 0.5; stats.fat += 5; break;
+        
+        // --- SPECIAL ACTIONS ---
+        case ScheduleAction.SchoolFestival:
+            actionFans += 5000 * actionMultiplier;
+            stats.sta += 2.0; stats.fat += 30; m.affection = Math.min(100, m.affection + 8);
+            chemistryDelta += 2.0 * actionMultiplier;
+            break;
+        case ScheduleAction.FireworksDate:
+            stats.fat -= 40; stats.str -= 60; m.affection = Math.min(100, m.affection + 20);
+            chemistryDelta += 1.5 * actionMultiplier;
+            break;
+        case ScheduleAction.ThemePark:
+            stats.fat -= 20; stats.str -= 80; stats.cre += 1.0; m.affection = Math.min(100, m.affection + 15);
+            chemistryDelta += 2.0 * actionMultiplier;
+            break;
+        case ScheduleAction.ChristmasParty:
+            stats.fat -= 50; stats.str -= 50; m.affection = Math.min(100, m.affection + 10);
+            stats.men += 2.0;
+            break;
+        case ScheduleAction.GraduationTrip:
+            stats.fat -= 90; stats.str -= 90; m.affection = Math.min(100, m.affection + 30);
+            stats.men += 5.0; stats.cre += 2.0;
+            chemistryDelta += 5.0 * actionMultiplier;
+            break;
+
         default:
           stats.mus += 0.3; stats.tec += 0.3; stats.fat += 5; break;
       }
@@ -528,13 +623,18 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         }
     }
 
-    if (songProgress > 0) {
+    if (songProgress > 0 || songQualityBoost > 0) {
         if (!currentProject) {
              currentLog.details.push("开启了新曲创作！");
         } else {
-            currentProject.completeness = Math.min(100, currentProject.completeness + songProgress);
-            currentProject.quality = currentProject.quality + songQualityBoost / 4; 
-            currentLog.details.push(`新曲完成度 +${Math.floor(songProgress)}%`);
+            if (songProgress > 0) {
+                currentProject.completeness = Math.min(100, currentProject.completeness + songProgress);
+                currentLog.details.push(`新曲完成度 +${Math.floor(songProgress)}%`);
+            }
+            if (songQualityBoost > 0) {
+                currentProject.quality = currentProject.quality + songQualityBoost / 4; 
+                currentLog.details.push(`新曲品质 +${songQualityBoost.toFixed(1)}`);
+            }
         }
     }
     
@@ -558,6 +658,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
     members: currentMembers,
     currentProject: currentProject,
     songs: songs,
+    actionCounts: actionCounts,
     teamStats: {
       technique: Math.floor(currentMembers.reduce((a, b) => a + b.technique, 0) / currentMembers.length) || 0,
       appeal: Math.floor(currentMembers.reduce((a, b) => a + b.stagePresence, 0) / currentMembers.length) || 0,

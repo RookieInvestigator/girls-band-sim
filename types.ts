@@ -38,7 +38,13 @@ export enum MusicGenre {
   Industrial = 'Industrial',
   Musical = 'Musical',
   Pop = 'Pop',
-  Dance = 'Dance'
+  Dance = 'Dance',
+  PostRock = 'Post Rock',
+  PopRock = 'Pop Rock',
+  Denpa = 'Denpa',
+  Traditional = 'Traditional',
+  Psychedelic = 'Psychedelic',
+  Noise = 'Noise'
 }
 
 export enum LyricTheme {
@@ -52,7 +58,12 @@ export enum LyricTheme {
   Rebellion = '叛逆',
   Fantasy = '幻想',
   SciFi = '科幻',
-  Party = '派对'
+  Party = '派对',
+  Love = '恋爱',
+  Gothic = '哥特',
+  Sea = '海洋',
+  Cute = '可爱',
+  Food = '美食'
 }
 
 export interface Song {
@@ -77,14 +88,14 @@ export enum ScheduleCategory {
   Band = '合奏排练',
   Creation = '创作录音',
   Promotion = '宣传活动',
-  Performance = '演出活动',
   Leisure = '休闲整顿',
-  Study = '理论学习'
+  Study = '理论学习',
+  Special = '特别企划'
 }
 
 export enum ScheduleAction {
-  SoloTechnical = '个人技术磨练',
-  SoloVocal = '个人声乐练习',
+  InstrumentPractice = '个人乐器练习',
+  VocalPractice = '声乐基础训练',
   SoloExpression = '台风动作修饰',
   BandEnsemble = '乐队合奏排练',
   BandRehearsal = '全员登台彩排',
@@ -96,20 +107,29 @@ export enum ScheduleAction {
   SocialMediaLive = '深夜直播互动',
   RadioInterview = '电台访谈录制',
   MusicVideoShoot = '首支MV拍摄',
+  CharityLive = '社区公益演出',
   TeaTime = '练习室茶话会',
+  GameCenter = '街机厅团建',
   GroupTrip = '海边采风旅行',
   EquipmentCare = '乐器深度保养',
   MusicTheory = '乐理知识讲座',
   PartTimeJob = '兼职打工补贴',
   RentStudio = '租用录音棚练习',
   VocalLesson = '专业声乐私教',
+  InstrumentLesson = '专业乐器私教', 
   LiveStream = '网络不插电直播',
   PhotoSession = '宣发写真拍摄',
   LyricsWorkshop = '歌词读书会',
   ComposeJam = '即兴作曲Jam',
   ListenAnalysis = '竞品音乐分析',
   StyleMakeover = '造型风格改造',
-  TrainingCamp = '夏季合宿特训' 
+  TrainingCamp = '夏季合宿特训',
+  // Special Actions
+  SchoolFestival = '文化祭压轴演出',
+  FireworksDate = '夏日花火大会',
+  ThemePark = '游乐园团建',
+  ChristmasParty = '圣诞特别派对',
+  GraduationTrip = '毕业纪念旅行' // Added
 }
 
 export enum InteractionType {
@@ -162,7 +182,7 @@ export interface Impact {
   rivalFans?: number;
   rivalRelation?: number;
   unlockRival?: boolean;
-  skillPoints?: number; // New: Gain Skill Points (PP)
+  skillPoints?: number; 
 }
 
 export interface Member {
@@ -213,8 +233,6 @@ export interface QueuedEvent {
   member: Member | null;
 }
 
-// --- NEW GIG SYSTEM TYPES (SIMPLIFIED) ---
-
 export enum CardType {
   Melody = 'Melody', 
   Rhythm = 'Rhythm', 
@@ -229,24 +247,14 @@ export interface GigCard {
   title: string;
   description: string;
   type: CardType;
-  
-  // Stats
   baseVoltage: number; 
-  difficulty: number; // 0-100
+  difficulty: number; 
   critBonus?: number; 
-  
-  // Scaling & Identity
   memberId?: string; 
   scalingStat?: keyof Member | 'chemistry' | 'stability' | 'appeal'; 
-  
-  // Effects
   hypeGain?: number;
-  
-  // Visuals
   color?: string; 
   isSongCard?: boolean; 
-  
-  // Card System Props (Optional)
   cost?: number;
   energyGain?: number;
   drawCount?: number;
@@ -259,7 +267,7 @@ export interface CardResult {
     voltage: number;
     hypeDelta: number;
     logText: string;
-    bonuses?: string[]; // Added: Specific buffs applied
+    bonuses?: string[]; 
 }
 
 export interface GigDefinition {
@@ -287,16 +295,15 @@ export interface ActiveGigState {
   
   currentVoltage: number;
   targetVoltage: number;
-  currentHype: number; // Percentage
+  currentHype: number; 
 
-  currentOptions: GigCard[]; // The 5 choices for this round
-  phaseName: string; // "Opening", "MC", "Climax" etc.
+  currentOptions: GigCard[]; 
+  phaseName: string; 
 
   logs: { text: string, type: 'play' | 'effect' | 'turn' | 'miss' | 'crit' }[];
   isFinished: boolean;
   lastResult?: CardResult;
 
-  // Card System Props (Optional)
   energy?: number;
   maxEnergy?: number;
   hand?: GigCard[];
@@ -314,8 +321,6 @@ export interface GigResultData {
     fansEarned: number;
     rewards: { money: number; fans: number; fame: number };
 }
-
-// ------------------------
 
 export interface RivalState {
   name: string;
@@ -369,10 +374,12 @@ export interface GameState {
   rival: RivalState;
   completedGigs: string[];
   
-  // NEW SKILL SYSTEM
   skillPoints: number;
   unlockedSkills: string[];
   bandState: BandState;
+  
+  actionCounts: Record<string, number>;
+  currentNews: string[];
 }
 
 export interface EventOption {

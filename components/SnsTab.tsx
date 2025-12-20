@@ -27,7 +27,11 @@ export const SnsTab = ({ engine }: { engine: any }) => {
 
                 {/* Feed */}
                 <div className="flex-1 overflow-y-auto p-0 bg-slate-50">
-                        {engine.gameState.snsPosts.map((p: SNSPost) => (
+                        {engine.gameState.snsPosts.map((p: SNSPost) => {
+                            // Logic to strip @ from display ID if present
+                            const displayId = p.authorId.replace(/^@/, '');
+                            
+                            return (
                             <div key={p.id} className={`p-6 border-b border-slate-100 bg-white hover:bg-slate-50/50 transition-colors ${p.type === 'rival' ? 'bg-[#0F172A] text-white hover:bg-[#1E293B] border-slate-800' : ''} ${p.type === 'system' ? 'bg-slate-50' : ''}`}>
                                 
                                 {/* System Post Special Style */}
@@ -54,7 +58,7 @@ export const SnsTab = ({ engine }: { engine: any }) => {
                                                     <span className={`font-black text-sm truncate ${p.type === 'member' ? 'text-slate-900' : (p.type === 'rival' ? 'text-white' : 'text-slate-900')}`}>
                                                         {p.authorName}
                                                     </span>
-                                                    <span className={`text-[10px] font-bold ${p.type === 'rival' ? 'text-slate-500' : 'text-slate-400'}`}>@{p.authorId}</span>
+                                                    <span className={`text-[10px] font-bold ${p.type === 'rival' ? 'text-slate-500' : 'text-slate-400'}`}>ID: {displayId}</span>
                                                 </div>
                                                 <span className={`text-[10px] font-bold uppercase tracking-widest ${p.type === 'rival' ? 'text-slate-600' : 'text-slate-300'}`}>
                                                     {p.timestamp}
@@ -84,7 +88,7 @@ export const SnsTab = ({ engine }: { engine: any }) => {
                                     </div>
                                 )}
                             </div>
-                        ))}
+                        )})}
                 </div>
             </div>
         </div>

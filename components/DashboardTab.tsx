@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { BandState } from '../types';
 import { SKILL_TREE } from '../data/skills';
-import { NEWS_LIBRARY } from '../data/news_content';
 
 export const DashboardTab = ({ engine }: { engine: any }) => {
     const { gameState, setBandState } = engine;
@@ -33,18 +32,8 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
     const rawProgress = (gameState.fans / 100000) * 100;
     const progress = Math.min(100, rawProgress);
 
-    // News
-    const newsItems = useMemo(() => {
-        const items = [];
-        // Rival News
-        if (gameState.rival.isUnlocked) {
-            items.push(`【劲敌情报】${gameState.rival.name} 的粉丝数突破了 ${gameState.rival.fans}！`);
-        }
-        // Random
-        items.push(NEWS_LIBRARY.industry[Math.floor(Math.random() * NEWS_LIBRARY.industry.length)]);
-        items.push(NEWS_LIBRARY.trend[Math.floor(Math.random() * NEWS_LIBRARY.trend.length)]);
-        return items;
-    }, [gameState.currentWeek]);
+    // Use news from gameState (Generated weekly in game_engine)
+    const newsItems = gameState.currentNews || ["No news today."];
 
     return (
         <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 font-sans h-full">
@@ -167,23 +156,29 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
                     </div>
                 </div>
 
-                {/* 3. NEWS TICKER (Full Width) */}
-                <div className="md:col-span-12 bg-rose-500 text-white rounded-2xl py-3 px-6 flex items-center gap-4 overflow-hidden shadow-lg shadow-rose-500/20 relative">
-                    <div className="flex items-center gap-2 font-black uppercase tracking-widest shrink-0 z-10 bg-rose-500 pr-4">
-                        <Radio size={16} className="animate-pulse"/> Breaking News
+                {/* 3. NEWS TICKER (Full Width) - SCROLLING IMPLEMENTED */}
+                <div className="md:col-span-12 bg-white rounded-2xl py-3 px-4 flex items-center gap-0 overflow-hidden border border-slate-200 shadow-sm relative group">
+                    <div className="flex items-center gap-2 font-black uppercase tracking-widest shrink-0 z-20 bg-rose-500 text-white px-4 py-1.5 rounded-xl shadow-lg shadow-rose-200 mr-6">
+                        <Radio size={14} className="animate-pulse"/> News
                     </div>
+                    
+                    {/* Fade Edges */}
+                    <div className="absolute left-24 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"/>
+                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"/>
+
                     <div className="flex-1 overflow-hidden relative h-6">
-                        <div className="absolute whitespace-nowrap animate-marquee flex gap-16 font-bold text-sm items-center">
-                            {newsItems.map((news, i) => (
-                                <span key={i} className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 bg-white rounded-full"/>
+                        <div className="absolute whitespace-nowrap animate-marquee flex gap-12 font-bold text-sm text-slate-600 items-center hover:pause-animation">
+                            {/* Original List */}
+                            {newsItems.map((news: string, i: number) => (
+                                <span key={i} className="flex items-center gap-3 group/item">
+                                    <span className="w-1.5 h-1.5 bg-slate-300 rounded-full group-hover/item:bg-rose-400 transition-colors"/>
                                     {news}
                                 </span>
                             ))}
                             {/* Duplicate for seamless loop */}
-                            {newsItems.map((news, i) => (
-                                <span key={`dup-${i}`} className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 bg-white rounded-full"/>
+                            {newsItems.map((news: string, i: number) => (
+                                <span key={`dup-${i}`} className="flex items-center gap-3 group/item">
+                                    <span className="w-1.5 h-1.5 bg-slate-300 rounded-full group-hover/item:bg-rose-400 transition-colors"/>
                                     {news}
                                 </span>
                             ))}

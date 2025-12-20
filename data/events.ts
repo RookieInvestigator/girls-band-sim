@@ -8,6 +8,8 @@ import { PRACTICE_EVENTS } from './events_practice';
 import { RELATIONSHIP_EVENTS } from './events_relation';
 import { CAREER_EVENTS } from './events_career';
 import { RIVAL_EVENTS } from './events_rival';
+import { SCHOOL_EVENTS } from './events_school';
+import { URBAN_EVENTS } from './events_urban';
 
 export const EVENT_LIBRARY: GameEvent[] = [
   ...CRITICAL_EVENTS,
@@ -17,5 +19,7 @@ export const EVENT_LIBRARY: GameEvent[] = [
   ...PRACTICE_EVENTS,
   ...RELATIONSHIP_EVENTS,
   ...CAREER_EVENTS,
-  ...RIVAL_EVENTS
+  ...RIVAL_EVENTS,
+  ...SCHOOL_EVENTS,
+  ...URBAN_EVENTS
 ];

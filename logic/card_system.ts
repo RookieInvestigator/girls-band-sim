@@ -19,7 +19,9 @@ const CHEMISTRY_ACTIONS: GigCard[] = [
 const SHOWMANSHIP_ACTIONS: GigCard[] = [
     { id: 'act_show_points', title: '指人 (Point)', description: '“I see you!” 指向台下的观众。', type: CardType.Spirit, baseVoltage: 20, difficulty: 10, hypeGain: 25, scalingStat: 'appeal', color: 'bg-rose-400' },
     { id: 'act_show_jump', title: '同步跳跃', description: '在副歌高潮时全员起跳！', type: CardType.Spirit, baseVoltage: 35, difficulty: 35, hypeGain: 40, scalingStat: 'appeal', color: 'bg-orange-500' },
-    { id: 'act_show_spin', title: '琴身旋转', description: '帅气地将吉他甩到身后转一圈。', type: CardType.Technique, baseVoltage: 25, difficulty: 65, hypeGain: 50, scalingStat: 'technique', color: 'bg-red-600' }
+    { id: 'act_show_spin', title: '琴身旋转', description: '帅气地将吉他甩到身后转一圈。', type: CardType.Technique, baseVoltage: 25, difficulty: 65, hypeGain: 50, scalingStat: 'technique', color: 'bg-red-600' },
+    // NEW: Visual based action
+    { id: 'act_show_visual', title: '视觉冲击', description: '精心设计的服装和站位，令人移不开眼。', type: CardType.Spirit, baseVoltage: 30, difficulty: 20, hypeGain: 45, scalingStat: 'design', color: 'bg-fuchsia-700' }
 ];
 
 const RISKY_ACTIONS: GigCard[] = [
@@ -33,7 +35,9 @@ const MC_ACTIONS: GigCard[] = [
     { id: 'act_mc_thanks', title: '感谢致辞', description: '真诚地感谢到场的粉丝。', type: CardType.Spirit, baseVoltage: 10, difficulty: 5, hypeGain: 15, scalingStat: 'appeal', color: 'bg-teal-500' },
     { id: 'act_mc_call', title: 'Call & Response', description: '“大家开心吗——！？”', type: CardType.Spirit, baseVoltage: 15, difficulty: 25, hypeGain: 45, scalingStat: 'stagePresence', color: 'bg-orange-500' },
     { id: 'act_mc_member', title: '成员介绍', description: '介绍身边的伙伴，展现团魂。', type: CardType.Spirit, baseVoltage: 20, difficulty: 15, hypeGain: 20, scalingStat: 'chemistry', color: 'bg-indigo-500' },
-    { id: 'act_mc_story', title: '讲述往事', description: '分享写这首歌时的心路历程。', type: CardType.Spirit, baseVoltage: 25, difficulty: 20, hypeGain: 10, scalingStat: 'mental', color: 'bg-cyan-600' }
+    { id: 'act_mc_story', title: '讲述往事', description: '分享写这首歌时的心路历程。', type: CardType.Spirit, baseVoltage: 25, difficulty: 20, hypeGain: 10, scalingStat: 'mental', color: 'bg-cyan-600' },
+    // NEW: Lyrics based MC
+    { id: 'act_mc_lyrics', title: '歌词朗读', description: '深情朗读歌曲中最动人的一句词。', type: CardType.Spirit, baseVoltage: 30, difficulty: 10, hypeGain: 25, scalingStat: 'lyrics', color: 'bg-emerald-500' }
 ];
 
 const TROUBLE_ACTIONS: GigCard[] = [
@@ -87,12 +91,18 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
 
     const pool: GigCard[] = [];
 
+    // --- NEW: Universal Action scaling with Design (Outfit/Visuals) ---
+    // Anyone can pull this off if they have high design stats
+    pool.push(mk('visual', '华丽登场', '精心设计的服装和动作，还没开始演奏就赢了。', CardType.Spirit, 35, 10, 40, 'design', 'bg-fuchsia-600'));
+
     switch (role) {
         case Role.Vocal:
             pool.push(mk('belt', '高音爆发', '主唱的决胜时刻！穿透天花板的声音！', CardType.Melody, 60, 50, 25, 'stagePresence', 'bg-rose-500'));
             pool.push(mk('emotional', '深情演绎', '注入全部情感的演唱，让观众落泪。', CardType.Spirit, 40, 25, 30, 'musicality', 'bg-pink-500'));
             pool.push(mk('mc', '煽动观众', '“把手举起来！” 掌控全场节奏。', CardType.Spirit, 25, 20, 50, 'stagePresence', 'bg-orange-500'));
             pool.push(mk('stable', '稳健演唱', '如同CD音质般的稳定发挥。', CardType.Melody, 30, 10, 15, 'technique', 'bg-rose-400'));
+            // NEW: Lyrics scaling
+            pool.push(mk('poetic', '诗意独白', '如同吟游诗人般念出歌词，直击灵魂。', CardType.Spirit, 45, 20, 25, 'lyrics', 'bg-indigo-400'));
             break;
         
         case Role.Guitar:
@@ -100,6 +110,10 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('riff', '重型Riff', '极具攻击性的失真音色，轰炸全场。', CardType.Rhythm, 45, 30, 25, 'technique', 'bg-red-600'));
             pool.push(mk('delay', '空间音效', '使用延迟效果器制造迷幻氛围。', CardType.Melody, 35, 25, 30, 'creativity', 'bg-sky-500'));
             pool.push(mk('backing', '强力和弦', '扎实的伴奏，支撑着整首歌的厚度。', CardType.Rhythm, 30, 15, 10, 'stability', 'bg-amber-600'));
+            // NEW: Composing scaling
+            pool.push(mk('improv_mel', '即兴旋律', '现场改编Solo旋律，展现作曲才华。', CardType.Melody, 50, 40, 30, 'composing', 'bg-cyan-600'));
+            // NEW: Arrangement scaling
+            pool.push(mk('live_arr', 'Live编曲', '临时改变音色配置，让老歌焕然一新。', CardType.Technique, 40, 30, 35, 'arrangement', 'bg-teal-600'));
             break;
 
         case Role.Bass:
@@ -107,6 +121,8 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('slap', 'Slap Solo', '华丽的击勾弦技巧，谁说贝斯听不见！', CardType.Technique, 50, 50, 30, 'technique', 'bg-violet-600'));
             pool.push(mk('root', '坚实根音', '默默支撑着乐队的底座，不可或缺的存在。', CardType.Rhythm, 30, 10, 10, 'stability', 'bg-blue-600'));
             pool.push(mk('drive', '失真贝斯', '如同推土机般的轰鸣声。', CardType.Rhythm, 45, 40, 20, 'stagePresence', 'bg-indigo-700'));
+            // NEW: Arrangement scaling
+            pool.push(mk('counter', '对位旋律', '不仅仅是根音，编织出华丽的低音旋律线。', CardType.Melody, 40, 35, 20, 'arrangement', 'bg-purple-600'));
             break;
 
         case Role.Drums:
@@ -114,6 +130,8 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('fill', '乱舞过门', '令人眼花缭乱的加花，展示技术。', CardType.Technique, 50, 45, 25, 'technique', 'bg-orange-600'));
             pool.push(mk('cymbal', '镲片碎音', '极具爆发力的重音，强调段落感。', CardType.Rhythm, 45, 40, 30, 'stagePresence', 'bg-yellow-500'));
             pool.push(mk('steady', '人体节拍器', '绝对精准的节奏，让队友感到安心。', CardType.Rhythm, 30, 15, 10, 'stability', 'bg-yellow-600'));
+            // NEW: Arrangement scaling
+            pool.push(mk('dynamic', '动态控制', '通过强弱变化重新诠释歌曲的起伏。', CardType.Rhythm, 35, 25, 20, 'arrangement', 'bg-lime-600'));
             break;
 
         case Role.Keyboard:
@@ -121,6 +139,9 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('lead', '合成器Lead', '极具穿透力的电子音色，主导旋律。', CardType.Technique, 50, 45, 25, 'technique', 'bg-fuchsia-500'));
             pool.push(mk('pad', '唯美铺底', '用和弦包裹住整个乐队的声音。', CardType.Spirit, 35, 20, 25, 'creativity', 'bg-violet-400'));
             pool.push(mk('piano', '古典钢琴', '优雅的钢琴独奏段落。', CardType.Melody, 45, 35, 20, 'technique', 'bg-purple-600'));
+            // NEW: Composing/Arrangement
+            pool.push(mk('reharm', '即兴和声', '现场改变和弦进行，展现深厚的理论功底。', CardType.Melody, 55, 45, 25, 'composing', 'bg-indigo-500'));
+            pool.push(mk('layer', '多层音色', '叠加多种音色，制造出管弦乐团般的宏大感。', CardType.Technique, 45, 30, 30, 'arrangement', 'bg-pink-600'));
             break;
             
         case Role.Violin:
@@ -131,6 +152,10 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
              break;
         case Role.DJ:
              pool.push(mk('scratch', '搓碟', '让现场燥起来！', CardType.Rhythm, 45, 40, 40, 'technique', 'bg-zinc-600'));
+             pool.push(mk('remix', 'Live Remix', '现场重混，赋予歌曲全新的生命。', CardType.Technique, 60, 50, 40, 'arrangement', 'bg-blue-500'));
+             break;
+        case Role.Producer:
+             pool.push(mk('direct', '现场指挥', '通过眼神和手势控制全队的动态。', CardType.Spirit, 30, 10, 20, 'arrangement', 'bg-slate-600'));
              break;
     }
 
@@ -358,7 +383,21 @@ export const resolveOption = (
         const statAdditive = Math.floor(performerStatValue * 0.5);
         if (statAdditive > 0) {
             finalVoltage += statAdditive;
-            const statName = option.scalingStat === 'chemistry' ? '默契' : (option.scalingStat as string).substring(0,3).toUpperCase();
+            const statNameMapping: Record<string, string> = {
+                'chemistry': '默契',
+                'technique': '技巧',
+                'musicality': '乐感',
+                'stagePresence': '表现',
+                'creativity': '想象',
+                'mental': '心态',
+                'stability': '稳定',
+                'appeal': '魅力',
+                'composing': '作曲',
+                'lyrics': '作词',
+                'arrangement': '编曲',
+                'design': '视觉'
+            };
+            const statName = statNameMapping[option.scalingStat as string] || (option.scalingStat as string).substring(0,3).toUpperCase();
             activeBonuses.push(`+${statAdditive} (${statName})`);
         }
 

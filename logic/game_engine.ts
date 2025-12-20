@@ -22,6 +22,7 @@ import { GIG_DEFINITIONS } from '../data/gigs';
 import { generateRivalBand } from '../data/rival_generators';
 import { initializeGigState, generateRoundOptions, resolveOption } from './card_system';
 import { SKILL_TREE } from '../data/skills';
+import { NEWS_LIBRARY } from '../data/news_content';
 
 export const useGameEngine = () => {
   const [isStarted, setIsStarted] = useState(false);
@@ -48,7 +49,8 @@ export const useGameEngine = () => {
   const [lastInteraction, setLastInteraction] = useState<InteractionOutcome | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
-    currentWeek: 1, money: INITIAL_MONEY, fans: 0, bandName: '未命名乐队',
+    currentWeek: 1, // Start at Week 1 (April 1st)
+    money: INITIAL_MONEY, fans: 0, bandName: '未命名乐队',
     teamStats: { technique: 15, appeal: 15, stability: 15, chemistry: 0 },
     members: [], history: [], weeklySchedule: Array(SLOTS_PER_WEEK).fill(null),
     scoutPool: [], refreshCountThisWeek: 0, snsPosts: [],
@@ -67,7 +69,9 @@ export const useGameEngine = () => {
     // Skill System Init
     skillPoints: 5,
     unlockedSkills: ['friend_1'], // Updated to match new Friend track
-    bandState: BandState.Normal
+    bandState: BandState.Normal,
+    currentNews: [],
+    actionCounts: {}
   });
 
   const [isEventOpen, setIsEventOpen] = useState(false);
@@ -82,6 +86,37 @@ export const useGameEngine = () => {
       if (memberName) res = res.replace(/\[NAME\]/g, memberName);
       if (gameState.rival) res = res.replace(/\[RIVAL_NAME\]/g, gameState.rival.name);
       return res;
+  };
+
+  const generateWeeklyNews = (rival: any, week: number) => {
+      const items = [];
+      if (rival && rival.isUnlocked) {
+          if (Math.random() < 0.3) items.push(NEWS_LIBRARY.rival[Math.floor(Math.random() * NEWS_LIBRARY.rival.length)].replace('[RIVAL_NAME]', rival.name));
+      }
+      
+      // Determine Season (Week 1 = April 1st)
+      // Spring: 1-13 (Apr, May, Jun)
+      // Summer: 14-26 (Jul, Aug, Sep)
+      // Autumn: 27-39 (Oct, Nov, Dec)
+      // Winter: 40-52 (Jan, Feb, Mar)
+      const normalizedWeek = ((week - 1) % 52) + 1;
+      
+      let seasonNews = [];
+      if (normalizedWeek >= 1 && normalizedWeek <= 13) seasonNews = NEWS_LIBRARY.spring;
+      else if (normalizedWeek >= 14 && normalizedWeek <= 26) seasonNews = NEWS_LIBRARY.summer;
+      else if (normalizedWeek >= 27 && normalizedWeek <= 39) seasonNews = NEWS_LIBRARY.autumn;
+      else seasonNews = NEWS_LIBRARY.winter;
+
+      // Pick seasonal news
+      items.push(seasonNews[Math.floor(Math.random() * seasonNews.length)]);
+      
+      // Pick general news
+      if (Math.random() < 0.5) items.push(NEWS_LIBRARY.industry[Math.floor(Math.random() * NEWS_LIBRARY.industry.length)]);
+      else items.push(NEWS_LIBRARY.trend[Math.floor(Math.random() * NEWS_LIBRARY.trend.length)]);
+      
+      items.push(NEWS_LIBRARY.gossip[Math.floor(Math.random() * NEWS_LIBRARY.gossip.length)]);
+      
+      return items;
   };
 
   const generateFallbackSNS = (state: GameState): SNSPost[] => {
@@ -187,7 +222,12 @@ export const useGameEngine = () => {
     // 2. Fallback to basic requirements
     const condition = ACTION_UNLOCKS[action];
     if (!condition) return true;
+    
+    // Time Check (Start Week)
     if (condition.week && gameState.currentWeek < condition.week) return false;
+    // Time Check (End Week / Seasonal)
+    if (condition.endWeek && gameState.currentWeek > condition.endWeek) return false;
+
     if (condition.fans && gameState.fans < condition.fans) return false;
     if (condition.members && gameState.members.length < condition.members) return false;
     if (condition.money && gameState.money < condition.money) return false;
@@ -214,12 +254,15 @@ export const useGameEngine = () => {
     };
     
     const randomRival = generateRivalBand();
+    const initialNews = generateWeeklyNews(randomRival, 1);
 
     setGameState(prev => ({
       ...prev,
+      currentWeek: 1, // Start at Week 1 (April)
       members: [leader],
       scoutPool: [...MEMBER_POOL].sort(() => 0.5 - Math.random()).slice(0, 3),
-      rival: randomRival
+      rival: randomRival,
+      currentNews: initialNews
     }));
     setIsStarted(true);
   };
@@ -328,13 +371,20 @@ export const useGameEngine = () => {
             setIsGeneratingSong(true);
             const idea = await generateSongIdea(finalState, composer, lyricist);
             setIsGeneratingSong(false); 
+            
+            // --- UPDATED QUALITY LOGIC ---
+            // Base quality uses Composer's Composing AND Arrangement stats directly.
+            // Formula: 10 (base) + Composing*0.3 + Arrangement*0.2 + Random(10)
+            // e.g., 80 Composing, 80 Arrangement => 10 + 24 + 16 + rand = ~50-60 base quality.
+            const baseQuality = 10 + (composer.composing * 0.3) + (composer.arrangement * 0.2) + Math.floor(Math.random() * 10);
+
             finalState.currentProject = {
                 id: Math.random().toString(36).substr(2, 9),
                 title: idea.title || "Untitled",
                 description: idea.description || "",
                 genre: idea.genre || MusicGenre.JPop,
                 lyricTheme: idea.lyricTheme || LyricTheme.Youth,
-                quality: 20 + Math.floor(Math.random() * 20), 
+                quality: baseQuality, 
                 completeness: 20, 
                 popularity: 0,
                 credits: { composer: composer.name, lyricist: lyricist.name }
@@ -342,7 +392,7 @@ export const useGameEngine = () => {
             actionLogs.push({
                 action: ScheduleAction.Songwriting,
                 result: ActionResult.Success,
-                details: [`灵感迸发！${composer.name}开始作曲，${lyricist.name}构思了【${finalState.currentProject.lyricTheme}】风格的歌词。`],
+                details: [`灵感迸发！${composer.name}开始作曲，${lyricist.name}构思了【${finalState.currentProject.lyricTheme}】风格的歌词。`, `初始品质: ${Math.floor(baseQuality)} (基于${composer.name}的能力)`],
                 date: "Special",
                 flavorText: "新的传说开始了。"
             });
@@ -381,6 +431,7 @@ export const useGameEngine = () => {
 
         finalState.weeklySchedule = Array(SLOTS_PER_WEEK).fill(null);
         finalState.refreshCountThisWeek = 0;
+        finalState.currentNews = generateWeeklyNews(finalState.rival, finalState.currentWeek);
 
         setGameState(finalState);
         setTurnResultData({ 
@@ -446,6 +497,7 @@ export const useGameEngine = () => {
              content: `演出结束！评级: ${rank} (Score: ${gig.currentVoltage})`, likes: 999,
              timestamp: weekStr, type: 'system'
         }];
+        const nextNews = generateWeeklyNews(prev.rival, prev.currentWeek + 1);
         return {
           ...prev,
           activeGig: null, 
@@ -456,7 +508,8 @@ export const useGameEngine = () => {
           weeklySchedule: Array(SLOTS_PER_WEEK).fill(null),
           snsPosts: [...newPosts, ...prev.snsPosts].slice(0, 30),
           completedGigs: rank === 'S' || rank === 'A' ? [...prev.completedGigs, prev.activeGig.definition.id] : prev.completedGigs,
-          skillPoints: prev.skillPoints + ppReward
+          skillPoints: prev.skillPoints + ppReward,
+          currentNews: nextNews
         };
      });
      
@@ -654,7 +707,7 @@ export const useGameEngine = () => {
         }
     }
 
-    if (gameState.currentWeek >= 2 && gameState.bandName === '未命名乐队') {
+    if (gameState.currentWeek >= 11 && gameState.bandName === '未命名乐队') { // Adjusted for later start
       const ev = EVENT_LIBRARY.find(e => e.id === 'naming_event');
       if (ev) { 
           setGameState(prev => ({ ...prev, eventQueue: [] }));
@@ -665,7 +718,7 @@ export const useGameEngine = () => {
       }
     } 
 
-    if (gameState.currentWeek >= 4 && !gameState.rival.isUnlocked) {
+    if (gameState.currentWeek >= 12 && !gameState.rival.isUnlocked) { // Adjusted for later start
         const ev = EVENT_LIBRARY.find(e => e.id === 'rival_encounter_ex_member');
         if (ev && gameState.eventQueue.length === 0) {
              setGameState(prev => ({ ...prev, eventQueue: [] }));
