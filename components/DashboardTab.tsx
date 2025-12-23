@@ -59,10 +59,10 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
                         className="group flex items-center gap-3 bg-white border-2 border-slate-900 px-5 py-3 rounded-full hover:bg-slate-900 hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
                     >
                         <div className="flex flex-col items-end leading-none">
-                            <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">Strategy</span>
-                            <span className="text-sm font-black">队长手账</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-white">Strategy</span>
+                            <span className="text-sm font-black">队长手记</span>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-xs group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs group-hover:bg-white group-hover:text-slate-900 transition-colors border border-slate-900">
                             {gameState.skillPoints}
                         </div>
                     </button>

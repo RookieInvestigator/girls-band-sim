@@ -1,35 +1,40 @@
 
-import React from 'react';
-import { X, Heart, Star, Lock, Check, Zap, Book, Sparkles, Briefcase, Flame } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Heart, Star, Lock, Check, Zap, Book, Sparkles, Briefcase, Flame, ArrowUp } from 'lucide-react';
 import { SKILL_TREE } from '../data/skills';
 
 export const SkillTreeModal = ({ engine }: { engine: any }) => {
     const { gameState, unlockSkill } = engine;
+    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
     const COLUMNS = [
         { 
             id: 'friendship', label: 'KIZUNA', sub: '羁绊·心态', icon: Heart, 
-            color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-200', 
-            node: 'bg-rose-500', ring: 'ring-rose-100',
-            trackBg: 'bg-rose-50/20' 
+            color: 'text-rose-600', border: 'border-rose-200', bg: 'bg-rose-50',
+            nodeLocked: 'bg-rose-50 border-rose-200 text-rose-300',
+            nodeUnlocked: 'bg-rose-600 border-rose-600 text-white',
+            lineActive: '#e11d48', lineInactive: '#e2e8f0'
         },
         { 
             id: 'passion', label: 'KIRAMEKI', sub: '闪耀·魅力', icon: Flame, 
-            color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-200', 
-            node: 'bg-amber-500', ring: 'ring-amber-100',
-            trackBg: 'bg-amber-50/20' 
+            color: 'text-amber-600', border: 'border-amber-200', bg: 'bg-amber-50',
+            nodeLocked: 'bg-amber-50 border-amber-200 text-amber-300',
+            nodeUnlocked: 'bg-amber-500 border-amber-500 text-white',
+            lineActive: '#f59e0b', lineInactive: '#e2e8f0'
         },
         { 
             id: 'technique', label: 'OTO', sub: '技艺·实力', icon: Star, 
-            color: 'text-sky-500', bg: 'bg-sky-50', border: 'border-sky-200', 
-            node: 'bg-sky-500', ring: 'ring-sky-100',
-            trackBg: 'bg-sky-50/20' 
+            color: 'text-sky-600', border: 'border-sky-200', bg: 'bg-sky-50',
+            nodeLocked: 'bg-sky-50 border-sky-200 text-sky-300',
+            nodeUnlocked: 'bg-sky-500 border-sky-500 text-white',
+            lineActive: '#0ea5e9', lineInactive: '#e2e8f0'
         },
         { 
             id: 'commercial', label: 'PRODUCE', sub: '运营·策略', icon: Briefcase, 
-            color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', 
-            node: 'bg-slate-500', ring: 'ring-slate-100',
-            trackBg: 'bg-slate-50/20' 
+            color: 'text-slate-600', border: 'border-slate-200', bg: 'bg-slate-50',
+            nodeLocked: 'bg-slate-50 border-slate-200 text-slate-300',
+            nodeUnlocked: 'bg-slate-600 border-slate-600 text-white',
+            lineActive: '#475569', lineInactive: '#e2e8f0'
         },
     ];
 
@@ -37,15 +42,17 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
         return SKILL_TREE.filter(s => s.category === cat);
     };
 
-    // Configuration for 8 Rows
-    const COL_WIDTH = 190; 
-    const ROW_HEIGHT = 90; // Slightly reduced to fit more
-    const CARD_WIDTH = 160; 
-    const CARD_HEIGHT = 50; 
-    const START_Y = 30;
-    const TRACK_HEIGHT = START_Y + (8 * ROW_HEIGHT); // Dynamic based on rows
+    const selectedNode = selectedNodeId ? SKILL_TREE.find(s => s.id === selectedNodeId) : null;
+    const selectedColumn = selectedNode ? COLUMNS.find(c => c.id === selectedNode.category) : null;
 
-    // Helper to calculate coordinates
+    // Configuration for 8 Rows
+    const COL_WIDTH = 200; 
+    const ROW_HEIGHT = 100; 
+    const CARD_WIDTH = 170; 
+    const CARD_HEIGHT = 60; 
+    const START_Y = 40;
+    const TRACK_HEIGHT = START_Y + (8 * ROW_HEIGHT);
+
     const getPos = (node: any) => {
         const xOffset = 0; 
         const left = (COL_WIDTH / 2) + xOffset - (CARD_WIDTH / 2); 
@@ -53,37 +60,36 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
         return { left, top, centerX: (COL_WIDTH / 2) + xOffset, centerY: top + (CARD_HEIGHT / 2) };
     };
 
+    const handleUnlock = () => {
+        if (selectedNode) {
+            unlockSkill(selectedNode.id);
+        }
+    };
+
     return (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[120] flex items-center justify-center p-4 animate-in fade-in duration-300 font-sans">
-            <div className="bg-slate-50 rounded-[2.5rem] w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl relative overflow-hidden ring-4 ring-white/10">
+        <div className="fixed inset-0 bg-slate-900/50 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+            <div className="bg-white rounded-xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl relative overflow-hidden border border-slate-200">
                 
-                {/* Header */}
-                <div className="px-8 py-5 border-b border-slate-200 flex justify-between items-center bg-white z-30 shrink-0 shadow-sm">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-slate-200">
+                {/* Header - Clean */}
+                <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-white z-20 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-slate-900 rounded-lg text-white">
                             <Book size={18}/>
                         </div>
                         <div>
-                            <h3 className="text-xl font-black text-slate-900 tracking-tight">队长手账</h3>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">
-                                    Band Strategy
-                                </span>
-                            </div>
+                            <h3 className="text-lg font-black text-slate-900 tracking-tight">队长手记</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Captain's Log</p>
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-6">
-                        <div className="flex flex-col items-end">
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">可用点数 (PP)</span>
-                            <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-pink-500 to-purple-600 leading-none filter drop-shadow-sm">
-                                {gameState.skillPoints}
-                            </div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">PP</span>
+                            <span className="text-xl font-black text-rose-500 leading-none">{gameState.skillPoints}</span>
                         </div>
-                        <div className="h-8 w-px bg-slate-200"/>
                         <button 
                             onClick={() => engine.setShowSkillTree(false)} 
-                            className="p-2 rounded-full bg-slate-100 hover:bg-rose-50 hover:text-rose-500 text-slate-400 transition-colors"
+                            className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
                         >
                             <X size={20}/>
                         </button>
@@ -91,19 +97,19 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                 </div>
 
                 {/* Main Scrollable Content */}
-                <div className="flex-1 overflow-auto bg-[#F8FAFC] relative custom-scrollbar">
-                    {/* Technical Grid Background */}
+                <div className="flex-1 overflow-auto bg-slate-50 relative custom-scrollbar pb-64"> 
+                    {/* Simple Grid Background */}
                     <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
                          style={{
                              backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', 
-                             backgroundSize: '20px 20px',
-                             height: '200%' // Extend for scrolling
+                             backgroundSize: '40px 40px',
+                             height: '200%' 
                          }}
                     />
 
                     {/* Centered Container */}
-                    <div className="w-full flex justify-center p-6 pb-20 min-w-max">
-                        <div className="flex gap-4">
+                    <div className="w-full flex justify-center p-8 min-w-max">
+                        <div className="flex gap-6">
                             {COLUMNS.map(col => {
                                 const skills = getSkillsForCategory(col.id);
                                 
@@ -111,20 +117,20 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                     <div key={col.id} className="flex flex-col shrink-0">
                                         
                                         {/* Column Header */}
-                                        <div className={`w-[190px] py-3 rounded-t-2xl border-x border-t ${col.border} bg-white flex flex-col items-center justify-center relative z-10 shadow-sm border-b border-b-slate-100 sticky top-0`}>
+                                        <div className={`w-[200px] py-4 rounded-t-xl border-x border-t ${col.border} bg-white flex flex-col items-center justify-center relative z-10 border-b border-b-slate-100`}>
                                             <div className="flex items-center gap-2 mb-1">
-                                                <col.icon size={14} className={col.color}/>
-                                                <span className="font-black text-sm text-slate-800 tracking-tight">{col.label}</span>
+                                                <col.icon size={16} className={col.color}/>
+                                                <span className="font-black text-sm text-slate-800 uppercase tracking-wide">{col.label}</span>
                                             </div>
-                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-full">{col.sub}</div>
+                                            <div className="text-[10px] font-bold text-slate-400">{col.sub}</div>
                                         </div>
 
                                         {/* Track Container */}
                                         <div 
-                                            className={`w-[190px] bg-white rounded-b-2xl border-x border-b ${col.border} shadow-sm relative overflow-hidden`}
+                                            className={`w-[200px] bg-white rounded-b-xl border-x border-b ${col.border} relative`}
                                             style={{ height: TRACK_HEIGHT }}
                                         >
-                                            <div className={`absolute inset-0 ${col.trackBg}`}/>
+                                            <div className={`absolute inset-0 ${col.bg} opacity-30`}/>
                                             
                                             {/* Tree Area */}
                                             <div className="relative w-full h-full">
@@ -144,10 +150,10 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                                             <path 
                                                                 key={`${parent.id}-${node.id}`}
                                                                 d={`M ${pPos.centerX} ${pPos.centerY + CARD_HEIGHT/2} L ${nPos.centerX} ${nPos.centerY - CARD_HEIGHT/2}`}
-                                                                stroke={isUnlocked ? (col.id === 'friendship' ? '#fda4af' : (col.id === 'passion' ? '#fcd34d' : (col.id === 'technique' ? '#7dd3fc' : '#cbd5e1'))) : "#e2e8f0"}
-                                                                strokeWidth={isUnlocked ? "3" : "2"}
+                                                                stroke={isUnlocked ? col.lineActive : col.lineInactive}
+                                                                strokeWidth="2"
                                                                 strokeDasharray={isUnlocked ? "0" : "4 4"}
-                                                                className="transition-all duration-500"
+                                                                fill="none"
                                                             />
                                                         );
                                                     }))}
@@ -160,64 +166,47 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                                     const parentsUnlocked = node.parents.length === 0 || node.parents.every(pid => gameState.unlockedSkills.includes(pid));
                                                     const canUnlock = !isUnlocked && parentsUnlocked && gameState.skillPoints >= node.cost;
                                                     const isLocked = !isUnlocked && !canUnlock;
+                                                    const isSelected = selectedNodeId === node.id;
 
                                                     return (
                                                         <div 
                                                             key={node.id}
-                                                            className="absolute z-10 group perspective"
+                                                            className="absolute z-10"
                                                             style={{ left, top, width: CARD_WIDTH, height: CARD_HEIGHT }}
                                                         >
                                                             <button
-                                                                onClick={() => canUnlock && unlockSkill(node.id)}
-                                                                disabled={!canUnlock && !isUnlocked}
+                                                                onClick={() => setSelectedNodeId(node.id)}
                                                                 className={`
-                                                                    w-full h-full rounded-lg flex items-center px-2.5 gap-2.5 transition-all duration-200 relative border-2 text-left shadow-[0_2px_4px_rgba(0,0,0,0.02)]
-                                                                    ${isUnlocked 
-                                                                        ? 'bg-white border-slate-200' 
-                                                                        : (canUnlock 
-                                                                            ? `bg-white border-${col.color.split('-')[1]}-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer ${col.ring} ring-2 ring-offset-1` 
-                                                                            : 'bg-slate-50 border-slate-100 opacity-60 grayscale'
+                                                                    w-full h-full rounded-lg flex items-center px-3 gap-3 transition-all duration-200 border-2 text-left
+                                                                    ${isSelected 
+                                                                        ? `ring-2 ring-slate-800 border-slate-800 transform scale-105 shadow-md bg-white z-20`
+                                                                        : (isUnlocked 
+                                                                            ? `${col.nodeUnlocked}` 
+                                                                            : (canUnlock 
+                                                                                ? 'bg-white border-slate-300 text-slate-700 hover:border-slate-400 hover:-translate-y-0.5 cursor-pointer' 
+                                                                                : `${col.nodeLocked} opacity-80 cursor-default`
+                                                                              )
                                                                           )
                                                                     }
                                                                 `}
                                                             >
-                                                                {/* Compact Icon */}
-                                                                <div className={`
-                                                                    w-6 h-6 rounded flex items-center justify-center shrink-0 transition-colors
-                                                                    ${isUnlocked ? `${col.node} text-white shadow-sm` : 'bg-slate-200 text-slate-400'}
-                                                                `}>
-                                                                    {isUnlocked ? <Check size={12} strokeWidth={4}/> : (isLocked ? <Lock size={10}/> : <col.icon size={12}/>)}
+                                                                {/* Icon */}
+                                                                <div className="shrink-0">
+                                                                    {isUnlocked ? <Check size={16} strokeWidth={3}/> : (isLocked ? <Lock size={14}/> : <div className="w-2 h-2 rounded-full bg-slate-400"/>)}
                                                                 </div>
 
-                                                                {/* Compact Info */}
+                                                                {/* Text */}
                                                                 <div className="flex-1 min-w-0">
-                                                                    <div className={`font-black text-[10px] truncate leading-tight ${isUnlocked ? 'text-slate-800' : 'text-slate-500'}`}>
+                                                                    <div className="font-bold text-[11px] truncate leading-tight">
                                                                         {node.name}
                                                                     </div>
+                                                                    {!isUnlocked && (
+                                                                        <div className="text-[9px] opacity-70 font-mono mt-0.5">
+                                                                            {node.cost} PP
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-
-                                                                {/* Cost Badge */}
-                                                                {!isUnlocked && (
-                                                                    <div className={`px-1 py-0.5 rounded text-[7px] font-black border ${canUnlock ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
-                                                                        {node.cost}p
-                                                                    </div>
-                                                                )}
-                                                                
-                                                                {/* Unlocked Sparkle */}
-                                                                {isUnlocked && <Sparkles size={12} className="text-yellow-400 absolute -top-1.5 -right-1.5 animate-pulse filter drop-shadow-sm"/>}
                                                             </button>
-
-                                                            {/* Hover Tooltip - Improved Z-index and Positioning */}
-                                                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-[100] transform scale-95 group-hover:scale-100 origin-bottom">
-                                                                <div className="bg-slate-800 text-white p-3 rounded-xl shadow-xl border border-slate-700 relative">
-                                                                    <div className="font-bold text-[10px] text-slate-300 uppercase mb-1 tracking-wider border-b border-slate-700 pb-1">{node.name}</div>
-                                                                    <div className="text-[10px] font-medium leading-relaxed text-slate-100">
-                                                                        {node.description}
-                                                                    </div>
-                                                                    {/* Arrow */}
-                                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-800"/>
-                                                                </div>
-                                                            </div>
                                                         </div>
                                                     );
                                                 })}
@@ -229,6 +218,74 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* BOTTOM INSPECTOR PANEL - Clean & Solid */}
+                <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-6 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] h-48 flex items-center">
+                    <div className="max-w-4xl mx-auto w-full">
+                        {selectedNode && selectedColumn ? (
+                            <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${selectedColumn.border} ${selectedColumn.color} bg-white`}>
+                                            {selectedColumn.label}
+                                        </span>
+                                        {gameState.unlockedSkills.includes(selectedNode.id) && (
+                                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+                                                <Check size={12}/> Unlocked
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h2 className="text-2xl font-black text-slate-900 mb-2 leading-none">
+                                        {selectedNode.name}
+                                    </h2>
+                                    <p className="text-sm font-medium text-slate-500 leading-relaxed max-w-2xl">
+                                        {selectedNode.description}
+                                    </p>
+                                </div>
+
+                                <div className="shrink-0">
+                                    {gameState.unlockedSkills.includes(selectedNode.id) ? (
+                                        <div className="px-8 py-3 rounded-lg bg-slate-100 text-slate-400 font-black uppercase tracking-widest text-xs border border-slate-200 select-none">
+                                            已获得
+                                        </div>
+                                    ) : (
+                                        (() => {
+                                            const parentsUnlocked = selectedNode.parents.length === 0 || selectedNode.parents.every(pid => gameState.unlockedSkills.includes(pid));
+                                            const canAfford = gameState.skillPoints >= selectedNode.cost;
+                                            const isUnlockable = parentsUnlocked && canAfford;
+
+                                            return (
+                                                <button
+                                                    onClick={handleUnlock}
+                                                    disabled={!isUnlockable}
+                                                    className={`
+                                                        px-8 py-3 rounded-lg font-black uppercase tracking-widest text-xs flex items-center gap-2 transition-all
+                                                        ${isUnlockable 
+                                                            ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-md hover:shadow-lg active:translate-y-0.5' 
+                                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                                        }
+                                                    `}
+                                                >
+                                                    {isUnlockable ? <ArrowUp size={14}/> : <Lock size={14}/>}
+                                                    <span>解锁技能</span>
+                                                    <span className="ml-2 bg-white/20 px-1.5 py-0.5 rounded text-[10px]">
+                                                        {selectedNode.cost} PP
+                                                    </span>
+                                                </button>
+                                            );
+                                        })()
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
+                                <Book size={32} className="opacity-30"/>
+                                <span className="text-sm font-bold uppercase tracking-widest">选择上方技能图标查看详情</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
             </div>
         </div>
     );
