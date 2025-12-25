@@ -1,34 +1,27 @@
 
 import { useState } from 'react';
-import { GameState, Member, Role, ScheduleAction, InteractionType, SelfActionType, ActionResult, GameEvent, EventOption, Impact, InteractionOutcome, SNSPost, Song, MusicGenre, QueuedEvent, ActiveGigState, GigCard, GigResultData, LyricTheme, BandState } from '../types';
+import { GameState, Member, Role, ScheduleAction, InteractionType, SelfActionType, ActionResult, GameEvent, EventOption, InteractionOutcome, Song, MusicGenre, QueuedEvent, GigCard, GigResultData, LyricTheme, BandState, FutureEvent } from '../types';
 import { MEMBER_POOL } from '../data/members';
 import { EVENT_LIBRARY } from '../data/events';
-import { calculateInteractionOutcome } from './interaction_system';
 import { processTurn, ActionLog } from './schedule_system';
+import { calculateBandStats } from './stats_system';
 import { INITIAL_MONEY, SLOTS_PER_WEEK, MAX_MEMBERS, ACTION_UNLOCKS, REFRESH_COST_BASE } from '../constants';
-import { SELF_ACTION_TEMPLATES } from '../data/interactions';
-import { 
-    MEMBER_POST_TEMPLATES, 
-    FAN_COMMENT_TEMPLATES, 
-    RIVAL_POST_TEMPLATES, 
-    RIVAL_PROMO_TEMPLATES, 
-    FAN_WAR_TEMPLATES,
-    SHORT_POST_TEMPLATES,
-    LONG_POST_TEMPLATES,
-    POETIC_POST_TEMPLATES
-} from '../data/sns_templates';
 import { generateAiSnsPosts, generateSongIdea, generateAiRivalBand } from '../geminiService';
 import { GIG_DEFINITIONS } from '../data/gigs';
 import { generateRivalBand } from '../data/rival_generators';
 import { initializeGigState, generateRoundOptions, resolveOption } from './card_system';
 import { SKILL_TREE } from '../data/skills';
-import { NEWS_LIBRARY } from '../data/news_content';
+import { formatText } from './utils';
+import { generateWeeklyNews, generateFallbackSNS } from './news_generator';
+import { processEventChoice } from './event_logic';
+import { processInteraction, processSelfAction, processDismissal } from './action_logic';
 
 export const useGameEngine = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRefreshingScout, setIsRefreshingScout] = useState(false);
   const [isGeneratingSong, setIsGeneratingSong] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false); 
   
   const [showTurnResult, setShowTurnResult] = useState(false);
   const [turnResultData, setTurnResultData] = useState<{
@@ -49,13 +42,22 @@ export const useGameEngine = () => {
   const [lastInteraction, setLastInteraction] = useState<InteractionOutcome | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
-    currentWeek: 1, // Start at Week 1 (April 1st)
+    currentWeek: 1, 
     money: INITIAL_MONEY, fans: 0, bandName: '未命名乐队',
-    teamStats: { technique: 15, appeal: 15, stability: 15, chemistry: 0 },
+    teamStats: { 
+        performance: 0, precision: 50, tone: 50, rhythm: 50, dynamics: 50,
+        stage: 0, aura: 50, interaction: 50, visual: 50, adaptation: 50,
+        bond: 0, synergy: 0, connection: 50, topic: 0,
+        work: 0, narrative: 50, melody: 50, detail: 50,
+        totalRating: 'D',
+        technique: 50, appeal: 50, stability: 50, chemistry: 0 // Legacy
+    },
+    rawChemistry: 0, // Init
     members: [], history: [], weeklySchedule: Array(SLOTS_PER_WEEK).fill(null),
     scoutPool: [], refreshCountThisWeek: 0, snsPosts: [],
     songs: [], currentProject: null,
     eventQueue: [],
+    futureEvents: [],
     activeGig: null,
     completedGigs: [], 
     rival: {
@@ -66,9 +68,8 @@ export const useGameEngine = () => {
       isUnlocked: false,
       style: '???'
     },
-    // Skill System Init
     skillPoints: 5,
-    unlockedSkills: ['friend_1'], // Updated to match new Friend track
+    unlockedSkills: ['friend_1'], 
     bandState: BandState.Normal,
     currentNews: [],
     actionCounts: {}
@@ -81,123 +82,7 @@ export const useGameEngine = () => {
 
   const refreshCost = gameState.refreshCountThisWeek === 0 ? 0 : REFRESH_COST_BASE * gameState.refreshCountThisWeek;
 
-  const formatText = (text: string, memberName?: string): string => {
-      let res = text;
-      if (memberName) res = res.replace(/\[NAME\]/g, memberName);
-      if (gameState.rival) res = res.replace(/\[RIVAL_NAME\]/g, gameState.rival.name);
-      return res;
-  };
-
-  const generateWeeklyNews = (rival: any, week: number) => {
-      const items = [];
-      if (rival && rival.isUnlocked) {
-          if (Math.random() < 0.3) items.push(NEWS_LIBRARY.rival[Math.floor(Math.random() * NEWS_LIBRARY.rival.length)].replace('[RIVAL_NAME]', rival.name));
-      }
-      
-      // Determine Season (Week 1 = April 1st)
-      // Spring: 1-13 (Apr, May, Jun)
-      // Summer: 14-26 (Jul, Aug, Sep)
-      // Autumn: 27-39 (Oct, Nov, Dec)
-      // Winter: 40-52 (Jan, Feb, Mar)
-      const normalizedWeek = ((week - 1) % 52) + 1;
-      
-      let seasonNews = [];
-      if (normalizedWeek >= 1 && normalizedWeek <= 13) seasonNews = NEWS_LIBRARY.spring;
-      else if (normalizedWeek >= 14 && normalizedWeek <= 26) seasonNews = NEWS_LIBRARY.summer;
-      else if (normalizedWeek >= 27 && normalizedWeek <= 39) seasonNews = NEWS_LIBRARY.autumn;
-      else seasonNews = NEWS_LIBRARY.winter;
-
-      // Pick seasonal news
-      items.push(seasonNews[Math.floor(Math.random() * seasonNews.length)]);
-      
-      // Pick general news
-      if (Math.random() < 0.5) items.push(NEWS_LIBRARY.industry[Math.floor(Math.random() * NEWS_LIBRARY.industry.length)]);
-      else items.push(NEWS_LIBRARY.trend[Math.floor(Math.random() * NEWS_LIBRARY.trend.length)]);
-      
-      items.push(NEWS_LIBRARY.gossip[Math.floor(Math.random() * NEWS_LIBRARY.gossip.length)]);
-      
-      return items;
-  };
-
-  const generateFallbackSNS = (state: GameState): SNSPost[] => {
-     // ... (Existing implementation preserved) ...
-     const newPosts: SNSPost[] = [];
-     const weekStr = `Week ${state.currentWeek}`;
-     
-     state.members.forEach(m => {
-       if (Math.random() < 0.35) {
-         let contentPool = MEMBER_POST_TEMPLATES['default'];
-         if (m.tags.some(t => ['三无', '酷', '社恐'].includes(t))) {
-             contentPool = SHORT_POST_TEMPLATES;
-         } else if (m.tags.some(t => ['辣妹', '元气', '偶像', '现充'].includes(t))) {
-             contentPool = LONG_POST_TEMPLATES;
-         } else if (m.tags.some(t => ['中二病', '电波', '文学少女'].includes(t))) {
-             contentPool = POETIC_POST_TEMPLATES;
-         } else {
-             for (const t of m.tags) {
-                 if (MEMBER_POST_TEMPLATES[t]) {
-                     contentPool = MEMBER_POST_TEMPLATES[t];
-                     break;
-                 }
-             }
-         }
-         const content = contentPool[Math.floor(Math.random() * contentPool.length)];
-         newPosts.push({
-           id: Math.random().toString(36), authorId: m.id, authorName: m.name,
-           content: content, likes: 10 + Math.floor(Math.random()*50),
-           timestamp: weekStr, type: 'member'
-         });
-       }
-     });
-
-     const fanPostCount = 1 + Math.floor(Math.random() * 2);
-     for(let i=0; i<fanPostCount; i++) {
-        const content = FAN_COMMENT_TEMPLATES[Math.floor(Math.random() * FAN_COMMENT_TEMPLATES.length)];
-        newPosts.push({
-           id: Math.random().toString(36), authorId: 'fan', authorName: '路人粉丝',
-           content: content, likes: Math.floor(Math.random()*20),
-           timestamp: weekStr, type: 'fan'
-        });
-     }
-     
-     if (state.rival.isUnlocked) {
-         const roll = Math.random();
-         if (roll < 0.4) {
-             const content = RIVAL_PROMO_TEMPLATES[Math.floor(Math.random() * RIVAL_PROMO_TEMPLATES.length)];
-             newPosts.push({
-                 id: Math.random().toString(36), authorId: 'rival', authorName: state.rival.name + '_OFFICIAL',
-                 content: content, 
-                 likes: state.rival.fans / 5 + Math.floor(Math.random()*200),
-                 timestamp: weekStr, 
-                 type: 'rival'
-             });
-         }
-         else if (roll < 0.7) {
-             let templateList = RIVAL_POST_TEMPLATES.neutral;
-             if (state.rival.relation >= 60) templateList = RIVAL_POST_TEMPLATES.friendly;
-             else if (state.rival.relation <= 40) templateList = RIVAL_POST_TEMPLATES.hostile;
-             const content = templateList[Math.floor(Math.random() * templateList.length)];
-             newPosts.push({
-                 id: Math.random().toString(36), authorId: 'rival', authorName: state.rival.name + '_MEMBER',
-                 content: formatText(content), 
-                 likes: state.rival.fans / 10 + Math.floor(Math.random()*100),
-                 timestamp: weekStr, 
-                 type: 'rival'
-             });
-         }
-         else {
-             const content = FAN_WAR_TEMPLATES[Math.floor(Math.random() * FAN_WAR_TEMPLATES.length)];
-             newPosts.push({
-                 id: Math.random().toString(36), authorId: 'gossip_fan', authorName: '吃瓜群众',
-                 content: formatText(content), 
-                 likes: Math.floor(Math.random()*50),
-                 timestamp: weekStr, 
-                 type: 'fan'
-             });
-         }
-     }
-     return newPosts;
-  };
+  // --- ACTIONS ---
 
   const unlockSkill = (skillId: string) => {
       const skill = SKILL_TREE.find(s => s.id === skillId);
@@ -213,21 +98,14 @@ export const useGameEngine = () => {
   };
 
   const isActionUnlocked = (action: ScheduleAction) => {
-    // 1. Check Skill Tree locks
     const skillLock = SKILL_TREE.find(node => node.effect?.unlockAction?.includes(action));
-    if (skillLock) {
-        return gameState.unlockedSkills.includes(skillLock.id);
-    }
+    if (skillLock) return gameState.unlockedSkills.includes(skillLock.id);
 
-    // 2. Fallback to basic requirements
     const condition = ACTION_UNLOCKS[action];
     if (!condition) return true;
     
-    // Time Check (Start Week)
     if (condition.week && gameState.currentWeek < condition.week) return false;
-    // Time Check (End Week / Seasonal)
     if (condition.endWeek && gameState.currentWeek > condition.endWeek) return false;
-
     if (condition.fans && gameState.fans < condition.fans) return false;
     if (condition.members && gameState.members.length < condition.members) return false;
     if (condition.money && gameState.money < condition.money) return false;
@@ -236,10 +114,7 @@ export const useGameEngine = () => {
 
   const isInteractionUnlocked = (type: InteractionType) => {
       const skillLock = SKILL_TREE.find(node => node.effect?.unlockInteraction?.includes(type));
-      if (skillLock) {
-          return gameState.unlockedSkills.includes(skillLock.id);
-      }
-      // Reprimand and IntensivePractice are unlocked by default if not in tree
+      if (skillLock) return gameState.unlockedSkills.includes(skillLock.id);
       return true;
   };
 
@@ -255,11 +130,15 @@ export const useGameEngine = () => {
     
     const randomRival = generateRivalBand();
     const initialNews = generateWeeklyNews(randomRival, 1);
+    const initialMembers = [leader];
+    const initialStats = calculateBandStats(initialMembers, [], 0, 0);
 
     setGameState(prev => ({
       ...prev,
-      currentWeek: 1, // Start at Week 1 (April)
-      members: [leader],
+      currentWeek: 1, 
+      members: initialMembers,
+      teamStats: initialStats,
+      rawChemistry: 0,
       scoutPool: [...MEMBER_POOL].sort(() => 0.5 - Math.random()).slice(0, 3),
       rival: randomRival,
       currentNews: initialNews
@@ -270,7 +149,6 @@ export const useGameEngine = () => {
   const startGig = (gigId: string) => {
     const def = GIG_DEFINITIONS[gigId];
     if (!def) return;
-    
     const gigState = initializeGigState(def, gameState.members, gameState.songs);
     setGameState(prev => ({ ...prev, activeGig: gigState }));
   };
@@ -279,7 +157,6 @@ export const useGameEngine = () => {
       setGameState(prev => {
           if (!prev.activeGig) return prev;
           const gig = prev.activeGig;
-          
           const result = resolveOption(option, prev.members, prev.teamStats, gig.currentHype);
           
           let newHype = gig.currentHype + result.hypeDelta;
@@ -293,7 +170,6 @@ export const useGameEngine = () => {
 
           const isFinished = gig.currentRound >= gig.maxRounds;
           const nextRoundNum = gig.currentRound + 1;
-          
           const nextState = isFinished 
             ? { options: [], phaseName: 'Finished' } 
             : generateRoundOptions(prev.members, prev.songs, nextRoundNum, gig.maxRounds);
@@ -315,9 +191,7 @@ export const useGameEngine = () => {
       });
   };
   
-  const nextRound = () => {
-      // Simplified system advances round automatically in selectGigOption
-  };
+  const nextRound = () => {};
 
   const executeTurn = async () => {
     setIsProcessing(true);
@@ -328,17 +202,29 @@ export const useGameEngine = () => {
         let newSongCreated: Song | undefined = undefined;
         let earnedPP = 0;
 
-        // PP Gain Logic: +1 for each Great Success
         actionLogs.forEach(log => {
             if (log.result === ActionResult.GreatSuccess) earnedPP += 1;
         });
         
-        // Passive PP gain from high fans (Weekly)
         if (finalState.fans > 5000) earnedPP += 1;
         if (finalState.fans > 50000) earnedPP += 2;
 
         finalState.skillPoints += earnedPP;
 
+        // Future Events Check
+        const triggeredEvents = finalState.futureEvents.filter(fe => fe.triggerWeek === finalState.currentWeek);
+        const remainingFuture = finalState.futureEvents.filter(fe => fe.triggerWeek !== finalState.currentWeek);
+        finalState.futureEvents = remainingFuture;
+
+        triggeredEvents.forEach(fe => {
+            const ev = EVENT_LIBRARY.find(e => e.id === fe.eventId);
+            const mem = finalState.members.find(m => m.id === fe.memberId);
+            if (ev && mem) {
+                finalState.eventQueue.unshift({ event: ev, member: mem });
+            }
+        });
+
+        // Rival Growth
         if (finalState.rival.isUnlocked) {
             const growthBase = 400 + (finalState.currentWeek * 100);
             const growthCompounding = finalState.rival.fans * 0.05;
@@ -346,7 +232,8 @@ export const useGameEngine = () => {
             finalState.rival = { ...finalState.rival, fans: finalState.rival.fans + rivalGrowth };
         }
         
-        if (finalState.currentWeek === 2) {
+        // AI Rival Init
+        if (finalState.currentWeek === 2 && hasApiKey) {
             generateAiRivalBand(finalState).then(aiRival => {
                 if (aiRival) {
                     setGameState(prev => ({ ...prev, rival: { ...prev.rival, ...aiRival } }));
@@ -354,6 +241,7 @@ export const useGameEngine = () => {
             });
         }
 
+        // Songwriting Logic
         const hasSongwriting = gameState.weeklySchedule.includes(ScheduleAction.Songwriting);
         if (hasSongwriting && !finalState.currentProject) {
             const selectCreative = (type: 'composing' | 'lyrics') => {
@@ -368,14 +256,22 @@ export const useGameEngine = () => {
             };
             const composer = selectCreative('composing');
             const lyricist = selectCreative('lyrics');
-            setIsGeneratingSong(true);
-            const idea = await generateSongIdea(finalState, composer, lyricist);
-            setIsGeneratingSong(false); 
             
-            // --- UPDATED QUALITY LOGIC ---
-            // Base quality uses Composer's Composing AND Arrangement stats directly.
-            // Formula: 10 (base) + Composing*0.3 + Arrangement*0.2 + Random(10)
-            // e.g., 80 Composing, 80 Arrangement => 10 + 24 + 16 + rand = ~50-60 base quality.
+            let idea: Partial<Song> = {
+                title: "未命名的旋律", description: "一首尚未完成的草稿。",
+                genre: MusicGenre.JPop, lyricTheme: LyricTheme.Youth
+            };
+
+            if (hasApiKey) {
+                setIsGeneratingSong(true);
+                try {
+                    idea = await generateSongIdea(finalState, composer, lyricist);
+                } catch(e) {
+                    console.error("AI Song Gen Failed", e);
+                }
+                setIsGeneratingSong(false); 
+            }
+            
             const baseQuality = 10 + (composer.composing * 0.3) + (composer.arrangement * 0.2) + Math.floor(Math.random() * 10);
 
             finalState.currentProject = {
@@ -398,6 +294,7 @@ export const useGameEngine = () => {
             });
         }
 
+        // Project Completion Logic
         if (finalState.currentProject && finalState.currentProject.completeness >= 100) {
             finalState.currentProject.releaseWeek = finalState.currentWeek;
             const isViral = Math.random() < 0.03;
@@ -445,10 +342,17 @@ export const useGameEngine = () => {
         setShowTurnResult(true);
         setIsProcessing(false);
 
-        generateAiSnsPosts(finalState, actionLogs).then(newAiPosts => {
-            if (newAiPosts.length === 0) newAiPosts = generateFallbackSNS(finalState); 
-            setGameState(current => ({ ...current, snsPosts: [...newAiPosts, ...current.snsPosts].slice(0, 30) }));
-        });
+        // SNS GENERATION
+        if (hasApiKey) {
+            generateAiSnsPosts(finalState, actionLogs).then(newAiPosts => {
+                if (newAiPosts.length === 0) newAiPosts = generateFallbackSNS(finalState); 
+                setGameState(current => ({ ...current, snsPosts: [...newAiPosts, ...current.snsPosts].slice(0, 30) }));
+            });
+        } else {
+            const fallbackPosts = generateFallbackSNS(finalState);
+            setGameState(current => ({ ...current, snsPosts: [...fallbackPosts, ...current.snsPosts].slice(0, 30) }));
+        }
+
     }, 1200); 
   };
 
@@ -467,20 +371,15 @@ export const useGameEngine = () => {
      const moneyEarned = Math.floor(gig.definition.rewards.money * scale);
      const fansEarned = Math.floor(gig.definition.rewards.fans * scale);
      
-     // PP Rewards for Gigs
      let ppReward = 1;
      if (rank === 'S') ppReward = 5;
      else if (rank === 'A') ppReward = 3;
      else if (rank === 'B') ppReward = 2;
 
      const resultData: GigResultData = {
-         gigTitle: gig.definition.title,
-         venue: gig.definition.venue,
-         finalHype: gig.currentVoltage, 
-         scoreRank: rank,
-         moneyEarned,
-         fansEarned,
-         rewards: gig.definition.rewards
+         gigTitle: gig.definition.title, venue: gig.definition.venue,
+         finalHype: gig.currentVoltage, scoreRank: rank,
+         moneyEarned, fansEarned, rewards: gig.definition.rewards
      };
 
      setIsProcessing(true);
@@ -492,12 +391,16 @@ export const useGameEngine = () => {
             interactionsLeft: 2
         }));
         const weekStr = `Week ${prev.currentWeek}`;
-        const newPosts: SNSPost[] = [{
+        const newPosts = [{
              id: Math.random().toString(), authorId: 'system', authorName: 'SYSTEM',
              content: `演出结束！评级: ${rank} (Score: ${gig.currentVoltage})`, likes: 999,
-             timestamp: weekStr, type: 'system'
+             timestamp: weekStr, type: 'system' as const
         }];
         const nextNews = generateWeeklyNews(prev.rival, prev.currentWeek + 1);
+        const gigChemistryBonus = rank === 'S' || rank === 'A' ? 3 : 1;
+        const newRawChemistry = prev.rawChemistry + gigChemistryBonus;
+        const newTeamStats = calculateBandStats(members, prev.songs, newRawChemistry, prev.fans + fansEarned);
+
         return {
           ...prev,
           activeGig: null, 
@@ -505,6 +408,8 @@ export const useGameEngine = () => {
           money: prev.money + moneyEarned,
           fans: prev.fans + fansEarned,
           members: members,
+          rawChemistry: newRawChemistry,
+          teamStats: newTeamStats,
           weeklySchedule: Array(SLOTS_PER_WEEK).fill(null),
           snsPosts: [...newPosts, ...prev.snsPosts].slice(0, 30),
           completedGigs: rank === 'S' || rank === 'A' ? [...prev.completedGigs, prev.activeGig.definition.id] : prev.completedGigs,
@@ -524,61 +429,33 @@ export const useGameEngine = () => {
   };
 
   const performInteraction = (member: Member, type: InteractionType, cost: number) => {
-      if (gameState.money < cost) return null;
       if (member.interactionsLeft <= 0) { alert("这名成员本周的精力已耗尽，请下周再找她。"); return null; }
-      const outcome = calculateInteractionOutcome(member, type);
-      setLastInteraction(outcome);
-      setGameState(prev => ({
-          ...prev,
-          money: prev.money - cost,
-          members: prev.members.map(m => m.id === member.id ? {
-              ...m,
-              stress: Math.max(0, Math.min(100, m.stress + (outcome.impact.stressChange || 0))),
-              fatigue: Math.max(0, Math.min(100, m.fatigue + (outcome.impact.fatigue || 0))),
-              affection: Math.max(0, Math.min(100, m.affection + (outcome.impact.affectionChange || 0))),
-              interactionsLeft: m.interactionsLeft - 1
-          } : m)
-      }));
-      return outcome;
+      
+      const result = processInteraction(gameState, member, type, cost);
+      if (result) {
+          setLastInteraction(result.outcome);
+          setGameState(result.newState);
+          return result.outcome;
+      }
+      return null;
   };
 
   const performSelfAction = (type: SelfActionType) => {
-      const leaderIndex = gameState.members.findIndex(m => m.isLeader);
-      if (leaderIndex === -1) return { log: "队长不存在", result: ActionResult.Failure };
-      const leader = gameState.members[leaderIndex];
-      if (leader.interactionsLeft <= 0) { alert("本周精力已耗尽。"); return { log: "精力耗尽", result: ActionResult.Failure }; }
-      const data = SELF_ACTION_TEMPLATES[type];
-      let impact: Impact = {};
-      switch(type) {
-          case SelfActionType.SoloPractice: impact = { technique: 2, fatigue: 10 }; break;
-          case SelfActionType.Meditation: impact = { stressChange: -30, mental: 2 }; break;
-          case SelfActionType.Songwriting: impact = { creativity: 2, composing: 1, fatigue: 10 }; break;
-          case SelfActionType.AdminWork: impact = { stressChange: 5, money: 200 }; break;
-          case SelfActionType.QuickNap: impact = { fatigue: -30, stressChange: -10 }; break;
+      const result = processSelfAction(gameState, type);
+      if ('error' in result) {
+          if (result.error === "精力耗尽") alert("本周精力已耗尽。");
+          return { log: result.error, result: ActionResult.Failure };
       }
-      const result = ActionResult.Success;
-      setGameState(prev => {
-          const newMembers = [...prev.members];
-          const m = newMembers[leaderIndex];
-          newMembers[leaderIndex] = {
-              ...m,
-              interactionsLeft: m.interactionsLeft - 1,
-              technique: Math.min(100, m.technique + (impact.technique || 0)),
-              stress: Math.max(0, Math.min(100, m.stress + (impact.stressChange || 0))),
-              fatigue: Math.max(0, Math.min(100, m.fatigue + (impact.fatigue || 0))),
-              mental: Math.min(100, m.mental + (impact.mental || 0)),
-              creativity: Math.min(100, m.creativity + (impact.creativity || 0)),
-              composing: Math.min(100, m.composing + (impact.composing || 0)),
-          };
-          return { ...prev, members: newMembers, money: prev.money + (impact.money || 0) };
-      });
-      setLastInteraction({ result, log: data.templates[result][0], impact });
-      return { log: data.templates[result][0], result };
+      setLastInteraction(result.outcome);
+      setGameState(result.newState);
+      return { log: result.outcome.log, result: result.outcome.result };
   };
 
   const recruitMember = (m: Member) => {
     if (gameState.members.length >= MAX_MEMBERS) return;
-    setGameState(prev => ({ ...prev, members: [...prev.members, { ...m, interactionsLeft: 2 }], scoutPool: prev.scoutPool.filter(sc => sc.id !== m.id) }));
+    const newMembers = [...gameState.members, { ...m, interactionsLeft: 2 }];
+    const newTeamStats = calculateBandStats(newMembers, gameState.songs, gameState.rawChemistry, gameState.fans);
+    setGameState(prev => ({ ...prev, members: newMembers, teamStats: newTeamStats, scoutPool: prev.scoutPool.filter(sc => sc.id !== m.id) }));
   };
 
   const refreshScout = () => {
@@ -597,81 +474,9 @@ export const useGameEngine = () => {
   };
 
   const handleEventChoice = (option: EventOption, customData?: string) => {
-        const successChance = option.successChance ?? 1;
-        const isSuccess = Math.random() < successChance;
-        const impact = isSuccess ? option.impact : (option.failImpact || {});
-        
-        const effectDesc = formatText(option.effectDescription);
-        const failDesc = option.failDescription ? formatText(option.failDescription) : undefined;
-
-        const resultOutcome = {
-            result: isSuccess ? ActionResult.Success : ActionResult.Failure,
-            log: isSuccess ? effectDesc : (failDesc || "遗憾的是，并没有达到预期的效果。"),
-            impact
-        };
-
-        setEventResult(resultOutcome);
-
-        const memberId = eventMember?.id;
-        setGameState(prev => {
-            let updatedMembers = prev.members.map(m => {
-                if (m.id === memberId) {
-                   return {
-                       ...m,
-                       stress: Math.max(0, Math.min(100, m.stress + (impact.stressChange || 0))),
-                       fatigue: Math.max(0, Math.min(100, m.fatigue + (impact.fatigue || 0))),
-                       affection: Math.max(0, Math.min(100, m.affection + (impact.affectionChange || 0))),
-                       musicality: Math.min(100, m.musicality + (impact.musicality || 0)),
-                       technique: Math.min(100, m.technique + (impact.technique || 0)),
-                       stagePresence: Math.min(100, m.stagePresence + (impact.stagePresence || 0)),
-                       creativity: Math.min(100, m.creativity + (impact.creativity || 0)),
-                       mental: Math.min(100, m.mental + (impact.mental || 0)),
-                       composing: Math.min(100, m.composing + (impact.composing || 0)),
-                       lyrics: Math.min(100, m.lyrics + (impact.lyrics || 0)),
-                       arrangement: Math.min(100, m.arrangement + (impact.arrangement || 0)),
-                       design: Math.min(100, m.design + (impact.design || 0)),
-                   };
-                }
-                return m;
-            });
-
-            if (option.isQuitConfirmed && memberId !== 'leader') {
-                updatedMembers = updatedMembers.filter(m => m.id !== memberId);
-            }
-
-            let currentProject = prev.currentProject;
-            if (currentProject) {
-                if (impact.quality) {
-                    currentProject = { ...currentProject, quality: Math.min(100, currentProject.quality + impact.quality) };
-                }
-                if (impact.songProgress) {
-                    currentProject = { ...currentProject, completeness: Math.min(100, currentProject.completeness + impact.songProgress) };
-                }
-            }
-
-            let newTeamStats = { ...prev.teamStats };
-            if (impact.stability) {
-                newTeamStats.stability = Math.max(0, Math.min(100, newTeamStats.stability + impact.stability));
-            }
-
-            let newRival = { ...prev.rival };
-            if (impact.unlockRival) newRival.isUnlocked = true;
-            if (impact.rivalFans) newRival.fans = Math.max(0, newRival.fans + impact.rivalFans);
-            if (impact.rivalRelation) newRival.relation = Math.max(0, Math.min(100, newRival.relation + impact.rivalRelation));
-
-            return {
-                ...prev,
-                bandName: (activeEvent?.isNamingEvent && customData) ? customData : prev.bandName,
-                money: Math.max(0, prev.money + (impact.money || 0)),
-                fans: Math.max(0, prev.fans + (impact.fans || 0)),
-                members: updatedMembers,
-                currentProject,
-                teamStats: newTeamStats,
-                rival: newRival,
-                completedGigs: prev.completedGigs,
-                skillPoints: prev.skillPoints + (impact.skillPoints || 0)
-            };
-        });
+      const { newState, outcome } = processEventChoice(gameState, activeEvent, option, eventMember, customData);
+      setEventResult(outcome);
+      setGameState(newState);
   };
 
   const closeEvent = () => {
@@ -691,8 +496,16 @@ export const useGameEngine = () => {
 
   const finishTurnResult = () => {
     setShowTurnResult(false);
-    
-    // ... (rest of logic unchanged)
+    // Naming Event Force
+    if (gameState.bandName === '未命名乐队') { 
+      const ev = EVENT_LIBRARY.find(e => e.id === 'naming_event');
+      if (ev) { 
+          setGameState(prev => ({ ...prev, eventQueue: [] }));
+          setActiveEvent(ev); setEventMember(gameState.members[0]); setIsEventOpen(true); 
+          return; 
+      }
+    } 
+    // Critical Events
     const criticalMember = gameState.members.find(m => m.stress >= 100 || m.fatigue >= 100);
     if (criticalMember) {
         const isStress = criticalMember.stress >= 100;
@@ -700,42 +513,26 @@ export const useGameEngine = () => {
         const ev = EVENT_LIBRARY.find(e => e.id === eventId);
         if (ev) {
             setGameState(prev => ({ ...prev, eventQueue: [] })); 
-            setActiveEvent(ev);
-            setEventMember(criticalMember);
-            setIsEventOpen(true);
+            setActiveEvent(ev); setEventMember(criticalMember); setIsEventOpen(true);
             return;
         }
     }
-
-    if (gameState.currentWeek >= 11 && gameState.bandName === '未命名乐队') { // Adjusted for later start
-      const ev = EVENT_LIBRARY.find(e => e.id === 'naming_event');
-      if (ev) { 
-          setGameState(prev => ({ ...prev, eventQueue: [] }));
-          setActiveEvent(ev); 
-          setEventMember(gameState.members[0]); 
-          setIsEventOpen(true); 
-          return; 
-      }
-    } 
-
-    if (gameState.currentWeek >= 12 && !gameState.rival.isUnlocked) { // Adjusted for later start
+    // Rival Encounter Force
+    if (gameState.currentWeek >= 12 && !gameState.rival.isUnlocked) { 
         const ev = EVENT_LIBRARY.find(e => e.id === 'rival_encounter_ex_member');
         if (ev && gameState.eventQueue.length === 0) {
              setGameState(prev => ({ ...prev, eventQueue: [] }));
-             setActiveEvent(ev);
-             setEventMember(gameState.members[0]);
-             setIsEventOpen(true);
+             setActiveEvent(ev); setEventMember(gameState.members[0]); setIsEventOpen(true);
              return;
         }
     }
-
+    // Random Event Generation
     const newEvents: QueuedEvent[] = [];
     const eventCount = 1 + (Math.random() > 0.6 ? 1 : 0);
-
     for (let i = 0; i < eventCount; i++) {
         const eligible = EVENT_LIBRARY.filter(e => {
             if (e.isNamingEvent) return false;
-            if (['stress_breakdown', 'fatigue_collapse'].includes(e.id)) return false; 
+            if (['stress_breakdown', 'fatigue_collapse', 'critical_dismissal', 'staff_return_decision'].includes(e.id)) return false; 
             if (e.id === 'rival_encounter_ex_member') return false; 
             if (newEvents.some(ne => ne.event.id === e.id)) return false;
             if (e.requiredRole && !gameState.members.some(m => m.roles.includes(e.requiredRole!) && !m.isLeader)) return false;
@@ -743,25 +540,29 @@ export const useGameEngine = () => {
             if (e.condition && !e.condition(gameState)) return false;
             return true;
         });
-
         if (eligible.length > 0) {
             const ev = eligible[Math.floor(Math.random() * eligible.length)];
             let validMembers = gameState.members;
             if (ev.requiredRole) validMembers = validMembers.filter(m => m.roles.includes(ev.requiredRole!));
             if (ev.requiredTag) validMembers = validMembers.filter(m => m.tags.includes(ev.requiredTag!));
             const targetCandidate = validMembers[Math.floor(Math.random() * validMembers.length)];
-            if (targetCandidate) {
-                newEvents.push({ event: ev, member: targetCandidate });
-            }
+            if (targetCandidate) newEvents.push({ event: ev, member: targetCandidate });
         }
     }
 
     if (newEvents.length > 0) {
         const first = newEvents[0];
         const remaining = newEvents.slice(1);
-        setGameState(prev => ({ ...prev, eventQueue: remaining }));
-        setActiveEvent(first.event);
-        setEventMember(first.member);
+        setGameState(prev => ({ ...prev, eventQueue: [...prev.eventQueue, ...remaining] })); 
+        if (gameState.eventQueue.length === 0) { 
+            setActiveEvent(first.event); setEventMember(first.member); setIsEventOpen(true);
+        } else {
+            setGameState(prev => ({ ...prev, eventQueue: [...prev.eventQueue, first] }));
+        }
+    } else if (gameState.eventQueue.length > 0) {
+        const next = gameState.eventQueue[0];
+        setActiveEvent(next.event); setEventMember(next.member);
+        setGameState(prev => ({ ...prev, eventQueue: prev.eventQueue.slice(1) }));
         setIsEventOpen(true);
     }
   };
@@ -769,6 +570,23 @@ export const useGameEngine = () => {
   const setBandState = (newState: BandState) => {
       setGameState(prev => ({ ...prev, bandState: newState }));
   };
+
+  const fireMember = (member: Member) => {
+      if (member.isLeader) return;
+      if (member.affection >= 60) {
+          const ev = EVENT_LIBRARY.find(e => e.id === 'critical_dismissal');
+          if (ev) {
+              setGameState(prev => ({ ...prev, eventQueue: [] }));
+              setActiveEvent(ev); setEventMember(member); setIsEventOpen(true);
+              return;
+          }
+      }
+      const { newState, outcome } = processDismissal(gameState, member);
+      setGameState(newState);
+      setLastInteraction(outcome);
+  };
+
+  const textFormatter = (t: string, mName?: string) => formatText(t, gameState, mName);
 
   return { 
     gameState, setGameState, isStarted, initGame, isProcessing, isRefreshingScout,
@@ -779,11 +597,13 @@ export const useGameEngine = () => {
     setShowScoutModal, lastInteraction, setLastInteraction,
     eventResult, closeEvent,
     playCard: selectGigOption,
-    finishGigAndContinueTurn, formatText, startGig,
+    finishGigAndContinueTurn, formatText: textFormatter, startGig,
     showGigResult, gigResultData, closeGigResult,
     isGeneratingSong,
     nextRound,
     unlockSkill, showSkillTree, setShowSkillTree,
-    setBandState
+    setBandState,
+    fireMember,
+    hasApiKey, setHasApiKey 
   };
 };

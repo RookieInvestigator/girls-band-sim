@@ -8,7 +8,8 @@ export enum Role {
   Producer = '制作人',
   DJ = 'DJ',
   Violin = '小提琴',
-  Saxophone = '萨克斯'
+  Saxophone = '萨克斯',
+  Staff = '临时经纪人'
 }
 
 export enum MusicGenre {
@@ -84,57 +85,80 @@ export interface Song {
 }
 
 export enum ScheduleCategory {
-  Solo = '个人练习',
+  Solo = '基础训练', 
   Band = '合奏排练',
   Creation = '创作录音',
   Promotion = '宣传活动',
   Leisure = '休闲整顿',
-  Study = '理论学习',
+  Study = '进阶研习',
   Special = '特别企划'
 }
 
 export enum ScheduleAction {
-  InstrumentPractice = '个人乐器练习',
-  VocalPractice = '声乐基础训练',
-  SoloExpression = '台风动作修饰',
+  // Basic Stats (Solo)
+  InstrumentPractice = '特训：演奏技巧',
+  VocalPractice = '特训：乐感视唱',
+  SoloExpression = '特训：舞台表现',
+  PhysicalTraining = '特训：体能强化', // NEW
+  ImageTraining = '特训：意象模拟', // NEW
+  SelfRecording = '特训：自录复盘',
+
+  // Advanced Stats (Study)
+  MusicTheory = '研习：作曲理论', 
+  LyricsWorkshop = '研习：作词采风', 
+  ObservationNote = '研习：观察笔记', // Renamed & Moved from HumanObservation
+  ListenAnalysis = '研习：编曲分析', 
+  DesignWork = '研习：视觉设计', 
+  LiveHouseStudy = '研习：Live观摩', 
+  VocalLesson = '专业声乐私教', 
+  InstrumentLesson = '专业乐器私教', 
+
+  // Band & Project
   BandEnsemble = '乐队合奏排练',
   BandRehearsal = '全员登台彩排',
-  Songwriting = '新曲创作研讨',
-  Recording = '录音棚录制',
-  DesignWork = '周边与海报设计',
+  MeetingReview = '乐队反省会', // NEW
+  AcousticSession = '不插电排练', // NEW
+  RentStudio = '租用录音棚练习',
+  TrainingCamp = '夏季合宿特训',
+
+  // Creation (Expanded to 6)
+  Songwriting = '新曲创作研讨', // 构思
+  DemoProduction = 'Demo编曲制作', // 编曲
+  LyricsPolishing = '歌词深度打磨', // 作词
+  ComposeJam = '即兴作曲Jam', // 灵感
+  Recording = '录音棚录制', // 录音
+  Mastering = '母带后期处理', // 后期
+
+  // Promotion
   StreetLive = '街头突袭路演',
   FlyerDistribution = '街区海报张贴',
   SocialMediaLive = '深夜直播互动',
   RadioInterview = '电台访谈录制',
   MusicVideoShoot = '首支MV拍摄',
   CharityLive = '社区公益演出',
+  LiveStream = '网络不插电直播',
+  PhotoSession = '宣发写真拍摄',
+
+  // Leisure
+  SugarIntake = '放松：糖分摄入', // Renamed & Moved from TechoTime
   TeaTime = '练习室茶话会',
   GameCenter = '街机厅团建',
   GroupTrip = '海边采风旅行',
   EquipmentCare = '乐器深度保养',
-  MusicTheory = '乐理知识讲座',
   PartTimeJob = '兼职打工补贴',
-  RentStudio = '租用录音棚练习',
-  VocalLesson = '专业声乐私教',
-  InstrumentLesson = '专业乐器私教', 
-  LiveStream = '网络不插电直播',
-  PhotoSession = '宣发写真拍摄',
-  LyricsWorkshop = '歌词读书会',
-  ComposeJam = '即兴作曲Jam',
-  ListenAnalysis = '竞品音乐分析',
   StyleMakeover = '造型风格改造',
-  TrainingCamp = '夏季合宿特训',
+  
   // Special Actions
   SchoolFestival = '文化祭压轴演出',
   FireworksDate = '夏日花火大会',
   ThemePark = '游乐园团建',
   ChristmasParty = '圣诞特别派对',
-  GraduationTrip = '毕业纪念旅行' // Added
+  GraduationTrip = '毕业纪念旅行'
 }
 
 export enum InteractionType {
   IntensivePractice = '强制加练',
-  CafeDate = '甜点约会',
+  CafeDate = '甜点时光',
   DeepTalk = '深夜长谈',
   Gift = '赠送小礼物',
   Reprimand = '队长训诫'
@@ -183,12 +207,21 @@ export interface Impact {
   rivalRelation?: number;
   unlockRival?: boolean;
   skillPoints?: number; 
+  // Global Effects
+  allMemberStress?: number;
+  allMemberMental?: number;
+  chemistry?: number;
+  // Future Events
+  scheduleEventId?: string;
+  scheduleEventDelay?: number;
+  restoreOriginalRole?: boolean;
 }
 
 export interface Member {
   id: string;
   name: string;
   roles: Role[];
+  originalRoles?: Role[]; 
   musicality: number;    
   technique: number;     
   stagePresence: number; 
@@ -211,11 +244,41 @@ export interface Member {
   snsStyle?: string;   
 }
 
-export interface TeamStats {
-  technique: number;
-  appeal: number;
-  stability: number;
-  chemistry: number;
+export interface BandStats {
+  // 1. Performance (演奏)
+  performance: number; // AGGREGATE
+  precision: number; // 精准
+  tone: number;      // 音色
+  rhythm: number;    // 律动
+  dynamics: number;  // 动态
+
+  // 2. Stage (现场)
+  stage: number;     // AGGREGATE
+  aura: number;      // 气场
+  interaction: number; // 互动
+  visual: number;    // 视觉
+  adaptation: number; // 改编
+
+  // 3. Bond (羁绊)
+  bond: number;      // AGGREGATE
+  synergy: number;   // 默契 (Calculated from rawChemistry)
+  connection: number; // 联结 (Avg Affection)
+  topic: number;     // 话题 (Fans + Design)
+
+  // 4. Work (作品)
+  work: number;      // AGGREGATE
+  narrative: number; // 叙事
+  melody: number;    // 旋律
+  detail: number;    // 细节
+
+  // Composite Rating
+  totalRating: string; // S, A, B, C, D...
+
+  // LEGACY MAPPING (For compatibility)
+  technique: number; 
+  appeal: number;    
+  stability: number; 
+  chemistry: number; 
 }
 
 export interface SNSPost {
@@ -231,6 +294,12 @@ export interface SNSPost {
 export interface QueuedEvent {
   event: GameEvent;
   member: Member | null;
+}
+
+export interface FutureEvent {
+  triggerWeek: number;
+  eventId: string;
+  memberId: string;
 }
 
 export enum CardType {
@@ -251,7 +320,7 @@ export interface GigCard {
   difficulty: number; 
   critBonus?: number; 
   memberId?: string; 
-  scalingStat?: keyof Member | 'chemistry' | 'stability' | 'appeal'; 
+  scalingStat?: keyof BandStats | keyof Member; 
   hypeGain?: number;
   color?: string; 
   isSongCard?: boolean; 
@@ -292,18 +361,14 @@ export interface ActiveGigState {
   definition: GigDefinition;
   currentRound: number;
   maxRounds: number;
-  
   currentVoltage: number;
   targetVoltage: number;
   currentHype: number; 
-
   currentOptions: GigCard[]; 
   phaseName: string; 
-
   logs: { text: string, type: 'play' | 'effect' | 'turn' | 'miss' | 'crit' }[];
   isFinished: boolean;
   lastResult?: CardResult;
-
   energy?: number;
   maxEnergy?: number;
   hand?: GigCard[];
@@ -360,7 +425,7 @@ export interface GameState {
   money: number;
   fans: number;
   bandName: string;
-  teamStats: TeamStats;
+  teamStats: BandStats;
   members: Member[];
   history: string[];
   weeklySchedule: (ScheduleAction | null)[];
@@ -370,16 +435,16 @@ export interface GameState {
   songs: Song[];
   currentProject: Song | null;
   eventQueue: QueuedEvent[];
+  futureEvents: FutureEvent[]; 
   activeGig: ActiveGigState | null;
   rival: RivalState;
   completedGigs: string[];
-  
   skillPoints: number;
   unlockedSkills: string[];
   bandState: BandState;
-  
   actionCounts: Record<string, number>;
   currentNews: string[];
+  rawChemistry: number; // Internal tracker for accumulated chemistry
 }
 
 export interface EventOption {

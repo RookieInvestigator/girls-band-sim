@@ -18,11 +18,11 @@ export const INTERACTION_DATA: Record<InteractionType, InteractionEffect> = {
     fatigueChange: 25,
     affectionChange: -5,
     techniqueChange: 12,
-    cost: 0, // Reverted to 0
+    cost: 0, 
     description: (name) => `你强制要求 ${name} 进行闭关练习。她虽然疲惫，但技艺确实精进了不少。`
   },
   [InteractionType.CafeDate]: {
-    label: '甜点约会',
+    label: '甜点时光',
     stressChange: -30,
     fatigueChange: -20,
     affectionChange: 15,

@@ -1,49 +1,47 @@
 
-import { Member, GigCard, CardType, Role, ActiveGigState, GigDefinition, Song, TeamStats, CardResult, PlayOutcome } from '../types';
+import { Member, GigCard, CardType, Role, ActiveGigState, GigDefinition, Song, BandStats, CardResult, PlayOutcome } from '../types';
 
 // --- 1. EXPANDED ACTION POOLS ---
 
 const SAFE_ACTIONS: GigCard[] = [
-    { id: 'act_safe_harmony', title: '稳健合奏', description: '依靠默契，优先保证不失误。', type: CardType.Melody, baseVoltage: 15, difficulty: 5, hypeGain: 5, scalingStat: 'chemistry', color: 'bg-slate-600' },
-    { id: 'act_safe_rhythm', title: '维持节奏', description: '平稳的鼓点，让观众安心。', type: CardType.Rhythm, baseVoltage: 10, difficulty: 0, hypeGain: 5, scalingStat: 'stability', color: 'bg-blue-600' },
-    { id: 'act_safe_smile', title: '营业微笑', description: '向台下挥手，维持基本热度。', type: CardType.Spirit, baseVoltage: 10, difficulty: 10, hypeGain: 10, scalingStat: 'appeal', color: 'bg-pink-500' },
-    { id: 'act_safe_tuning', title: '快速调音', description: '利用间隙调整状态。', type: CardType.Technique, baseVoltage: 5, difficulty: 0, hypeGain: 2, scalingStat: 'technique', color: 'bg-gray-600' }
+    { id: 'act_safe_harmony', title: '稳健合奏', description: '依靠默契，优先保证不失误。', type: CardType.Melody, baseVoltage: 15, difficulty: 5, hypeGain: 5, scalingStat: 'synergy', color: 'bg-slate-600' },
+    { id: 'act_safe_rhythm', title: '维持节奏', description: '平稳的鼓点，让观众安心。', type: CardType.Rhythm, baseVoltage: 10, difficulty: 0, hypeGain: 5, scalingStat: 'rhythm', color: 'bg-blue-600' },
+    { id: 'act_safe_smile', title: '营业微笑', description: '向台下挥手，维持基本热度。', type: CardType.Spirit, baseVoltage: 10, difficulty: 10, hypeGain: 10, scalingStat: 'interaction', color: 'bg-pink-500' },
+    { id: 'act_safe_tuning', title: '快速调音', description: '利用间隙调整状态。', type: CardType.Technique, baseVoltage: 5, difficulty: 0, hypeGain: 2, scalingStat: 'precision', color: 'bg-gray-600' }
 ];
 
 const CHEMISTRY_ACTIONS: GigCard[] = [
-    { id: 'act_chem_eye_contact', title: '眼神交流', description: '确认彼此的呼吸，同步率上升。', type: CardType.Spirit, baseVoltage: 25, difficulty: 15, hypeGain: 15, scalingStat: 'chemistry', color: 'bg-indigo-500' },
-    { id: 'act_chem_back_to_back', title: '背靠背演奏', description: '经典的摇滚姿势！信任你的队友。', type: CardType.Spirit, baseVoltage: 40, difficulty: 25, hypeGain: 30, scalingStat: 'chemistry', color: 'bg-violet-600' },
-    { id: 'act_chem_unison', title: 'Unison', description: '全员演奏同一旋律，音压震撼全场。', type: CardType.Melody, baseVoltage: 50, difficulty: 40, hypeGain: 20, scalingStat: 'chemistry', color: 'bg-fuchsia-600' }
+    { id: 'act_chem_eye_contact', title: '眼神交流', description: '确认彼此的呼吸，同步率上升。', type: CardType.Spirit, baseVoltage: 25, difficulty: 15, hypeGain: 15, scalingStat: 'synergy', color: 'bg-indigo-500' },
+    { id: 'act_chem_back_to_back', title: '背靠背演奏', description: '经典的摇滚姿势！信任你的队友。', type: CardType.Spirit, baseVoltage: 40, difficulty: 25, hypeGain: 30, scalingStat: 'synergy', color: 'bg-violet-600' },
+    { id: 'act_chem_unison', title: 'Unison', description: '全员演奏同一旋律，音压震撼全场。', type: CardType.Melody, baseVoltage: 50, difficulty: 40, hypeGain: 20, scalingStat: 'synergy', color: 'bg-fuchsia-600' }
 ];
 
 const SHOWMANSHIP_ACTIONS: GigCard[] = [
-    { id: 'act_show_points', title: '指人 (Point)', description: '“I see you!” 指向台下的观众。', type: CardType.Spirit, baseVoltage: 20, difficulty: 10, hypeGain: 25, scalingStat: 'appeal', color: 'bg-rose-400' },
-    { id: 'act_show_jump', title: '同步跳跃', description: '在副歌高潮时全员起跳！', type: CardType.Spirit, baseVoltage: 35, difficulty: 35, hypeGain: 40, scalingStat: 'appeal', color: 'bg-orange-500' },
-    { id: 'act_show_spin', title: '琴身旋转', description: '帅气地将吉他甩到身后转一圈。', type: CardType.Technique, baseVoltage: 25, difficulty: 65, hypeGain: 50, scalingStat: 'technique', color: 'bg-red-600' },
-    // NEW: Visual based action
-    { id: 'act_show_visual', title: '视觉冲击', description: '精心设计的服装和站位，令人移不开眼。', type: CardType.Spirit, baseVoltage: 30, difficulty: 20, hypeGain: 45, scalingStat: 'design', color: 'bg-fuchsia-700' }
+    { id: 'act_show_points', title: '指人 (Point)', description: '“I see you!” 指向台下的观众。', type: CardType.Spirit, baseVoltage: 20, difficulty: 10, hypeGain: 25, scalingStat: 'interaction', color: 'bg-rose-400' },
+    { id: 'act_show_jump', title: '同步跳跃', description: '在副歌高潮时全员起跳！', type: CardType.Spirit, baseVoltage: 35, difficulty: 35, hypeGain: 40, scalingStat: 'visual', color: 'bg-orange-500' },
+    { id: 'act_show_spin', title: '琴身旋转', description: '帅气地将吉他甩到身后转一圈。', type: CardType.Technique, baseVoltage: 25, difficulty: 65, hypeGain: 50, scalingStat: 'aura', color: 'bg-red-600' },
+    { id: 'act_show_visual', title: '视觉冲击', description: '精心设计的服装和站位，令人移不开眼。', type: CardType.Spirit, baseVoltage: 30, difficulty: 20, hypeGain: 45, scalingStat: 'visual', color: 'bg-fuchsia-700' }
 ];
 
 const RISKY_ACTIONS: GigCard[] = [
     { id: 'act_risk_improv', title: '疯狂即兴', description: '脱离谱子的狂野演奏！高风险高回报。', type: CardType.Technique, baseVoltage: 70, difficulty: 60, critBonus: 2.5, hypeGain: 30, scalingStat: 'creativity', color: 'bg-purple-700' },
-    { id: 'act_risk_dive', title: '舞台跳水', description: '跳进观众席！如果不被接住就完了。', type: CardType.Spirit, baseVoltage: 30, difficulty: 75, hypeGain: 80, scalingStat: 'stagePresence', color: 'bg-red-700' },
-    { id: 'act_risk_shout', title: '嘶吼咆哮', description: '撕裂声带的演出，孤注一掷。', type: CardType.Melody, baseVoltage: 80, difficulty: 55, hypeGain: 35, scalingStat: 'technique', color: 'bg-rose-800' },
-    { id: 'act_risk_fast', title: 'BPM 200+', description: '全员加速！挑战极限速度！', type: CardType.Rhythm, baseVoltage: 60, difficulty: 50, hypeGain: 40, scalingStat: 'technique', color: 'bg-amber-600' }
+    { id: 'act_risk_dive', title: '舞台跳水', description: '跳进观众席！如果不被接住就完了。', type: CardType.Spirit, baseVoltage: 30, difficulty: 75, hypeGain: 80, scalingStat: 'aura', color: 'bg-red-700' },
+    { id: 'act_risk_shout', title: '嘶吼咆哮', description: '撕裂声带的演出，孤注一掷。', type: CardType.Melody, baseVoltage: 80, difficulty: 55, hypeGain: 35, scalingStat: 'dynamics', color: 'bg-rose-800' },
+    { id: 'act_risk_fast', title: 'BPM 200+', description: '全员加速！挑战极限速度！', type: CardType.Rhythm, baseVoltage: 60, difficulty: 50, hypeGain: 40, scalingStat: 'precision', color: 'bg-amber-600' }
 ];
 
 const MC_ACTIONS: GigCard[] = [
-    { id: 'act_mc_thanks', title: '感谢致辞', description: '真诚地感谢到场的粉丝。', type: CardType.Spirit, baseVoltage: 10, difficulty: 5, hypeGain: 15, scalingStat: 'appeal', color: 'bg-teal-500' },
-    { id: 'act_mc_call', title: 'Call & Response', description: '“大家开心吗——！？”', type: CardType.Spirit, baseVoltage: 15, difficulty: 25, hypeGain: 45, scalingStat: 'stagePresence', color: 'bg-orange-500' },
-    { id: 'act_mc_member', title: '成员介绍', description: '介绍身边的伙伴，展现团魂。', type: CardType.Spirit, baseVoltage: 20, difficulty: 15, hypeGain: 20, scalingStat: 'chemistry', color: 'bg-indigo-500' },
-    { id: 'act_mc_story', title: '讲述往事', description: '分享写这首歌时的心路历程。', type: CardType.Spirit, baseVoltage: 25, difficulty: 20, hypeGain: 10, scalingStat: 'mental', color: 'bg-cyan-600' },
-    // NEW: Lyrics based MC
-    { id: 'act_mc_lyrics', title: '歌词朗读', description: '深情朗读歌曲中最动人的一句词。', type: CardType.Spirit, baseVoltage: 30, difficulty: 10, hypeGain: 25, scalingStat: 'lyrics', color: 'bg-emerald-500' }
+    { id: 'act_mc_thanks', title: '感谢致辞', description: '真诚地感谢到场的粉丝。', type: CardType.Spirit, baseVoltage: 10, difficulty: 5, hypeGain: 15, scalingStat: 'interaction', color: 'bg-teal-500' },
+    { id: 'act_mc_call', title: 'Call & Response', description: '“大家开心吗——！？”', type: CardType.Spirit, baseVoltage: 15, difficulty: 25, hypeGain: 45, scalingStat: 'aura', color: 'bg-orange-500' },
+    { id: 'act_mc_member', title: '成员介绍', description: '介绍身边的伙伴，展现团魂。', type: CardType.Spirit, baseVoltage: 20, difficulty: 15, hypeGain: 20, scalingStat: 'synergy', color: 'bg-indigo-500' },
+    { id: 'act_mc_story', title: '讲述往事', description: '分享写这首歌时的心路历程。', type: CardType.Spirit, baseVoltage: 25, difficulty: 20, hypeGain: 10, scalingStat: 'narrative', color: 'bg-cyan-600' },
+    { id: 'act_mc_lyrics', title: '歌词朗读', description: '深情朗读歌曲中最动人的一句词。', type: CardType.Spirit, baseVoltage: 30, difficulty: 10, hypeGain: 25, scalingStat: 'narrative', color: 'bg-emerald-500' }
 ];
 
 const TROUBLE_ACTIONS: GigCard[] = [
     { id: 'act_fix_string', title: '紧急换弦', description: '糟糕，弦断了！必须马上处理！', type: CardType.Technique, baseVoltage: 5, difficulty: 40, hypeGain: 5, scalingStat: 'technique', color: 'bg-gray-700' },
-    { id: 'act_cover_mistake', title: '即兴救场', description: '用Solo掩盖队友的失误。', type: CardType.Technique, baseVoltage: 30, difficulty: 50, hypeGain: 15, scalingStat: 'musicality', color: 'bg-yellow-600' },
-    { id: 'act_joke', title: '讲冷笑话', description: '音响坏了，只能尬聊拖时间。', type: CardType.Spirit, baseVoltage: 0, difficulty: 30, hypeGain: 10, scalingStat: 'mental', color: 'bg-sky-600' }
+    { id: 'act_cover_mistake', title: '即兴救场', description: '用Solo掩盖队友的失误。', type: CardType.Technique, baseVoltage: 30, difficulty: 50, hypeGain: 15, scalingStat: 'adaptation', color: 'bg-yellow-600' },
+    { id: 'act_joke', title: '讲冷笑话', description: '音响坏了，只能尬聊拖时间。', type: CardType.Spirit, baseVoltage: 0, difficulty: 30, hypeGain: 10, scalingStat: 'interaction', color: 'bg-sky-600' }
 ];
 
 // --- 2. TAG MODIFIERS ---
@@ -55,7 +53,7 @@ const TAG_ACTIONS: Record<string, Partial<GigCard>> = {
     '完美主义': { title: '精密机械', description: '绝对精准的零失误演奏，令人叹为观止。', difficulty: 35, critBonus: 1.3, baseVoltage: 70, hypeGain: 15, color: 'bg-indigo-700' },
     '大小姐': { title: '优雅谢幕', description: '即使流汗也要保持华丽的舞台身姿。', baseVoltage: 40, hypeGain: 30, color: 'bg-rose-300' },
     '网游废人': { title: 'AP连击', description: '把指板当成键盘，像打音游一样精准。', difficulty: 25, baseVoltage: 45, hypeGain: 15, color: 'bg-cyan-500' },
-    '辣妹': { title: 'Wink攻击', description: '对镜头放电，收割少男少女的心。', hypeGain: 60, baseVoltage: 20, color: 'bg-pink-500' },
+    '辣妹': { title: 'Wink攻击', description: '对镜头放电，收割全场粉丝的心。', hypeGain: 60, baseVoltage: 20, color: 'bg-pink-500' },
     '吃货': { title: '能量补给', description: '偷偷吃了一口藏好的糖，恢复状态。', baseVoltage: 30, difficulty: 0, hypeGain: 5, color: 'bg-yellow-400' },
     '玻璃心': { title: '战战兢兢', description: '虽然害怕，但还是坚持站在聚光灯下。', difficulty: 45, baseVoltage: 55, hypeGain: 35, color: 'bg-blue-300' },
     '三无': { title: '绝对零度', description: '毫无表情的高难度演奏，酷到没朋友。', difficulty: 35, baseVoltage: 65, hypeGain: 10, color: 'bg-gray-600' },
@@ -101,7 +99,6 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('emotional', '深情演绎', '注入全部情感的演唱，让观众落泪。', CardType.Spirit, 40, 25, 30, 'musicality', 'bg-pink-500'));
             pool.push(mk('mc', '煽动观众', '“把手举起来！” 掌控全场节奏。', CardType.Spirit, 25, 20, 50, 'stagePresence', 'bg-orange-500'));
             pool.push(mk('stable', '稳健演唱', '如同CD音质般的稳定发挥。', CardType.Melody, 30, 10, 15, 'technique', 'bg-rose-400'));
-            // NEW: Lyrics scaling
             pool.push(mk('poetic', '诗意独白', '如同吟游诗人般念出歌词，直击灵魂。', CardType.Spirit, 45, 20, 25, 'lyrics', 'bg-indigo-400'));
             break;
         
@@ -109,19 +106,16 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('solo', '速弹Solo', '吉他手的炫技时间，手指快成残影。', CardType.Technique, 55, 55, 20, 'technique', 'bg-red-500'));
             pool.push(mk('riff', '重型Riff', '极具攻击性的失真音色，轰炸全场。', CardType.Rhythm, 45, 30, 25, 'technique', 'bg-red-600'));
             pool.push(mk('delay', '空间音效', '使用延迟效果器制造迷幻氛围。', CardType.Melody, 35, 25, 30, 'creativity', 'bg-sky-500'));
-            pool.push(mk('backing', '强力和弦', '扎实的伴奏，支撑着整首歌的厚度。', CardType.Rhythm, 30, 15, 10, 'stability', 'bg-amber-600'));
-            // NEW: Composing scaling
+            pool.push(mk('backing', '强力和弦', '扎实的伴奏，支撑着整首歌的厚度。', CardType.Rhythm, 30, 15, 10, 'mental', 'bg-amber-600'));
             pool.push(mk('improv_mel', '即兴旋律', '现场改编Solo旋律，展现作曲才华。', CardType.Melody, 50, 40, 30, 'composing', 'bg-cyan-600'));
-            // NEW: Arrangement scaling
             pool.push(mk('live_arr', 'Live编曲', '临时改变音色配置，让老歌焕然一新。', CardType.Technique, 40, 30, 35, 'arrangement', 'bg-teal-600'));
             break;
 
         case Role.Bass:
             pool.push(mk('groove', '稳健律动', '贝斯稳住全场节奏，低音直击心脏。', CardType.Rhythm, 35, 20, 15, 'technique', 'bg-indigo-500'));
             pool.push(mk('slap', 'Slap Solo', '华丽的击勾弦技巧，谁说贝斯听不见！', CardType.Technique, 50, 50, 30, 'technique', 'bg-violet-600'));
-            pool.push(mk('root', '坚实根音', '默默支撑着乐队的底座，不可或缺的存在。', CardType.Rhythm, 30, 10, 10, 'stability', 'bg-blue-600'));
+            pool.push(mk('root', '坚实根音', '默默支撑着乐队的底座，不可或缺的存在。', CardType.Rhythm, 30, 10, 10, 'mental', 'bg-blue-600'));
             pool.push(mk('drive', '失真贝斯', '如同推土机般的轰鸣声。', CardType.Rhythm, 45, 40, 20, 'stagePresence', 'bg-indigo-700'));
-            // NEW: Arrangement scaling
             pool.push(mk('counter', '对位旋律', '不仅仅是根音，编织出华丽的低音旋律线。', CardType.Melody, 40, 35, 20, 'arrangement', 'bg-purple-600'));
             break;
 
@@ -129,8 +123,7 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('beat', '激昂鼓点', '鼓手带动全场气氛，心脏随着底鼓跳动。', CardType.Rhythm, 40, 35, 20, 'mental', 'bg-amber-600'));
             pool.push(mk('fill', '乱舞过门', '令人眼花缭乱的加花，展示技术。', CardType.Technique, 50, 45, 25, 'technique', 'bg-orange-600'));
             pool.push(mk('cymbal', '镲片碎音', '极具爆发力的重音，强调段落感。', CardType.Rhythm, 45, 40, 30, 'stagePresence', 'bg-yellow-500'));
-            pool.push(mk('steady', '人体节拍器', '绝对精准的节奏，让队友感到安心。', CardType.Rhythm, 30, 15, 10, 'stability', 'bg-yellow-600'));
-            // NEW: Arrangement scaling
+            pool.push(mk('steady', '人体节拍器', '绝对精准的节奏，让队友感到安心。', CardType.Rhythm, 30, 15, 10, 'mental', 'bg-yellow-600'));
             pool.push(mk('dynamic', '动态控制', '通过强弱变化重新诠释歌曲的起伏。', CardType.Rhythm, 35, 25, 20, 'arrangement', 'bg-lime-600'));
             break;
 
@@ -139,7 +132,6 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
             pool.push(mk('lead', '合成器Lead', '极具穿透力的电子音色，主导旋律。', CardType.Technique, 50, 45, 25, 'technique', 'bg-fuchsia-500'));
             pool.push(mk('pad', '唯美铺底', '用和弦包裹住整个乐队的声音。', CardType.Spirit, 35, 20, 25, 'creativity', 'bg-violet-400'));
             pool.push(mk('piano', '古典钢琴', '优雅的钢琴独奏段落。', CardType.Melody, 45, 35, 20, 'technique', 'bg-purple-600'));
-            // NEW: Composing/Arrangement
             pool.push(mk('reharm', '即兴和声', '现场改变和弦进行，展现深厚的理论功底。', CardType.Melody, 55, 45, 25, 'composing', 'bg-indigo-500'));
             pool.push(mk('layer', '多层音色', '叠加多种音色，制造出管弦乐团般的宏大感。', CardType.Technique, 45, 30, 30, 'arrangement', 'bg-pink-600'));
             break;
@@ -176,7 +168,7 @@ const getSongAction = (song: Song): GigCard => {
         baseVoltage: Math.floor(voltage),
         difficulty: 35,
         hypeGain: 35,
-        scalingStat: 'chemistry',
+        scalingStat: 'synergy', // Changed from chemistry
         color: song.isViral ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-slate-800',
         isSongCard: true
     };
@@ -326,7 +318,7 @@ export const generateRoundOptions = (members: Member[], songs: Song[], currentRo
 export const resolveOption = (
     option: GigCard, 
     members: Member[], 
-    teamStats: TeamStats,
+    teamStats: BandStats, // Updated to BandStats
     currentHype: number
 ): CardResult => {
     
@@ -338,18 +330,27 @@ export const resolveOption = (
     if (option.memberId) {
         member = members.find(mem => mem.id === option.memberId);
         if (member) {
-            performerStatValue = option.scalingStat && option.scalingStat !== 'chemistry' ? (member[option.scalingStat as keyof Member] as number) : 50;
+            // Check if key is a Member stat, otherwise fallback to 50
+            if (option.scalingStat && option.scalingStat in member) {
+                performerStatValue = member[option.scalingStat as keyof Member] as number;
+            } else {
+                performerStatValue = 50;
+            }
             performerMental = member.mental;
             performerPresence = member.stagePresence;
         }
     } else {
-        if (option.scalingStat === 'chemistry') performerStatValue = (teamStats.chemistry || 0); 
-        else if (option.scalingStat === 'stability') performerStatValue = teamStats.stability;
-        else if (option.scalingStat === 'appeal') performerStatValue = teamStats.appeal;
-        else performerStatValue = 50;
+        // Scaling off BandStats
+        if (option.scalingStat && option.scalingStat in teamStats) {
+            performerStatValue = teamStats[option.scalingStat as keyof BandStats] as number;
+        } else {
+            performerStatValue = 50;
+        }
         
-        performerMental = teamStats.stability;
-        performerPresence = teamStats.appeal;
+        // Calculate average mental for fallback since BandStats no longer has raw stability
+        const avgMental = members.length > 0 ? members.reduce((s, m) => s + m.mental, 0) / members.length : 50;
+        performerMental = avgMental;
+        performerPresence = teamStats.aura;
     }
 
     // --- HIT & CRIT ROLL ---
@@ -377,32 +378,39 @@ export const resolveOption = (
     const activeBonuses: string[] = [];
 
     if (outcome !== 'Miss') {
-        // 1. DIRECT STAT ADDITION (The change requested)
-        // Add 50% of the stat value directly to voltage. 
-        // e.g. 100 Technique => +50 Voltage. 50 Technique => +25 Voltage.
         const statAdditive = Math.floor(performerStatValue * 0.5);
         if (statAdditive > 0) {
             finalVoltage += statAdditive;
             const statNameMapping: Record<string, string> = {
-                'chemistry': '默契',
+                'synergy': '默契',
+                'precision': '精准',
+                'tone': '音色',
+                'rhythm': '律动',
+                'dynamics': '动态',
+                'aura': '气场',
+                'interaction': '互动',
+                'visual': '视觉',
+                'adaptation': '改编',
+                'connection': '联结',
+                'topic': '话题',
+                'narrative': '叙事',
+                'melody': '旋律',
+                'detail': '细节',
                 'technique': '技巧',
                 'musicality': '乐感',
                 'stagePresence': '表现',
                 'creativity': '想象',
                 'mental': '心态',
-                'stability': '稳定',
-                'appeal': '魅力',
                 'composing': '作曲',
                 'lyrics': '作词',
                 'arrangement': '编曲',
-                'design': '视觉'
+                'design': '设计'
             };
             const statName = statNameMapping[option.scalingStat as string] || (option.scalingStat as string).substring(0,3).toUpperCase();
             activeBonuses.push(`+${statAdditive} (${statName})`);
         }
 
         // 2. ROLE MATCH BONUS
-        // If a drummer plays a rhythm card, or vocal plays melody/spirit, etc.
         let isRoleMatch = false;
         if (member) {
             const role = member.roles[0];
@@ -443,8 +451,8 @@ export const resolveOption = (
             }
         }
 
-        // 4. TEAM SYNERGY
-        if (option.scalingStat === 'chemistry' && teamStats.chemistry >= 60) {
+        // 4. TEAM SYNERGY (Synergy Stat)
+        if (teamStats.synergy >= 60 && option.scalingStat === 'synergy') {
             hypeDelta += 5;
             finalVoltage = Math.floor(finalVoltage * 1.1);
             activeBonuses.push('TEAM SYNC');

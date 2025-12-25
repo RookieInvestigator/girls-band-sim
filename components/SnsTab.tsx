@@ -1,8 +1,10 @@
 
-import { MessageCircle, Heart, Share2, MoreHorizontal, Sword, Repeat2 } from 'lucide-react';
+import { MessageCircle, Heart, Share2, MoreHorizontal, Sword, Repeat2, WifiOff } from 'lucide-react';
 import { SNSPost } from '../types';
 
 export const SnsTab = ({ engine }: { engine: any }) => {
+    const isOffline = !engine.hasApiKey;
+
     return (
         <div className="max-w-2xl mx-auto h-full pb-20 lg:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 flex flex-col h-full overflow-hidden relative">
@@ -16,9 +18,18 @@ export const SnsTab = ({ engine }: { engine: any }) => {
                             </div>
                             Social Feed
                         </h3>
-                        <div className="flex gap-2 items-center bg-slate-50 px-2 py-1 rounded-full">
-                            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"/>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live</span>
+                        <div className={`flex gap-2 items-center px-2 py-1 rounded-full ${isOffline ? 'bg-slate-100' : 'bg-slate-50'}`}>
+                            {isOffline ? (
+                                <>
+                                    <WifiOff size={10} className="text-slate-400"/>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Offline Mode</span>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"/>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Live</span>
+                                </>
+                            )}
                         </div>
                     </div>
                     {/* Right side empty for floating bar */}
@@ -27,6 +38,15 @@ export const SnsTab = ({ engine }: { engine: any }) => {
 
                 {/* Feed */}
                 <div className="flex-1 overflow-y-auto p-0 bg-slate-50">
+                        {isOffline && (
+                            <div className="p-4 m-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3 text-amber-700 text-xs font-bold">
+                                <div className="p-1.5 bg-amber-200 rounded-full"><WifiOff size={14}/></div>
+                                <div>
+                                    未检测到 API Key，SNS 将使用本地离线模板生成。
+                                </div>
+                            </div>
+                        )}
+
                         {engine.gameState.snsPosts.map((p: SNSPost) => {
                             // Logic to strip @ from display ID if present
                             const displayId = p.authorId.replace(/^@/, '');

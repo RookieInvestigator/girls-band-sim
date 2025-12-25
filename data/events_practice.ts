@@ -51,7 +51,7 @@ export const PRACTICE_EVENTS: GameEvent[] = [
     id: 'prac_genre_swap',
     title: '风格大挑战',
     description: '一直练流行摇滚有点腻了。今天大家提议尝试一下完全不同的风格！',
-    condition: (state) => state.members.length >= 4 && state.teamStats.technique > 20,
+    condition: (state) => state.members.length >= 4 && state.teamStats.precision > 20, // UPDATED: technique -> precision
     options: [
       { label: '尝试即兴爵士 (Jazz)', effectDescription: '虽然乱七八糟，但乐感提升了。', successChance: 0.6, impact: { musicality: 25, technique: 10 }, failImpact: { stressChange: 15, technique: 5 } },
       { label: '尝试死亡金属 (Metal)', effectDescription: '嗓子喊哑了，但压力释放了！', successChance: 0.8, impact: { stressChange: -40, stagePresence: 15 }, failImpact: { fatigue: 20 } },

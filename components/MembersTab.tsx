@@ -4,10 +4,11 @@ import {
     Search, Heart, Frown, Battery, Music, Guitar, Star, Brain, PenTool, FileText, 
     Sparkles, Zap, Coffee, MessageCircle, Gift, AlertCircle, Lock,
     Activity, User, Crown, Terminal, TrendingUp, Music2, Mic2, Disc, Keyboard,
-    Palette, Layers, Smile, LayoutGrid, BarChart3
+    Palette, Layers, Smile, LayoutGrid, BarChart3, DoorOpen, XCircle, Clapperboard, Trash2, PieChart
 } from 'lucide-react';
 import { Member, InteractionType, SelfActionType, ActionResult, Role } from '../types';
 import { INTERACTION_DATA } from '../data/interactions';
+import { MAX_MEMBERS } from '../constants';
 
 // --- HELPER: RANK SYSTEM ---
 const getRankConfig = (val: number) => {
@@ -18,8 +19,6 @@ const getRankConfig = (val: number) => {
     if (val >= 60) return { label: 'C', color: 'text-sky-500', bg: 'bg-sky-100', bar: 'bg-sky-500' };
     return { label: 'D', color: 'text-slate-400', bg: 'bg-slate-100', bar: 'bg-slate-300' };
 };
-
-// --- VISUAL COMPONENTS ---
 
 const StatRow = ({ label, value, icon: Icon, showMax = false }: any) => {
     const rank = getRankConfig(value);
@@ -68,11 +67,12 @@ const RoleIcon = ({ role, size=16 }: { role: Role, size?: number }) => {
         case Role.Bass: return <Zap size={size}/>;
         case Role.Drums: return <Disc size={size}/>;
         case Role.Keyboard: return <Keyboard size={size}/>;
+        case Role.Producer: return <Clapperboard size={size}/>;
         default: return <Music2 size={size}/>;
     }
 }
 
-const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, highlight }: any) => (
+const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, highlight, isDanger }: any) => (
     <button 
         onClick={onClick}
         disabled={disabled || locked}
@@ -82,22 +82,25 @@ const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, high
                 ? 'bg-slate-50 border-slate-100 text-slate-300' 
                 : (disabled 
                     ? 'bg-white border-slate-100 text-slate-300 cursor-not-allowed opacity-60' 
-                    : `bg-white border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer ${highlight ? 'ring-2 ring-pink-100 border-pink-200' : ''}`)
+                    : (isDanger 
+                        ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md'
+                        : `bg-white border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer ${highlight ? 'ring-2 ring-pink-100 border-pink-200' : ''}`)
+                    )
             }
         `}
     >
         <div className={`
             w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-all
-            ${locked ? 'bg-slate-100' : (disabled ? 'bg-slate-50' : 'bg-slate-50 group-hover:bg-slate-900 group-hover:text-white')}
+            ${locked ? 'bg-slate-100' : (disabled ? 'bg-slate-50' : (isDanger ? 'bg-rose-100 group-hover:bg-white/20 group-hover:text-white' : 'bg-slate-50 group-hover:bg-slate-900 group-hover:text-white'))}
         `}>
             {locked ? <Lock size={14}/> : <Icon size={16}/>}
         </div>
         
-        <span className={`text-[10px] font-bold text-center leading-tight tracking-wide mb-1 ${!disabled && !locked ? 'text-slate-600' : ''}`}>
+        <span className={`text-[10px] font-bold text-center leading-tight tracking-wide mb-1 ${!disabled && !locked && !isDanger ? 'text-slate-600' : ''}`}>
             {label}
         </span>
         
-        {!locked && (
+        {!locked && !isDanger && (
             <span className={`text-[9px] font-bold px-1.5 rounded text-slate-400`}>
                 {cost > 0 ? `¥${cost}` : 'Free'}
             </span>
@@ -105,8 +108,34 @@ const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, high
     </button>
 );
 
+const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
+    const rolesToCheck = [Role.Vocal, Role.Guitar, Role.Bass, Role.Drums, Role.Keyboard];
+    
+    return (
+        <div className="flex gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-100 justify-between items-center mb-2 mt-auto">
+            {rolesToCheck.map(role => {
+                const count = members.filter(m => m.roles.includes(role)).length;
+                let statusColor = 'bg-slate-200 text-slate-400';
+                if (count === 0) statusColor = 'bg-rose-100 text-rose-500';
+                else if (count === 1) statusColor = 'bg-emerald-100 text-emerald-600';
+                else statusColor = 'bg-amber-100 text-amber-600';
+
+                return (
+                    <div key={role} className="flex flex-col items-center gap-1 w-full">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${statusColor}`}>
+                            <RoleIcon role={role} size={10}/>
+                        </div>
+                        <span className="text-[8px] font-black text-slate-400">{count}</span>
+                    </div>
+                )
+            })}
+        </div>
+    );
+};
+
 export const MembersTab = ({ engine }: { engine: any }) => {
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+    const [showFireConfirm, setShowFireConfirm] = useState(false);
 
     const selectedMember = useMemo(() => 
         engine.gameState.members.find((m: Member) => m.id === (selectedMemberId || 'leader')) || engine.gameState.members[0]
@@ -129,15 +158,50 @@ export const MembersTab = ({ engine }: { engine: any }) => {
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)] animate-in fade-in duration-500 pb-20 lg:pb-0">
+        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)] animate-in fade-in duration-500 pb-20 lg:pb-0 relative">
             
+            {/* --- CUSTOM CONFIRM MODAL --- */}
+            {showFireConfirm && (
+                <div className="absolute inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-200 rounded-3xl">
+                    <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border border-slate-100 animate-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <DoorOpen size={32}/>
+                        </div>
+                        <h3 className="font-black text-2xl text-slate-900 mb-2">解雇确认</h3>
+                        <p className="text-sm font-bold text-slate-500 mb-8 leading-relaxed">
+                            确定要让 <span className="text-slate-900">{selectedMember.name}</span> 离开乐队吗？<br/>
+                            <span className="text-xs text-rose-500 mt-1 block">此操作不可撤销，且可能影响团队士气。</span>
+                        </p>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setShowFireConfirm(false)} 
+                                className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 font-black rounded-xl text-slate-600 transition-colors uppercase tracking-widest text-xs"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={() => { 
+                                    engine.fireMember(selectedMember); 
+                                    setShowFireConfirm(false); 
+                                    // Reset selection to leader if current is fired (handled in engine but safe here)
+                                    setSelectedMemberId('leader');
+                                }} 
+                                className="flex-1 py-3.5 bg-rose-500 hover:bg-rose-600 font-black rounded-xl text-white transition-colors uppercase tracking-widest text-xs shadow-lg shadow-rose-200"
+                            >
+                                确定解雇
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* --- LEFT: ROSTER LIST --- */}
             <div className="lg:w-72 shrink-0 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-full">
                 <div className="px-6 py-5 bg-white z-10 border-b border-slate-100">
                     <h3 className="font-black text-lg text-slate-900 tracking-tight flex justify-between items-center">
                         Members
                         <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full">
-                            {engine.gameState.members.length}/5
+                            {engine.gameState.members.length}/{MAX_MEMBERS}
                         </span>
                     </h3>
                 </div>
@@ -180,13 +244,37 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                         <Search size={14}/> Scout
                     </button>
                 </div>
+
+                {/* Role Indicator moved to bottom */}
+                <div className="px-3 pb-3">
+                    <RoleCompositionIndicator members={engine.gameState.members} />
+                </div>
             </div>
 
             {/* --- RIGHT: DATA PANEL --- */}
-            <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-full">
+            <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-full relative">
                 
                 {/* 1. HEADER */}
-                <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row gap-6 items-center md:items-start bg-slate-50/30">
+                <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row gap-6 items-center md:items-start bg-slate-50/30 relative">
+                    
+                    {/* NEW Dismiss Button Location - Top Right of Header, visible */}
+                    {!selectedMember?.isLeader && (
+                        <div className="absolute top-6 right-6 z-20">
+                            <button 
+                                onClick={(e) => {
+                                    e.preventDefault(); 
+                                    e.stopPropagation();
+                                    setShowFireConfirm(true);
+                                }}
+                                className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-transparent hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all text-slate-300 hover:text-rose-500"
+                                title="解雇成员 / Dismiss Member"
+                            >
+                                <span className="text-[10px] font-bold uppercase tracking-wider hidden group-hover:inline-block">Dismiss</span>
+                                <Trash2 size={16}/>
+                            </button>
+                        </div>
+                    )}
+
                     {/* Avatar */}
                     <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-4xl font-black text-white shadow-lg shrink-0">
                         {selectedMember?.name[0]}
@@ -241,7 +329,7 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                 </div>
 
                 {/* 2. STATS GRID (DATA CENTRIC) */}
-                <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 relative">
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:gap-12">
                         
                         {/* Column 1: Performance */}

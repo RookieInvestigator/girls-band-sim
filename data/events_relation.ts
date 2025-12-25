@@ -17,7 +17,7 @@ export const RELATIONSHIP_EVENTS: GameEvent[] = [
     id: 'rel_makeup_fight',
     title: '和弦的战争',
     description: '“所以说，这里应该用减九和弦啊！” “哈？那样一点都不朋克好吗！” 练习室里爆发了激烈的争吵。',
-    condition: (state) => state.members.length >= 3 && state.teamStats.technique > 30,
+    condition: (state) => state.members.length >= 3 && state.teamStats.precision > 30, // UPDATED: technique -> precision
     options: [
       { label: '用音乐决胜负', effectDescription: 'Jam Session 解决一切！', successChance: 0.7, impact: { technique: 20, creativity: 20 }, failImpact: { stability: -20 } },
       { label: '带她们去吃烤肉 (¥5000)', effectDescription: '没有什么是一顿牛舌解决不了的。', successChance: 1.0, impact: { money: -5000, affectionChange: 30, stressChange: -40 } },
@@ -75,7 +75,7 @@ export const RELATIONSHIP_EVENTS: GameEvent[] = [
     description: '离开LiveHouse时下起了大雨，而你和 [NAME] 加起来只有一把透明雨伞。',
     condition: (state) => state.members.length >= 2,
     options: [
-      { label: '两人共撑一把伞', effectDescription: '肩膀碰在一起，心跳声被雨声掩盖。', successChance: 1.0, impact: { affectionChange: 30, stressChange: -10 } },
+      { label: '两人共撑一把伞', effectDescription: '肩膀碰在一起，感受到了彼此的体温。', successChance: 1.0, impact: { affectionChange: 30, stressChange: -10 } },
       { label: '把伞给她，自己淋雨', effectDescription: '帅气是帅气，但是感冒了。', successChance: 1.0, impact: { affectionChange: 40, fatigue: 20, mental: 5 } },
       { label: '等雨停再走', effectDescription: '聊了很多平时不会聊的话题。', successChance: 1.0, impact: { affectionChange: 15, stability: 10 } }
     ]
@@ -107,7 +107,7 @@ export const RELATIONSHIP_EVENTS: GameEvent[] = [
     id: 'rel_conflict_center',
     title: 'C位之争',
     description: '新歌的站位图中，[NAME] 对自己不是C位感到非常不满。“我的吉他Solo明明是这首歌的亮点，为什么要把我排在后面？”',
-    condition: (state) => state.members.length >= 3 && state.teamStats.appeal > 40 && Math.random() < 0.3,
+    condition: (state) => state.members.length >= 3 && state.teamStats.aura > 40 && Math.random() < 0.3, // UPDATED: appeal -> aura
     options: [
       { label: '坚持原定站位', effectDescription: '“这也是为了整体效果。”', successChance: 1.0, impact: { stability: -10, stressChange: 10 }, failImpact: { affectionChange: -20 } },
       { label: '为她专门设计一段高光时刻', effectDescription: '虽然不是C位，但也很显眼。', successChance: 0.8, impact: { arrangement: 10, affectionChange: 5 }, failImpact: { stressChange: 20 } },
@@ -118,7 +118,7 @@ export const RELATIONSHIP_EVENTS: GameEvent[] = [
     id: 'rel_conflict_late',
     title: '迟到惯犯',
     description: '[NAME] 这个月已经迟到第五次了。其他成员的脸色越来越难看，练习室的气氛降到了冰点。',
-    condition: (state) => state.teamStats.stability < 30,
+    condition: (state) => state.teamStats.precision < 30, // UPDATED: stability -> precision (proxy for discipline)
     options: [
       { label: '严肃地批评她', effectDescription: '虽然气氛尴尬，但必须立规矩。', successChance: 1.0, impact: { stability: 15, affectionChange: -10 } },
       { label: '询问是否有隐情', effectDescription: '原来是家里出了点事……大家表示理解。', successChance: 0.7, impact: { affectionChange: 15, stability: 5 }, failDescription: '只是睡过头了。', failImpact: { stability: -30, stressChange: 20 } },

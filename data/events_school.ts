@@ -82,7 +82,7 @@ export const SCHOOL_EVENTS: GameEvent[] = [
   {
     id: 'sch_love_letter',
     title: '鞋柜里的信',
-    description: '[NAME] 在鞋柜里发现了一封粉红色的信。队友们立刻围了上来起哄。',
+    description: '[NAME] 在鞋柜里发现了一封装饰精美的信。队友们立刻围了上来起哄。',
     condition: (state) => state.fans > 1000 && Math.random() < 0.3,
     options: [
       { label: '打开看，其实是挑战书', effectDescription: '“放学后别走，我的乐队要和你们Battle！”', successChance: 1.0, impact: { mental: 10, rivalRelation: -10 } },

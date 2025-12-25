@@ -1,12 +1,12 @@
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   PenTool, Mic2, Calendar, MessageCircle, Users, Coffee, Play, Zap, Trash2, 
   Ticket, BookOpen, Briefcase, Music2, Lock, Star, AlertCircle, Plus, ChevronRight,
   LayoutGrid, ArrowRight, Sparkles, Heart
 } from 'lucide-react';
 import { ScheduleAction, ScheduleCategory } from '../types';
-import { ACTION_TO_CATEGORY, ACTION_UNLOCKS, SCHEDULE_COSTS, MAX_SPECIAL_EXECUTIONS, SPECIAL_ACTION_LIMITS } from '../constants';
+import { ACTION_TO_CATEGORY, ACTION_UNLOCKS, SCHEDULE_COSTS, MAX_SPECIAL_EXECUTIONS, SPECIAL_ACTION_LIMITS, ACTION_PRIMARY_STAT } from '../constants';
 
 // Clean Theme Helpers
 const getCategoryTheme = (cat: ScheduleCategory) => {
@@ -47,6 +47,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
   const theme = getCategoryTheme(category);
   const cost = SCHEDULE_COSTS[action as ScheduleAction] || 0;
   const isSpecial = category === ScheduleCategory.Special;
+  const primaryStat = ACTION_PRIMARY_STAT[action as ScheduleAction];
   
   // Specific Limits Logic
   const limit = SPECIAL_ACTION_LIMITS[action as ScheduleAction] || MAX_SPECIAL_EXECUTIONS;
@@ -59,7 +60,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
       disabled={disabled}
       onClick={onClick}
       className={`
-        group relative flex flex-col p-5 rounded-[2rem] border-2 transition-all duration-300 w-full h-40 justify-between overflow-hidden text-left shadow-sm
+        group relative flex flex-col p-5 rounded-[2rem] border-2 transition-all duration-300 w-full h-44 justify-between overflow-hidden text-left shadow-sm
         ${disabled 
           ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed grayscale-[0.5]' 
           : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-xl hover:-translate-y-1 active:scale-95'
@@ -86,12 +87,21 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
            </div>
        </div>
        
-       {/* Bottom Row: Text */}
-       <div className="z-10 relative mt-2">
+       {/* Middle: Content */}
+       <div className="z-10 relative mt-3 flex-1">
           <span className={`text-base font-black leading-snug line-clamp-2 w-full ${!disabled ? 'text-slate-800 group-hover:text-slate-900' : 'text-slate-400'}`}>
              {action}
           </span>
        </div>
+
+        {/* Bottom: Stat Badge */}
+        {!disabled && primaryStat && (
+            <div className="z-10 relative mt-2">
+                <span className="inline-flex items-center gap-1 bg-slate-100/80 px-2 py-1 rounded-md text-[9px] font-bold text-slate-500 uppercase tracking-wider backdrop-blur-sm border border-slate-200/50">
+                    <ArrowRight size={8} className="text-pink-500"/> {primaryStat}
+                </span>
+            </div>
+        )}
 
        {/* Decorative Background */}
        {!disabled && (
@@ -107,7 +117,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
 export const ScheduleTab = ({ engine }: { engine: any }) => {
   const [activeCategory, setActiveCategory] = useState<ScheduleCategory | 'ALL'>('ALL');
   const memberCount = engine.gameState.members.length;
-  const isMemberEnough = memberCount > 3;
+  const isMemberEnough = memberCount >= 3; // UPDATED: Min 3
 
   const categorizedActions = useMemo(() => {
     const grouped: Record<string, ScheduleAction[]> = {};
@@ -165,7 +175,7 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                 </button>
                 {!isMemberEnough && (
                     <div className="mt-3 text-[10px] font-bold text-amber-500 flex items-center gap-1.5 bg-amber-50 px-3 py-2 rounded-xl">
-                        <AlertCircle size={12}/> 需要至少4名成员。
+                        <AlertCircle size={12}/> 需要至少3名成员。
                     </div>
                 )}
             </div>

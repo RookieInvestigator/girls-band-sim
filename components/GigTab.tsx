@@ -5,7 +5,7 @@ import { GIG_DEFINITIONS } from '../data/gigs';
 export const GigTab = ({ engine }: { engine: any }) => {
   const { gameState, startGig } = engine;
   const memberCount = gameState.members.length;
-  const isMemberEnough = memberCount > 3;
+  const isMemberEnough = memberCount >= 3; // UPDATED: Min 3
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full pb-20 lg:pb-0">
@@ -32,7 +32,7 @@ export const GigTab = ({ engine }: { engine: any }) => {
          {!isMemberEnough && (
             <div className="relative z-10 bg-amber-500 text-slate-900 px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-3 shadow-lg max-w-xs mt-2">
                 <AlertCircle size={20} className="shrink-0"/>
-                <span>成员不足！至少需要4人才能开始演出。</span>
+                <span>成员不足！至少需要3人才能开始演出。</span>
             </div>
          )}
       </div>

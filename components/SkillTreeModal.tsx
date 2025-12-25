@@ -278,9 +278,37 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
-                                <Book size={32} className="opacity-30"/>
-                                <span className="text-sm font-bold uppercase tracking-widest">选择上方技能图标查看详情</span>
+                            <div className="w-full h-full flex flex-col md:flex-row items-center justify-center text-slate-400 gap-8 md:gap-16 opacity-90">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="p-3 bg-slate-50 rounded-full">
+                                        <Book size={24} className="opacity-50"/>
+                                    </div>
+                                    <span className="text-xs font-black uppercase tracking-widest">选择技能查看详情</span>
+                                </div>
+                                
+                                <div className="hidden md:block w-px h-12 bg-slate-200"/>
+
+                                <div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-300 mb-3 text-center md:text-left">PP (Point) 获取方式</div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-xs font-bold text-slate-500">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"/>
+                                            日程大成功 (+1)
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"/>
+                                            演出评级 S/A (+3~5)
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"/>
+                                            粉丝数奖励 (每周)
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"/>
+                                            特殊事件奖励
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
