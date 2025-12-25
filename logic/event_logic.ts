@@ -103,7 +103,7 @@ export const processEventChoice = (
     
     const finalFans = Math.max(0, state.fans + (impact.fans || 0));
     const finalRawChemistry = state.rawChemistry + chemistryChange;
-    const newTeamStats = calculateBandStats(updatedMembers, state.songs, finalRawChemistry, finalFans);
+    const newTeamStats = calculateBandStats(updatedMembers, state.songs, finalRawChemistry, finalFans, state.unlockedSkills);
 
     const newState = {
         ...state,

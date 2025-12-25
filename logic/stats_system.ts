@@ -33,7 +33,7 @@ const getSoftMaxBase = (values: number[]) => {
 };
 
 // --- EXPORTED CALCULATION FUNCTION ---
-export const calculateBandStats = (members: Member[], songs: Song[], rawChemistry: number, fans: number): BandStats => {
+export const calculateBandStats = (members: Member[], songs: Song[], rawChemistry: number, fans: number, unlockedSkills: string[] = []): BandStats => {
       if (members.length === 0) {
           return {
               performance: 0, precision: 0, tone: 0, rhythm: 0, dynamics: 0,
@@ -145,9 +145,7 @@ export const calculateBandStats = (members: Member[], songs: Song[], rawChemistr
       // Stress Penalty: High Stress KILLS Connection.
       // Formula: Multiplier = 1.0 - (AvgStress / 200). 
       // If AvgStress is 100, effective connection is reduced by 50%.
-      const stressPenalty = Math.max(0.4, 1.0 - (avgStress / 200));
-      
-      let connection = connectionBase * stressPenalty;
+      let stressPenalty = Math.max(0.4, 1.0 - (avgStress / 200));
       
       // Topic: Logarithmic Fan Scale + Design (Visuals drive clicks) + Viral Hits.
       const viralCount = songs.filter(s => s.isViral).length;
@@ -173,6 +171,40 @@ export const calculateBandStats = (members: Member[], songs: Song[], rawChemistr
       // Detail: Arrangement * Technique (Harmonic Mean for precision in details).
       let arrangePower = Math.sqrt(getMax('arrangement') * getHarmonicMean(getStats('technique')));
       let detail = (arrangePower * potentialWeight) + (avgSongQuality * achievementWeight);
+
+      // --- SKILL MODIFIERS (Applied before clamp) ---
+      if (unlockedSkills.includes('pass_3')) { // Aura Up
+          aura *= 1.1;
+      }
+      
+      if (unlockedSkills.includes('tech_6')) { // Quality/Detail Up
+          detail *= 1.1;
+          melody *= 1.05;
+          narrative *= 1.05;
+      }
+
+      if (unlockedSkills.includes('friend_8')) { // Bond Boost 1
+          synergy *= 1.1;
+          connectionBase *= 1.1; // Apply to base
+      }
+
+      if (unlockedSkills.includes('comm_10')) { // Topic Boost Max (New)
+          topic *= 1.4; // Huge boost to topic
+          visual *= 1.1; // Slight boost to visual (Branding)
+      }
+
+      // Re-calculate connection before friend_10 check to use base
+      let connection = connectionBase * stressPenalty;
+
+      if (unlockedSkills.includes('friend_10')) { // Bond Boost 2 + No Stress Penalty
+          synergy *= 1.2;
+          // Ignore stress penalty or reduce its impact significantly
+          connection = connectionBase * 1.3; 
+      } else {
+          // Re-apply if not friend_10 (already done above, but for clarity)
+          connection = connectionBase * stressPenalty;
+          if (unlockedSkills.includes('friend_8')) connection *= 1.05; // Slight extra boost on final
+      }
 
       // --- 3. TAG MODIFIERS (Buffs/Nerfs) ---
       const allTags = members.flatMap(m => m.tags);

@@ -59,7 +59,11 @@ const TAG_ACTIONS: Record<string, Partial<GigCard>> = {
     '三无': { title: '绝对零度', description: '毫无表情的高难度演奏，酷到没朋友。', difficulty: 35, baseVoltage: 65, hypeGain: 10, color: 'bg-gray-600' },
     '特摄厨': { title: '骑士变身', description: '摆出了帅气的变身Pose！', hypeGain: 40, baseVoltage: 50, color: 'bg-red-600' },
     '视觉系': { title: '死亡凝视', description: '用极其夸张的妆容和眼神震慑全场。', hypeGain: 30, baseVoltage: 40, color: 'bg-zinc-800' },
-    '爵士': { title: '摇摆律动', description: '加入了复杂的切分音，格调瞬间提升。', baseVoltage: 50, difficulty: 30, hypeGain: 10, color: 'bg-emerald-600' }
+    '爵士': { title: '摇摆律动', description: '加入了复杂的切分音，格调瞬间提升。', baseVoltage: 50, difficulty: 30, hypeGain: 10, color: 'bg-emerald-600' },
+    '和风': { title: '大和之魂', description: '宛如樱花飘落般的凄美演奏。', baseVoltage: 55, hypeGain: 15, color: 'bg-rose-700' },
+    '吟游诗人': { title: '旅之歌', description: '讲述远方的故事，让人心驰神往。', baseVoltage: 45, hypeGain: 25, color: 'bg-emerald-500' },
+    '贵族': { title: '高贵气场', description: '平民们，跪下听歌！', baseVoltage: 60, difficulty: 25, hypeGain: 20, color: 'bg-amber-500' },
+    '街头': { title: '街头霸王', description: '在这里，我就是规则！', baseVoltage: 50, difficulty: 40, hypeGain: 40, color: 'bg-slate-800' }
 };
 
 const getRoleAction = (role: Role, member: Member): GigCard => {
@@ -148,6 +152,25 @@ const getRoleAction = (role: Role, member: Member): GigCard => {
              break;
         case Role.Producer:
              pool.push(mk('direct', '现场指挥', '通过眼神和手势控制全队的动态。', CardType.Spirit, 30, 10, 20, 'arrangement', 'bg-slate-600'));
+             break;
+             
+        // --- NEW ROLES ---
+        case Role.Accordion:
+             pool.push(mk('pump', '风箱呼吸', '如同呼吸般自然的节奏律动。', CardType.Rhythm, 40, 30, 20, 'technique', 'bg-orange-600'));
+             pool.push(mk('folk', '异国旋律', '奏响充满流浪气息的民谣旋律。', CardType.Melody, 50, 35, 25, 'musicality', 'bg-amber-600'));
+             break;
+        case Role.Harp:
+             pool.push(mk('arpeggio', '天界琶音', '如流水般倾泻而下的华丽琶音。', CardType.Melody, 60, 50, 30, 'technique', 'bg-sky-400'));
+             pool.push(mk('heaven', '治愈之音', '净化心灵的音色，让观众平静下来（然后爆发）。', CardType.Spirit, 40, 20, 20, 'mental', 'bg-cyan-400'));
+             break;
+        case Role.Shamisen:
+             pool.push(mk('pick', '拨子连打', '极具冲击力的连续拨弦，气势逼人。', CardType.Technique, 65, 60, 35, 'technique', 'bg-red-700'));
+             pool.push(mk('fast', '疾风迅雷', '比吉他还快的超高速演奏！', CardType.Rhythm, 55, 50, 30, 'speed', 'bg-orange-700'));
+             break;
+        case Role.Rapper:
+             pool.push(mk('flow', '急速Flow', '像机关枪一样的歌词输出！', CardType.Rhythm, 50, 45, 30, 'technique', 'bg-yellow-600'));
+             pool.push(mk('diss', 'Battle Rhyme', '充满攻击性的歌词，点燃全场火药味。', CardType.Spirit, 60, 40, 50, 'lyrics', 'bg-purple-700'));
+             pool.push(mk('hype', 'Put ya hands up', '煽动全场，掌控节奏！', CardType.Spirit, 40, 20, 40, 'stagePresence', 'bg-pink-600'));
              break;
     }
 
@@ -419,6 +442,10 @@ export const resolveOption = (
             if (role === Role.Guitar && option.type === CardType.Technique) isRoleMatch = true;
             if (role === Role.Vocal && (option.type === CardType.Melody || option.type === CardType.Spirit)) isRoleMatch = true;
             if (role === Role.Keyboard && (option.type === CardType.Melody || option.type === CardType.Technique)) isRoleMatch = true;
+            if (role === Role.Accordion && (option.type === CardType.Rhythm || option.type === CardType.Melody)) isRoleMatch = true;
+            if (role === Role.Harp && (option.type === CardType.Melody || option.type === CardType.Spirit)) isRoleMatch = true;
+            if (role === Role.Shamisen && (option.type === CardType.Technique || option.type === CardType.Rhythm)) isRoleMatch = true;
+            if (role === Role.Rapper && (option.type === CardType.Spirit || option.type === CardType.Rhythm)) isRoleMatch = true;
         }
         
         if (isRoleMatch) {
@@ -448,6 +475,19 @@ export const resolveOption = (
             if (member.tags.includes('完美主义')) {
                 finalVoltage = Math.floor(finalVoltage * 1.15);
                 activeBonuses.push('PERFECT PITCH');
+            }
+            // NEW TAG SYNERGIES
+            if (member.tags.includes('和风') && (option.type === CardType.Technique || option.type === CardType.Melody)) {
+                finalVoltage += 20;
+                activeBonuses.push('YAMATO SOUL');
+            }
+            if (member.tags.includes('贵族') && outcome === 'Critical') {
+                hypeDelta += 15;
+                activeBonuses.push('ROYAL AURA');
+            }
+            if (member.tags.includes('街头') && option.type === CardType.Spirit) {
+                hypeDelta += 10;
+                activeBonuses.push('STREET HYPE');
             }
         }
 

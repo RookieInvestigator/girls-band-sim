@@ -30,6 +30,24 @@ export const GUITARS: Member[] = [
       screenName: 'Chihiro @gear_maker',
       snsStyle: '展示自己改造乐器的过程，满桌子的零件和工具。'
   },
+  {
+      id: 'n_23', name: '荒神 棘', roles: [Role.Guitar],
+      musicality: 50, technique: 65, stagePresence: 90, creativity: 40, mental: 80,
+      fatigue: 0, stress: 30, affection: 20, personality: '眼神凶恶的朋克少女，弹琴时像是在用吉他打架，经常弄坏设备。',
+      tags: ['不良', '破坏神'], interactionsLeft: 2, composing: 30, lyrics: 30, arrangement: 20, design: 60,
+      favoriteGenres: [MusicGenre.Punk, MusicGenre.Hardcore], favoriteLyricThemes: [LyricTheme.Rebellion, LyricTheme.Satire],
+      screenName: 'Spike @destroy_all',
+      snsStyle: '全是感叹号和模糊的现场照片，充满攻击性。'
+  },
+  {
+      id: 'n_24', name: '绵贯 丝', roles: [Role.Guitar],
+      musicality: 65, technique: 55, stagePresence: 40, creativity: 70, mental: 90,
+      fatigue: 0, stress: 0, affection: 90, personality: '手芸部部长，给乐队成员亲手制作了演出服和背带，像妈妈一样温柔。',
+      tags: ['治愈', '设计'], interactionsLeft: 2, composing: 40, lyrics: 40, arrangement: 30, design: 95,
+      favoriteGenres: [MusicGenre.Pop, MusicGenre.Folk], favoriteLyricThemes: [LyricTheme.Love, LyricTheme.Cute],
+      screenName: 'Ito @handmade_life',
+      snsStyle: '分享自己制作的可爱玩偶和刺绣过程。'
+  },
 
   // --- Standard Guitars ---
   { 

@@ -9,7 +9,11 @@ export enum Role {
   DJ = 'DJ',
   Violin = '小提琴',
   Saxophone = '萨克斯',
-  Staff = '临时经纪人'
+  Staff = '临时经纪人',
+  Accordion = '手风琴',
+  Harp = '竖琴',
+  Shamisen = '电三味线',
+  Rapper = 'MC/Rapper'
 }
 
 export enum MusicGenre {

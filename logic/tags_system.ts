@@ -14,12 +14,20 @@ export const TAG_MODIFIERS: Record<string, {
 }> = {
     // === LEGENDARY / UR TAGS ===
     '作词天才': { growthMult: 1.2, statsBonus: { lyrics: 2.0, mental: -0.2 }, stressMult: 1.2 }, // High risk high return
-    '绝对王者': { growthMult: 1.3, money: 200, stressMult: 1.5, successRate: 10 }, // Rich & talented but stressful
+    '绝对王者': { growthMult: 1.4, money: -200, stressMult: 1.6, successRate: 10 }, // Rich & talented but stressful
     '双重人格': { growthMult: 1.1, statsBonus: { stagePresence: 1.5, technique: 1.0, mental: -0.5 } }, // Unstable but explosive
     '领袖气质': { growthMult: 1.2, statsBonus: { affection: 1.0 }, stressMult: 0.8 }, // Buffs team bond
     '铁人': { fatigueMult: 0.4, growthMult: 1.1 }, // Barely gets tired
     '天然呆': { successRate: -10, growthMult: 1.5, stressMult: 0.5 }, // Prone to fail but learns fast
     '自由人': { growthMult: 1.4, statsBonus: { creativity: 2.0 }, successRate: -5, stressMult: 0.8 }, // Creative genius
+    '凡人拟态': { growthMult: 1.3, successRate: 15, statsBonus: { technique: 0.5, arrangement: 0.5 } }, // High success (can do anything) but mimics others
+    '叛逆者': { statsBonus: { technique: 0.5, stagePresence: 0.3 }, stressMult: 0.8, money: -100 }, // Skilled, chill, but spends money (drinks)
+
+    // === NEW SPECIAL TAGS ===
+    '和风': { statsBonus: { technique: 0.4, design: 0.4 }, fans: 15 },
+    '吟游诗人': { fatigueMult: 0.7, statsBonus: { mental: 0.3 }, fans: 10 },
+    '贵族': { money: 1000, stressMult: 1.8, statsBonus: { design: 0.5 } }, // High income but high stress
+    '街头': { fans: 40, statsBonus: { stagePresence: 0.4 }, money: -50 }, // Good for hype, bad for money
 
     // === PERSONALITY / TRAIT TAGS ===
     '天才': { growthMult: 1.4, stressMult: 1.1, fatigueMult: 0.9 },
@@ -68,7 +76,9 @@ export const TAG_MODIFIERS: Record<string, {
     '吐槽役': { statsBonus: { mental: 0.3 } },
     '冒失': { successRate: -15, growthMult: 1.2 }, // Learns from mistakes
     '神秘': { fans: 10, statsBonus: { creativity: 0.3 } },
-    '傲娇': { statsBonus: { technique: 0.2, affection: -0.1 } }
+    '傲娇': { statsBonus: { technique: 0.2, affection: -0.1 } },
+    '毒舌': { statsBonus: { lyrics: 0.5, affection: -0.2 } },
+    '前职业': { statsBonus: { technique: 0.4, stagePresence: 0.4 }, fans: 50 },
 };
 
 // --- EXPANDED TAG BAND MODIFIERS (Global Effects) ---
@@ -82,6 +92,14 @@ export const TAG_BAND_MODIFIERS: Record<string, Partial<BandStats>> = {
     '铁人': { rhythm: 1.2, stability: 1.2 },
     '天然呆': { adaptation: 0.8, interaction: 1.3 }, // Unpredictable but cute
     '自由人': { adaptation: 1.5, precision: 0.8 }, // Improvisation god
+    '凡人拟态': { synergy: 1.4, precision: 1.3, tone: 1.1 }, // Perfectly blends in (High Synergy) and executes perfectly (High Precision)
+    '叛逆者': { dynamics: 1.4, tone: 1.2, synergy: 0.9 }, // Explosive sound but hard to control
+
+    // === NEW SPECIAL TAGS ===
+    '和风': { visual: 1.25, tone: 1.2, technique: 1.1 },
+    '吟游诗人': { narrative: 1.3, connection: 1.1 },
+    '贵族': { visual: 1.3, aura: 1.3, connection: 0.8 },
+    '街头': { interaction: 1.4, dynamics: 1.2, precision: 0.9 },
 
     // === PERSONALITY / TRAIT TAGS ===
     '天才': { melody: 1.2, narrative: 1.1, adaptation: 1.2 },
@@ -122,5 +140,7 @@ export const TAG_BAND_MODIFIERS: Record<string, Partial<BandStats>> = {
     '器材党': { tone: 1.25 },
     '家里蹲': { connection: 0.9, detail: 1.1 },
     '冒失': { precision: 0.8, interaction: 1.1 },
-    '混血': { visual: 1.1, aura: 1.1 }
+    '混血': { visual: 1.1, aura: 1.1 },
+    '毒舌': { narrative: 1.2, synergy: 0.8 },
+    '前职业': { precision: 1.3, aura: 1.2 }
 };

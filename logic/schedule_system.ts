@@ -51,9 +51,9 @@ const FLAVOR_DB: Record<string, { success: string[], great: string[], fail: stri
     }
 };
 
-const calculateGrowth = (current: number, increment: number, multiplier: number): number => {
+const calculateGrowth = (current: number, increment: number, multiplier: number, softCap: number = 100): number => {
   if (increment <= 0) return increment;
-  const resistance = Math.max(1, current / 120); 
+  const resistance = Math.max(1, current / softCap); 
   const val = (increment * multiplier) / Math.pow(resistance, 0.8);
   return Number(val.toFixed(1));
 };
@@ -94,6 +94,13 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
           date: "Weekly Bonus"
       });
   }
+
+  // --- SKILL CHECKS ---
+  const hasTech8 = state.unlockedSkills.includes('tech_8'); // "Muse": Creation boost
+  const hasTech9 = state.unlockedSkills.includes('tech_9'); // "Rhythm in Blood": Practice cost down
+  const hasTech10 = state.unlockedSkills.includes('tech_10'); // "Surpassing Legends": Stat cap break
+  
+  const statSoftCap = hasTech10 ? 120 : 100;
 
   // --- CAPTAIN COMMAND EFFECT ---
   let globalGrowthMult = 1.0;
@@ -175,6 +182,25 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
     
     const statSum: Record<string, number> = {};
 
+    // --- Apply Skill Effects on Action Type ---
+    
+    // Tech 8: Songwriting Boost
+    let creationBonus = 1.0;
+    if (hasTech8 && [ScheduleAction.Songwriting, ScheduleAction.DemoProduction, ScheduleAction.LyricsPolishing, ScheduleAction.ComposeJam].includes(action)) {
+        creationBonus = 1.2;
+    }
+
+    // Tech 9: Practice Fatigue Reduction
+    const techActions = [
+        ScheduleAction.InstrumentPractice, ScheduleAction.VocalPractice, ScheduleAction.InstrumentLesson, 
+        ScheduleAction.BandEnsemble, ScheduleAction.BandRehearsal, ScheduleAction.SelfRecording, 
+        ScheduleAction.ImageTraining, ScheduleAction.RentStudio
+    ];
+    let practiceFatigueMult = 1.0;
+    if (hasTech9 && techActions.includes(action)) {
+        practiceFatigueMult = 0.8;
+    }
+
     currentMembers = currentMembers.map(m => {
       let stats = { mus: 0, tec: 0, sta: 0, cre: 0, men: 0, fat: 0, str: 0, cmp: 0, lyr: 0, arr: 0, dsg: 0 };
       
@@ -239,7 +265,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
             stats.arr += 1.5; stats.mus += 0.5; stats.fat += 5; break;
         case ScheduleAction.DesignWork:
             stats.dsg += 1.5; stats.cre += 0.5; stats.fat += 5; 
-            if (currentProject) songQualityBoost += m.design * 0.04 * actionMultiplier; 
+            if (currentProject) songQualityBoost += m.design * 0.04 * actionMultiplier * creationBonus; 
             break;
         case ScheduleAction.LiveHouseStudy:
             stats.mus += 1.2; stats.sta += 1.2; stats.fat += 5; break; 
@@ -268,7 +294,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         case ScheduleAction.RentStudio:
             stats.tec += 1.0; stats.mus += 1.0; stats.arr += 0.5; stats.fat += 15; stats.str += 10;
             chemistryDelta += 2.5 * actionMultiplier;
-            if (currentProject) songQualityBoost += 5 * actionMultiplier;
+            if (currentProject) songQualityBoost += 5 * actionMultiplier * creationBonus;
             break;
         case ScheduleAction.TrainingCamp:
             stats.tec += 1.5; stats.mus += 1.5; stats.sta += 1.5; stats.fat += 25; stats.str -= 10;
@@ -279,17 +305,17 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
         // --- CREATION ACTIONS ---
         case ScheduleAction.Songwriting:
           stats.cre += 0.5; stats.cmp += 0.3; stats.lyr += 0.3; stats.fat += 8; stats.str += 8; 
-          songProgress += (m.creativity * 0.12 + m.composing * 0.08 + m.lyrics * 0.08 + m.arrangement * 0.05) * actionMultiplier;
+          songProgress += (m.creativity * 0.12 + m.composing * 0.08 + m.lyrics * 0.08 + m.arrangement * 0.05) * actionMultiplier * creationBonus;
           break;
         case ScheduleAction.DemoProduction:
             stats.arr += 1.5; stats.cmp += 0.5; stats.fat += 10; stats.str += 5;
-            if (currentProject) songProgress += (m.arrangement * 0.15 + m.composing * 0.05) * actionMultiplier;
+            if (currentProject) songProgress += (m.arrangement * 0.15 + m.composing * 0.05) * actionMultiplier * creationBonus;
             break;
         case ScheduleAction.LyricsPolishing:
             stats.lyr += 1.5; stats.men += 0.5; stats.fat += 5; stats.str += 5;
             if (currentProject) {
-                songProgress += m.lyrics * 0.08 * actionMultiplier;
-                songQualityBoost += m.lyrics * 0.05 * actionMultiplier;
+                songProgress += m.lyrics * 0.08 * actionMultiplier * creationBonus;
+                songQualityBoost += m.lyrics * 0.05 * actionMultiplier * creationBonus;
             }
             break;
         case ScheduleAction.ComposeJam:
@@ -298,20 +324,20 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
             stats.fat += 12; stats.str += 5;
             chemistryDelta += 1.2 * actionMultiplier;
             if (currentProject) {
-                songQualityBoost += (m.composing * 0.05 + m.arrangement * 0.05) * actionMultiplier;
+                songQualityBoost += (m.composing * 0.05 + m.arrangement * 0.05) * actionMultiplier * creationBonus;
             }
             break;
         case ScheduleAction.Recording:
           stats.tec += 0.5; stats.fat += 15; stats.str += 15; 
           if (currentProject) {
-              songQualityBoost += (m.technique * 0.08 + m.arrangement * 0.15) * actionMultiplier;
-              songProgress += 10 * actionMultiplier; 
+              songQualityBoost += (m.technique * 0.08 + m.arrangement * 0.15) * actionMultiplier * creationBonus;
+              songProgress += 10 * actionMultiplier * creationBonus; 
           }
           break;
         case ScheduleAction.Mastering:
             stats.tec += 0.5; stats.fat += 10;
             if (currentProject) {
-                songQualityBoost += 8 * actionMultiplier; 
+                songQualityBoost += 8 * actionMultiplier * creationBonus; 
             }
             break;
 
@@ -407,17 +433,17 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
           activeMemberForFlavor = m;
       }
 
-      const musG = calculateGrowth(m.musicality, stats.mus, actionMultiplier * tagGrowthMult);
-      const tecG = calculateGrowth(m.technique, stats.tec, actionMultiplier * tagGrowthMult);
-      const staG = calculateGrowth(m.stagePresence, stats.sta, actionMultiplier * tagGrowthMult);
-      const creG = calculateGrowth(m.creativity, stats.cre, actionMultiplier * tagGrowthMult);
-      const menG = calculateGrowth(m.mental, stats.men, actionMultiplier * tagGrowthMult);
-      const cmpG = calculateGrowth(m.composing, stats.cmp, actionMultiplier * tagGrowthMult);
-      const lyrG = calculateGrowth(m.lyrics, stats.lyr, actionMultiplier * tagGrowthMult);
-      const arrG = calculateGrowth(m.arrangement, stats.arr, actionMultiplier * tagGrowthMult);
-      const dsgG = calculateGrowth(m.design, stats.dsg, actionMultiplier * tagGrowthMult);
+      const musG = calculateGrowth(m.musicality, stats.mus, actionMultiplier * tagGrowthMult, statSoftCap);
+      const tecG = calculateGrowth(m.technique, stats.tec, actionMultiplier * tagGrowthMult, statSoftCap);
+      const staG = calculateGrowth(m.stagePresence, stats.sta, actionMultiplier * tagGrowthMult, statSoftCap);
+      const creG = calculateGrowth(m.creativity, stats.cre, actionMultiplier * tagGrowthMult, statSoftCap);
+      const menG = calculateGrowth(m.mental, stats.men, actionMultiplier * tagGrowthMult, statSoftCap);
+      const cmpG = calculateGrowth(m.composing, stats.cmp, actionMultiplier * tagGrowthMult, statSoftCap);
+      const lyrG = calculateGrowth(m.lyrics, stats.lyr, actionMultiplier * tagGrowthMult, statSoftCap);
+      const arrG = calculateGrowth(m.arrangement, stats.arr, actionMultiplier * tagGrowthMult, statSoftCap);
+      const dsgG = calculateGrowth(m.design, stats.dsg, actionMultiplier * tagGrowthMult, statSoftCap);
 
-      const fA = Math.floor(stats.fat * tagFatigueMult * globalFatigueMult);
+      const fA = Math.floor(stats.fat * tagFatigueMult * globalFatigueMult * practiceFatigueMult);
       const sA = Math.floor(stats.str * tagStressMult * globalStressMult);
 
       if (musG > 0) statSum['musicality'] = (statSum['musicality'] || 0) + musG;
@@ -514,7 +540,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
     songs: songs,
     actionCounts: actionCounts,
     rawChemistry: Number(newChemistry.toFixed(1)),
-    teamStats: calculateBandStats(currentMembers, songs, newChemistry, Math.max(0, state.fans + fansDelta))
+    teamStats: calculateBandStats(currentMembers, songs, newChemistry, Math.max(0, state.fans + fansDelta), state.unlockedSkills)
   };
 
   return { newState, actionLogs };

@@ -30,6 +30,24 @@ export const DRUMMERS: Member[] = [
       screenName: 'PanPan @bamboo_eat',
       snsStyle: '全是熊猫头套的搞怪自拍，或者讲冷笑话。'
   },
+  {
+      id: 'n_27', name: '铁 轮', roles: [Role.Drums],
+      musicality: 50, technique: 80, stagePresence: 60, creativity: 40, mental: 90,
+      fatigue: 0, stress: 0, affection: 40, personality: '铁匠铺的女儿，手臂肌肉发达，能连续敲击双踩两小时不累。',
+      tags: ['体力怪物', '技术流'], interactionsLeft: 2, composing: 20, lyrics: 10, arrangement: 40, design: 20,
+      favoriteGenres: [MusicGenre.Metal, MusicGenre.Industrial], favoriteLyricThemes: [LyricTheme.Rebellion],
+      screenName: 'Rin @iron_works',
+      snsStyle: '分享自己打磨鼓棒和镲片的视频，非常有工匠精神。'
+  },
+  {
+      id: 'n_28', name: '泡沫 梦', roles: [Role.Drums],
+      musicality: 80, technique: 60, stagePresence: 30, creativity: 70, mental: 40,
+      fatigue: 0, stress: 10, affection: 50, personality: '永远一副睡眼惺忪的样子，但拿起鼓棒就能敲出复杂的爵士变奏。',
+      tags: ['随性', '天才'], interactionsLeft: 2, composing: 50, lyrics: 30, arrangement: 60, design: 30,
+      favoriteGenres: [MusicGenre.Jazz, MusicGenre.Shoegaze], favoriteLyricThemes: [LyricTheme.Absurdist, LyricTheme.Sea],
+      screenName: 'Yume @bubble_pop',
+      snsStyle: '发一些意识流的短句，或者深夜的街道照片。'
+  },
 
   // --- Standard Drummers ---
   { 

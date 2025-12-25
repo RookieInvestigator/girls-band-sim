@@ -39,6 +39,15 @@ export const SPECIALISTS: Member[] = [
       screenName: 'Miyabi @blue_jazz',
       snsStyle: '分享红酒、黑胶唱片和深夜的城市夜景，非常有格调。'
   },
+  {
+      id: 'n_31', name: '弓削 绯色', roles: [Role.Violin],
+      musicality: 80, technique: 90, stagePresence: 75, creativity: 50, mental: 30,
+      fatigue: 0, stress: 50, affection: 95, personality: '对声音有着病态的执着，如果不让她拉琴就会黑化。',
+      tags: ['重力', '古典'], interactionsLeft: 2, composing: 40, lyrics: 20, arrangement: 60, design: 30,
+      favoriteGenres: [MusicGenre.Classic, MusicGenre.Gothic], favoriteLyricThemes: [LyricTheme.Dark, LyricTheme.Love],
+      screenName: 'Hiiro @red_string',
+      snsStyle: '每天发几十条关于练习的内容，偶尔夹杂着一些“想要独占”的危险发言。'
+  },
 
   // --- Standard Specialists ---
   { 

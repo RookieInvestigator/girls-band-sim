@@ -42,9 +42,19 @@ export const SKILL_TREE: SkillNode[] = [
         effect: { statMult: { mental: 1.2 } }
     },
     {
-        id: 'friend_8', name: '我们要永远在一起', description: '这是约定，也是诅咒。全员【稳定度】上限大幅提升。',
+        id: 'friend_8', name: '我们要永远在一起', description: '这是我们共同许下的誓言，无论未来如何，心永远相连。乐队【羁绊】属性小幅提升。',
         cost: 50, x: 0, y: 7, parents: ['friend_7'], category: 'friendship',
-        effect: { passive: 'stability_max' }
+        effect: { passive: 'bond_boost_1' }
+    },
+    {
+        id: 'friend_9', name: '连心跳都在共鸣', description: '这种感觉绝无仅有。所有【合奏类】行动的大成功率显著提升。',
+        cost: 65, x: 0, y: 8, parents: ['friend_8'], category: 'friendship',
+        effect: { passive: 'ensemble_crit_up' }
+    },
+    {
+        id: 'friend_10', name: '绝不会放开这只手', description: '我们是一体的。全员【羁绊】与【默契】获得极大幅度提升，且不再受压力影响。',
+        cost: 80, x: 0, y: 9, parents: ['friend_9'], category: 'friendship',
+        effect: { passive: 'bond_boost_2' }
     },
 
     // ==========================================================================================
@@ -62,9 +72,9 @@ export const SKILL_TREE: SkillNode[] = [
         effect: { unlockAction: [ScheduleAction.StreetLive] }
     },
     {
-        id: 'pass_3', name: '视线，统统给我', description: '演出的魅力值 (Appeal) 基础加成 +10%。',
+        id: 'pass_3', name: '视线，统统给我', description: '演出的【气场】(Aura) 基础数值 +10%。',
         cost: 15, x: 0, y: 2, parents: ['pass_2'], category: 'passion',
-        effect: { passive: 'appeal_up' }
+        effect: { passive: 'aura_up' }
     },
     {
         id: 'pass_4', name: '顺应时代，然后超越', description: '解锁日程：【直播互动】。利用网络的力量引发奇迹。',
@@ -90,6 +100,16 @@ export const SKILL_TREE: SkillNode[] = [
         id: 'pass_8', name: '我们会成为传说', description: '目标是星辰大海。所有途径获得的粉丝数 +20%。',
         cost: 60, x: 0, y: 7, parents: ['pass_7'], category: 'passion',
         effect: { passive: 'fan_gain_max' }
+    },
+    {
+        id: 'pass_9', name: '谁也无法移开视线', description: '只要站在台上，我们就是神。Live 演出时【热度】(Hype) 不会下降。',
+        cost: 75, x: 0, y: 8, parents: ['pass_8'], category: 'passion',
+        effect: { passive: 'hype_sustain' }
+    },
+    {
+        id: 'pass_10', name: '整个世界都是舞台', description: '现在的我们无所不能。最终目标【粉丝数要求】降低 10%。',
+        cost: 90, x: 0, y: 9, parents: ['pass_9'], category: 'passion',
+        effect: { passive: 'budokan_easier' }
     },
 
     // ==========================================================================================
@@ -122,9 +142,9 @@ export const SKILL_TREE: SkillNode[] = [
         effect: { unlockAction: [ScheduleAction.TrainingCamp] }
     },
     {
-        id: 'tech_6', name: '我不需要“不纯粹”', description: '拒绝妥协。创作的歌曲【品质】基础值提升。',
+        id: 'tech_6', name: '我不需要“不纯粹”', description: '拒绝妥协。作品的【细节】(Detail) 与【品质】获得提升。',
         cost: 35, x: 0, y: 5, parents: ['tech_5'], category: 'technique',
-        effect: { passive: 'quality_up' }
+        effect: { passive: 'quality_stats_up' }
     },
     {
         id: 'tech_7', name: '突破人类的极限', description: '超越乐谱的束缚。演出中出现【Critical】（暴击）的概率大幅提升。',
@@ -132,9 +152,19 @@ export const SKILL_TREE: SkillNode[] = [
         effect: { passive: 'crit_rate_up' }
     },
     {
-        id: 'tech_8', name: '听到了吗？神的低语', description: '那是名为灵感的声音。创作新歌时，更容易获得高完成度和高评价。',
+        id: 'tech_8', name: '降临于指尖的缪斯', description: '灵感不再是偶然的馈赠，而是随时听候差遣的仆人。创作新歌时，更容易获得高完成度和高评价。',
         cost: 60, x: 0, y: 7, parents: ['tech_7'], category: 'technique',
         effect: { passive: 'songwriting_max' }
+    },
+    {
+        id: 'tech_9', name: '融入血液的节拍', description: '乐器不再是冰冷的工具，而是身体延伸出的器官。所有【技巧类】练习的体力消耗减少 20%。',
+        cost: 75, x: 0, y: 8, parents: ['tech_8'], category: 'technique',
+        effect: { passive: 'practice_cost_down' }
+    },
+    {
+        id: 'tech_10', name: '在此刻，超越传说', description: '凡人的极限只不过是我们的起跑线。全员各项能力的软上限从 100 提升至 120。',
+        cost: 90, x: 0, y: 9, parents: ['tech_9'], category: 'technique',
+        effect: { passive: 'stat_cap_break' }
     },
 
     // ==========================================================================================
@@ -180,5 +210,15 @@ export const SKILL_TREE: SkillNode[] = [
         id: 'comm_8', name: '这不仅仅是游戏', description: '建立专业的事务所运作体系。每周自动获得少量资金赞助。',
         cost: 60, x: 0, y: 7, parents: ['comm_7'], category: 'commercial',
         effect: { passive: 'passive_income' }
+    },
+    {
+        id: 'comm_9', name: '贪心一点也没关系', description: '保护我们的知识产权。歌曲带来的被动收入（Live/SNS）大幅增加。',
+        cost: 75, x: 0, y: 8, parents: ['comm_8'], category: 'commercial',
+        effect: { passive: 'royalty_up' }
+    },
+    {
+        id: 'comm_10', name: '把这里变成我们的庭院', description: '不仅是顺应规则，而是制定规则。乐队的【话题度】(Topic) 获得极大幅度提升。',
+        cost: 90, x: 0, y: 9, parents: ['comm_9'], category: 'commercial',
+        effect: { passive: 'topic_boost_max' }
     }
 ];

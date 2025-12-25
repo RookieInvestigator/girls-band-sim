@@ -21,6 +21,8 @@ import { SkillTreeModal } from './components/SkillTreeModal';
 
 declare var process: { env: { API_KEY: string } };
 
+const DEFAULT_PLAYER_NAME = "七曜 舞禾";
+
 const App = () => {
   const engine = useGameEngine();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'schedule' | 'members' | 'songs' | 'sns' | 'gigs'>('dashboard');
@@ -199,7 +201,7 @@ const App = () => {
                             type="text" 
                             value={playerNameInput}
                             onChange={(e) => setPlayerNameInput(e.target.value)}
-                            placeholder="你的名字..." 
+                            placeholder={DEFAULT_PLAYER_NAME} 
                             className="w-full bg-slate-50 border-2 border-slate-100 text-slate-900 font-bold text-lg py-4 px-6 rounded-2xl outline-none focus:border-rose-500 focus:bg-white transition-all placeholder:text-slate-300"
                         />
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none">
@@ -227,8 +229,8 @@ const App = () => {
                         <button
                             key={role.id}
                             onClick={() => {
-                                if(!playerNameInput.trim()) { alert("请输入你的名字 / ENTER NAME FIRST"); return; }
-                                engine.initGame(role.id, playerNameInput.trim())
+                                const finalName = playerNameInput.trim() || DEFAULT_PLAYER_NAME;
+                                engine.initGame(role.id, finalName)
                             }}
                             className={`group relative p-5 rounded-3xl border-2 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-100 bg-white ${role.border} ${role.hover}`}
                         >

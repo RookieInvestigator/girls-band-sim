@@ -4,7 +4,8 @@ import {
     Search, Heart, Frown, Battery, Music, Guitar, Star, Brain, PenTool, FileText, 
     Sparkles, Zap, Coffee, MessageCircle, Gift, AlertCircle, Lock,
     Activity, User, Crown, Terminal, TrendingUp, Music2, Mic2, Disc, Keyboard,
-    Palette, Layers, Smile, LayoutGrid, BarChart3, DoorOpen, XCircle, Clapperboard, Trash2, PieChart
+    Palette, Layers, Smile, LayoutGrid, BarChart3, DoorOpen, XCircle, Clapperboard, Trash2, PieChart,
+    Wind, Cloud, Slash, Megaphone
 } from 'lucide-react';
 import { Member, InteractionType, SelfActionType, ActionResult, Role } from '../types';
 import { INTERACTION_DATA } from '../data/interactions';
@@ -68,6 +69,10 @@ const RoleIcon = ({ role, size=16 }: { role: Role, size?: number }) => {
         case Role.Drums: return <Disc size={size}/>;
         case Role.Keyboard: return <Keyboard size={size}/>;
         case Role.Producer: return <Clapperboard size={size}/>;
+        case Role.Accordion: return <Wind size={size}/>;
+        case Role.Harp: return <Cloud size={size}/>;
+        case Role.Shamisen: return <Slash size={size}/>;
+        case Role.Rapper: return <Megaphone size={size}/>;
         default: return <Music2 size={size}/>;
     }
 }
@@ -111,6 +116,14 @@ const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, high
 const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
     const rolesToCheck = [Role.Vocal, Role.Guitar, Role.Bass, Role.Drums, Role.Keyboard];
     
+    // Non-Special Roles: The Standard 5 + Producer
+    // Anyone who has a role NOT in this list is counted as Special.
+    const nonSpecialRoles = [Role.Vocal, Role.Guitar, Role.Bass, Role.Drums, Role.Keyboard, Role.Producer];
+    
+    const specialCount = members.filter(m => 
+        m.roles.some(r => !nonSpecialRoles.includes(r))
+    ).length;
+
     return (
         <div className="flex gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-100 justify-between items-center mb-2 mt-auto">
             {rolesToCheck.map(role => {
@@ -129,6 +142,15 @@ const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
                     </div>
                 )
             })}
+            
+            {/* Special Role Indicator */}
+            <div className="flex flex-col items-center gap-1 w-full relative">
+                <div className="absolute left-0 top-1 bottom-3 w-px bg-slate-200"></div>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${specialCount > 0 ? 'bg-fuchsia-100 text-fuchsia-600' : 'bg-slate-200 text-slate-400'}`}>
+                    <Sparkles size={10}/>
+                </div>
+                <span className="text-[8px] font-black text-slate-400">{specialCount}</span>
+            </div>
         </div>
     );
 };

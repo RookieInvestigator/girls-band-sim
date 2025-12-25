@@ -9,7 +9,7 @@ import { BandState } from '../types';
 import { SKILL_TREE } from '../data/skills';
 
 export const DashboardTab = ({ engine }: { engine: any }) => {
-    const { gameState, setBandState } = engine;
+    const { gameState, setBandState, setShowSkillTree } = engine;
     const stats = gameState.teamStats;
 
     const isStateUnlocked = (s: BandState) => {
@@ -20,9 +20,9 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
 
     const getStateConfig = (s: BandState) => {
         switch(s) {
-            case BandState.Serious: return { label: 'SERIOUS', desc: '训练效果UP / 压力UP', bg: 'bg-amber-500', text: 'text-white' };
-            case BandState.Relaxed: return { label: 'RELAXED', desc: '恢复效果UP / 羁绊UP', bg: 'bg-emerald-500', text: 'text-white' };
-            default: return { label: 'NORMAL', desc: '标准平衡状态', bg: 'bg-slate-900', text: 'text-white' };
+            case BandState.Serious: return { label: 'SERIOUS', desc: '训练UP / 压力UP', bg: 'bg-amber-500', text: 'text-white' };
+            case BandState.Relaxed: return { label: 'RELAXED', desc: '恢复UP / 羁绊UP', bg: 'bg-emerald-500', text: 'text-white' };
+            default: return { label: 'NORMAL', desc: '标准平衡', bg: 'bg-slate-900', text: 'text-white' };
         }
     };
 
@@ -119,47 +119,75 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
                     </div>
                 </div>
 
-                {/* 2. COMMAND CENTER (Col 4) */}
-                <div className="md:col-span-4 bg-white rounded-[2rem] p-6 border-2 border-slate-100 shadow-[8px_8px_0px_0px_rgba(241,245,249,1)] flex flex-col relative overflow-hidden">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
-                            <Command size={20}/>
+                {/* 2. RIGHT COLUMN (Col 4) - SKILL TREE & TACTICS */}
+                <div className="md:col-span-4 flex flex-col gap-4">
+                    
+                    {/* A. SKILL TREE BUTTON */}
+                    <button 
+                        onClick={() => setShowSkillTree(true)}
+                        className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl flex items-center justify-between group relative overflow-hidden border border-slate-800 hover:border-pink-500 transition-colors"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity"/>
+                        
+                        <div className="relative z-10 text-left">
+                            <div className="flex items-center gap-2 text-[10px] font-black text-pink-400 uppercase tracking-[0.2em] mb-1">
+                                <Sparkles size={10} className="animate-pulse"/> Captain's Log
+                            </div>
+                            <div className="text-2xl font-black italic tracking-tighter group-hover:text-pink-100 transition-colors">
+                                SKILL TREE
+                            </div>
+                            <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded text-xs font-bold">
+                                <span className="text-amber-400">PP</span> 
+                                <span>{gameState.skillPoints}</span>
+                            </div>
                         </div>
-                        <div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tactics</div>
-                            <div className="text-lg font-black text-slate-900 leading-none">队长指令</div>
-                        </div>
-                    </div>
 
-                    <div className="flex-1 flex flex-col gap-2">
-                        {[BandState.Normal, BandState.Serious, BandState.Relaxed].map(s => {
-                            const conf = getStateConfig(s);
-                            const unlocked = isStateUnlocked(s);
-                            const isActive = gameState.bandState === s;
-                            
-                            return (
-                                <button
-                                    key={s}
-                                    disabled={!unlocked}
-                                    onClick={() => setBandState(s)}
-                                    className={`
-                                        relative w-full p-4 rounded-xl text-left transition-all duration-200 border-2
-                                        ${isActive 
-                                            ? 'bg-slate-900 border-slate-900 text-white shadow-lg scale-[1.02] z-10' 
-                                            : (unlocked ? 'bg-white border-slate-200 hover:border-slate-400 text-slate-500 hover:bg-slate-50' : 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed')
-                                        }
-                                    `}
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-black text-sm uppercase tracking-wider">{conf.label}</span>
-                                        {!unlocked ? <Lock size={12}/> : (isActive && <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"/>)}
-                                    </div>
-                                    <div className={`text-[10px] font-bold mt-1 ${isActive ? 'text-slate-400' : 'text-slate-400'}`}>
-                                        {conf.desc}
-                                    </div>
-                                </button>
-                            );
-                        })}
+                        <div className="relative z-10 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center group-hover:bg-pink-500 group-hover:text-white transition-all shadow-lg">
+                            <Book size={20}/>
+                        </div>
+                    </button>
+
+                    {/* B. COMPACT COMMAND CENTER */}
+                    <div className="bg-white rounded-[2rem] p-5 border-2 border-slate-100 shadow-sm flex flex-col flex-1 relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2 text-slate-900">
+                                <Command size={16}/>
+                                <h4 className="font-black text-sm uppercase tracking-widest">Tactics</h4>
+                            </div>
+                            <div className="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded">
+                                MODE SWITCH
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col gap-2 justify-center">
+                            {[BandState.Normal, BandState.Serious, BandState.Relaxed].map(s => {
+                                const conf = getStateConfig(s);
+                                const unlocked = isStateUnlocked(s);
+                                const isActive = gameState.bandState === s;
+                                
+                                return (
+                                    <button
+                                        key={s}
+                                        disabled={!unlocked}
+                                        onClick={() => setBandState(s)}
+                                        className={`
+                                            relative w-full px-4 py-3 rounded-xl flex items-center justify-between transition-all duration-200 border-2
+                                            ${isActive 
+                                                ? 'bg-slate-900 border-slate-900 text-white shadow-md z-10' 
+                                                : (unlocked ? 'bg-white border-slate-100 hover:border-slate-300 text-slate-600 hover:bg-slate-50' : 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed')
+                                            }
+                                        `}
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <span className="font-black text-xs uppercase tracking-wider leading-none">{conf.label}</span>
+                                            {isActive && <span className="text-[9px] font-bold opacity-70 mt-1">{conf.desc}</span>}
+                                        </div>
+                                        
+                                        {!unlocked ? <Lock size={12}/> : (isActive ? <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse"/> : <div className="w-2 h-2 rounded-full bg-slate-200"/>)}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 

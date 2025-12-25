@@ -39,6 +39,24 @@ export const VOCALS: Member[] = [
       screenName: 'Ruri @lapis_gem',
       snsStyle: '喜欢发亮晶晶的东西，比如首饰、星空，配文充满童心。'
   },
+  {
+      id: 'n_21', name: '镜见 琉璃', roles: [Role.Vocal],
+      musicality: 95, technique: 85, stagePresence: 60, creativity: 40, mental: 50,
+      fatigue: 0, stress: 40, affection: 10, personality: '声乐科第一名，认为摇滚是“粗俗的噪音”但为了反抗父母而加入。',
+      tags: ['古典', '傲娇', '大小姐'], interactionsLeft: 2, composing: 60, lyrics: 20, arrangement: 80, design: 50,
+      favoriteGenres: [MusicGenre.Classic, MusicGenre.SymphonicMetal], favoriteLyricThemes: [LyricTheme.Classic, LyricTheme.Satire],
+      screenName: 'Ruri @opera_diva',
+      snsStyle: '经常转发歌剧演出的信息，偶尔会发“哼，勉强承认你们的实力”这种傲娇言论。'
+  },
+  {
+      id: 'n_22', name: '戌亥 篝', roles: [Role.Vocal, Role.Guitar],
+      musicality: 70, technique: 60, stagePresence: 50, creativity: 75, mental: 80,
+      fatigue: 0, stress: 0, affection: 90, personality: '喜欢在河边弹唱民谣的森系女孩，声音有种让时间静止的治愈感。',
+      tags: ['治愈', '吟游诗人'], interactionsLeft: 2, composing: 70, lyrics: 70, arrangement: 30, design: 40,
+      favoriteGenres: [MusicGenre.Folk, MusicGenre.Ballad], favoriteLyricThemes: [LyricTheme.Poetic, LyricTheme.Youth],
+      screenName: 'Bonfire @camp_songs',
+      snsStyle: '野营、篝火和木吉他的照片，给人一种暖洋洋的感觉。'
+  },
 
   // --- Standard Vocals ---
   { 

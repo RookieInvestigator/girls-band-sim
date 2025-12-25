@@ -30,6 +30,24 @@ export const KEYBOARDS: Member[] = [
       screenName: 'Mirror @tarot_key',
       snsStyle: '每日运势分享，以及一些神秘的符号图片。'
   },
+  {
+      id: 'n_29', name: '七草 纳兹娜', roles: [Role.Keyboard],
+      musicality: 70, technique: 60, stagePresence: 40, creativity: 85, mental: 50,
+      fatigue: 0, stress: 20, affection: 30, personality: '典型的夜猫子，喜欢在凌晨两点写Synthwave，白天总是没精神。',
+      tags: ['网游废人', '宅女'], interactionsLeft: 2, composing: 80, lyrics: 30, arrangement: 70, design: 60,
+      favoriteGenres: [MusicGenre.Electronic, MusicGenre.Techno], favoriteLyricThemes: [LyricTheme.SciFi, LyricTheme.Sea],
+      screenName: 'Nazuna @night_walker',
+      snsStyle: '深夜活跃，分享复古的霓虹灯图片和蒸汽波音乐。'
+  },
+  {
+      id: 'n_30', name: '音乃木 诗', roles: [Role.Keyboard],
+      musicality: 95, technique: 90, stagePresence: 30, creativity: 80, mental: 40,
+      fatigue: 0, stress: 30, affection: 20, personality: '钢琴神童，因为讨厌看乐谱和练习枯燥的古典曲目而逃出来玩乐队。',
+      tags: ['天才', '自由人'], interactionsLeft: 2, composing: 90, lyrics: 20, arrangement: 60, design: 20,
+      favoriteGenres: [MusicGenre.Jazz, MusicGenre.Pop], favoriteLyricThemes: [LyricTheme.Youth, LyricTheme.Absurdist],
+      screenName: 'Uta @free_piano',
+      snsStyle: '发一些即兴演奏的片段，配文通常是“不想练琴”。'
+  },
 
   // --- Standard Keyboards ---
   { 

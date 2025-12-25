@@ -1,3 +1,4 @@
+
 import { GameState, Member, InteractionType, SelfActionType, ActionResult, Impact, InteractionOutcome } from '../types';
 import { SELF_ACTION_TEMPLATES } from '../data/interactions';
 import { calculateInteractionOutcome } from './interaction_system';
@@ -24,7 +25,7 @@ export const processInteraction = (
         interactionsLeft: m.interactionsLeft - 1
     } : m);
 
-    const newTeamStats = calculateBandStats(newMembers, state.songs, state.rawChemistry, state.fans);
+    const newTeamStats = calculateBandStats(newMembers, state.songs, state.rawChemistry, state.fans, state.unlockedSkills);
 
     return {
         newState: {
@@ -75,7 +76,7 @@ export const processSelfAction = (
         composing: Math.min(100, m.composing + (impact.composing || 0)),
     };
     
-    const newTeamStats = calculateBandStats(newMembers, state.songs, state.rawChemistry, state.fans);
+    const newTeamStats = calculateBandStats(newMembers, state.songs, state.rawChemistry, state.fans, state.unlockedSkills);
 
     return {
         newState: { 
@@ -90,7 +91,7 @@ export const processSelfAction = (
 
 export const processDismissal = (state: GameState, member: Member): { newState: GameState, outcome: InteractionOutcome } => {
     const newMembers = state.members.filter(m => m.id !== member.id);
-    const newTeamStats = calculateBandStats(newMembers, state.songs, state.rawChemistry, state.fans);
+    const newTeamStats = calculateBandStats(newMembers, state.songs, state.rawChemistry, state.fans, state.unlockedSkills);
 
     return {
         newState: {

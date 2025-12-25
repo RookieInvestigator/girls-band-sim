@@ -131,7 +131,7 @@ export const useGameEngine = () => {
     const randomRival = generateRivalBand();
     const initialNews = generateWeeklyNews(randomRival, 1);
     const initialMembers = [leader];
-    const initialStats = calculateBandStats(initialMembers, [], 0, 0);
+    const initialStats = calculateBandStats(initialMembers, [], 0, 0, ['friend_1']);
 
     setGameState(prev => ({
       ...prev,
@@ -399,7 +399,7 @@ export const useGameEngine = () => {
         const nextNews = generateWeeklyNews(prev.rival, prev.currentWeek + 1);
         const gigChemistryBonus = rank === 'S' || rank === 'A' ? 3 : 1;
         const newRawChemistry = prev.rawChemistry + gigChemistryBonus;
-        const newTeamStats = calculateBandStats(members, prev.songs, newRawChemistry, prev.fans + fansEarned);
+        const newTeamStats = calculateBandStats(members, prev.songs, newRawChemistry, prev.fans + fansEarned, prev.unlockedSkills);
 
         return {
           ...prev,
@@ -454,7 +454,7 @@ export const useGameEngine = () => {
   const recruitMember = (m: Member) => {
     if (gameState.members.length >= MAX_MEMBERS) return;
     const newMembers = [...gameState.members, { ...m, interactionsLeft: 2 }];
-    const newTeamStats = calculateBandStats(newMembers, gameState.songs, gameState.rawChemistry, gameState.fans);
+    const newTeamStats = calculateBandStats(newMembers, gameState.songs, gameState.rawChemistry, gameState.fans, gameState.unlockedSkills);
     setGameState(prev => ({ ...prev, members: newMembers, teamStats: newTeamStats, scoutPool: prev.scoutPool.filter(sc => sc.id !== m.id) }));
   };
 

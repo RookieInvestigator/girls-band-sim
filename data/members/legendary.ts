@@ -26,7 +26,7 @@ export const LEGENDARY_MEMBERS: Member[] = [
     favoriteGenres: [MusicGenre.SymphonicMetal, MusicGenre.Classic, MusicGenre.Electronic],
     favoriteLyricThemes: [LyricTheme.Classic, LyricTheme.Philosophy],
     screenName: '鲸·Official @karen_official',
-    snsStyle: '语气非常官方和礼貌，像在发新闻通稿，偶尔会暴露出对平民食物的好奇。'
+    snsStyle: '语气非常官方和礼貌。'
   },
   { 
     id: 'ur_chihiro', name: '时 彩枝', roles: [Role.Guitar], 
@@ -62,5 +62,27 @@ export const LEGENDARY_MEMBERS: Member[] = [
     favoriteGenres: [MusicGenre.JPop, MusicGenre.Pop], favoriteLyricThemes: [LyricTheme.Youth, LyricTheme.Fantasy],
     screenName: '舞的世界 @mai_world',
     snsStyle: '经常打错字，或者发出意义不明的拟声词（如“咚咔咔！”）。'
+  },
+  { 
+    id: 'ur_nano', name: '七濑 奈乃', roles: [Role.Bass], 
+    musicality: 90, technique: 90, stagePresence: 50, creativity: 85, mental: 50, 
+    fatigue: 0, stress: 20, affection: 40, personality: '为了融入集体而拼命隐藏实力的天才，总是担心自己“不普通”。', 
+    tags: ['凡人拟态', '天才', '怪人'], // Unique: 凡人拟态
+    interactionsLeft: 2, 
+    composing: 70, lyrics: 50, arrangement: 90, design: 60, 
+    favoriteGenres: [MusicGenre.Pop, MusicGenre.JPop], favoriteLyricThemes: [LyricTheme.Youth, LyricTheme.Cute],
+    screenName: 'Nano @normal_girl',
+    snsStyle: '经常发布“今天的普通午餐”、“普通JK的日常”等内容，但照片背景里经常出现昂贵的乐器或奖状。'
+  },
+  { 
+    id: 'ur_toka', name: '葛城 桃华', roles: [Role.Guitar], 
+    musicality: 85, technique: 95, stagePresence: 90, creativity: 80, mental: 70, 
+    fatigue: 0, stress: 10, affection: 20, personality: '曾经是主流出道的职业乐手，因为讨厌“商业垃圾”而退团。平时是个喜欢喝酒的废柴大姐姐，但拿起吉他就会变成摇滚之神。', 
+    tags: ['叛逆者', '前职业', '大姐姐'], // Unique: 叛逆者
+    interactionsLeft: 2, 
+    composing: 75, lyrics: 60, arrangement: 85, design: 60, 
+    favoriteGenres: [MusicGenre.Rock, MusicGenre.Punk, MusicGenre.Emo], favoriteLyricThemes: [LyricTheme.Rebellion, LyricTheme.Philosophy],
+    screenName: 'Toka @real_rock',
+    snsStyle: '经常发一些居酒屋的食物照片，或者对当今乐坛的辛辣点评。'
   }
 ];

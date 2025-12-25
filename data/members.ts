@@ -7,9 +7,11 @@ import { BASSISTS } from './members/bass';
 import { DRUMMERS } from './members/drums';
 import { KEYBOARDS } from './members/keyboards';
 import { SPECIALISTS } from './members/specialists';
+import { NEW_WAVES } from './members/new_waves';
 
 export const MEMBER_POOL: Member[] = [
     ...LEGENDARY_MEMBERS,
+    ...NEW_WAVES,
     ...VOCALS,
     ...GUITARS,
     ...BASSISTS,

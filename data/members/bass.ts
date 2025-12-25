@@ -30,6 +30,24 @@ export const BASSISTS: Member[] = [
       screenName: 'Sakura @iron_wall',
       snsStyle: '非常简短和严肃，主要是关于训练和比赛的记录。'
   },
+  {
+      id: 'n_25', name: '轰 雷华', roles: [Role.Bass],
+      musicality: 60, technique: 85, stagePresence: 90, creativity: 40, mental: 85,
+      fatigue: 0, stress: 20, affection: 40, personality: '使用六弦贝斯的重金属狂热者，喜欢甩头和踩监听音箱。',
+      tags: ['大姐头', '体力怪物'], interactionsLeft: 2, composing: 40, lyrics: 30, arrangement: 60, design: 50,
+      favoriteGenres: [MusicGenre.Metal, MusicGenre.Hardcore], favoriteLyricThemes: [LyricTheme.Dark, LyricTheme.Rebellion],
+      screenName: 'Thunder @heavy_bass',
+      snsStyle: '全是关于低频轰炸和现场Pogo的狂热发言。'
+  },
+  {
+      id: 'n_26', name: '影山 薄荷', roles: [Role.Bass],
+      musicality: 70, technique: 70, stagePresence: 30, creativity: 50, mental: 70,
+      fatigue: 0, stress: 10, affection: 30, personality: '总是含着薄荷糖的无口少女，演奏出的贝斯线像冰一样冷静。',
+      tags: ['三无', '学霸'], interactionsLeft: 2, composing: 50, lyrics: 20, arrangement: 60, design: 30,
+      favoriteGenres: [MusicGenre.MathRock, MusicGenre.Electronic], favoriteLyricThemes: [LyricTheme.Philosophy, LyricTheme.SciFi],
+      screenName: 'Mint @cool_line',
+      snsStyle: '只在有新歌发布时转发，平时没有任何动静。'
+  },
 
   // --- Standard Bassists ---
   { 
