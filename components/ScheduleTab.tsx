@@ -49,7 +49,6 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
   const isSpecial = category === ScheduleCategory.Special;
   const primaryStat = ACTION_PRIMARY_STAT[action as ScheduleAction];
   
-  // Specific Limits Logic
   const limit = SPECIAL_ACTION_LIMITS[action as ScheduleAction] || MAX_SPECIAL_EXECUTIONS;
   const isMaxed = isSpecial && count >= limit;
   
@@ -60,7 +59,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
       disabled={disabled}
       onClick={onClick}
       className={`
-        group relative flex flex-col p-5 rounded-[2rem] border-2 transition-all duration-300 w-full h-44 justify-between overflow-hidden text-left shadow-sm
+        group relative flex flex-col p-3 md:p-5 rounded-2xl md:rounded-[2rem] border-2 transition-all duration-300 w-full h-28 md:h-44 justify-between overflow-hidden text-left shadow-sm
         ${disabled 
           ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed grayscale-[0.5]' 
           : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-xl hover:-translate-y-1 active:scale-95'
@@ -69,18 +68,18 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
     >
        {/* Top Row: Icon + Price/Status */}
        <div className="flex justify-between items-start w-full relative z-10">
-           <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${!disabled ? theme.iconBg + ' ' + theme.iconColor : 'bg-slate-200 text-slate-400'}`}>
-              {getCategoryIcon(category, 18)}
+           <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${!disabled ? theme.iconBg + ' ' + theme.iconColor : 'bg-slate-200 text-slate-400'}`}>
+              {getCategoryIcon(category, 16)}
            </div>
            
-           <div className="flex flex-col items-end gap-1.5">
+           <div className="flex flex-col items-end gap-1">
                {!disabled && cost > 0 && (
-                   <span className="bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-lg text-[11px] font-black group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-colors">
+                   <span className="bg-slate-100 text-slate-600 border border-slate-200 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-lg text-[9px] md:text-[11px] font-black group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-colors">
                        ¥{cost}
                    </span>
                )}
                {isSpecial && (
-                   <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border ${isMaxed ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100'}`}>
+                   <span className={`text-[9px] md:text-[10px] font-black px-2 py-0.5 rounded-lg border ${isMaxed ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100'}`}>
                        {count}/{limit}
                    </span>
                )}
@@ -88,15 +87,15 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
        </div>
        
        {/* Middle: Content */}
-       <div className="z-10 relative mt-3 flex-1">
-          <span className={`text-base font-black leading-snug line-clamp-2 w-full ${!disabled ? 'text-slate-800 group-hover:text-slate-900' : 'text-slate-400'}`}>
+       <div className="z-10 relative mt-1 md:mt-2 flex-1 flex items-end">
+          <span className={`text-[10px] md:text-base font-black leading-tight md:leading-snug line-clamp-2 w-full ${!disabled ? 'text-slate-800 group-hover:text-slate-900' : 'text-slate-400'}`}>
              {action}
           </span>
        </div>
 
-        {/* Bottom: Stat Badge */}
+        {/* Bottom: Stat Badge (Desktop only) */}
         {!disabled && primaryStat && (
-            <div className="z-10 relative mt-2">
+            <div className="z-10 relative mt-2 hidden md:block">
                 <span className="inline-flex items-center gap-1 bg-slate-100/80 px-2 py-1 rounded-md text-[9px] font-bold text-slate-500 uppercase tracking-wider backdrop-blur-sm border border-slate-200/50">
                     <ArrowRight size={8} className="text-pink-500"/> {primaryStat}
                 </span>
@@ -107,7 +106,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
        {!disabled && (
            <>
                 <div className={`absolute inset-0 bg-gradient-to-b ${theme.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}/>
-                <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full opacity-10 group-hover:opacity-20 transition-opacity ${theme.iconBg} blur-2xl`}/>
+                <div className={`absolute -right-4 -bottom-4 w-20 h-20 md:w-24 md:h-24 rounded-full opacity-10 group-hover:opacity-20 transition-opacity ${theme.iconBg} blur-2xl`}/>
            </>
        )}
     </button>
@@ -117,7 +116,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
 export const ScheduleTab = ({ engine }: { engine: any }) => {
   const [activeCategory, setActiveCategory] = useState<ScheduleCategory | 'ALL'>('ALL');
   const memberCount = engine.gameState.members.length;
-  const isMemberEnough = memberCount >= 3; // UPDATED: Min 3
+  const isMemberEnough = memberCount >= 3; 
 
   const categorizedActions = useMemo(() => {
     const grouped: Record<string, ScheduleAction[]> = {};
@@ -139,50 +138,37 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
     : categorizedActions[activeCategory] || [];
 
   return (
-    <div className="flex flex-col gap-6 h-full animate-in fade-in duration-500 pb-24 lg:pb-0">
+    <div className="flex flex-col gap-4 h-[calc(100dvh-140px)] lg:h-full animate-in fade-in duration-500 pb-0 lg:pb-0">
       
-      {/* 1. PLANNER HEADER & TIMELINE */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 shrink-0 relative overflow-hidden flex flex-col md:flex-row gap-8 items-stretch">
+      {/* 1. COMPACT DASHBOARD (Top) */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-4 md:p-6 shrink-0 flex flex-col gap-4">
          
-         {/* Left: Control Panel */}
-         <div className="flex-1 flex flex-col justify-between max-w-sm">
-            <div>
-                <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] font-black text-white bg-slate-900 px-3 py-1 rounded-full uppercase tracking-widest">
+         {/* Row 1: Status & Start Button */}
+         <div className="flex items-center gap-4 justify-between">
+            <div className="flex flex-col">
+                <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current</span>
+                    <span className="bg-rose-50 text-rose-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                         Week {engine.gameState.currentWeek}
                     </span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Planner</span>
                 </div>
-                <h3 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-2">
-                    SCHEDULE
+                <h3 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight leading-none">
+                    Schedule
                 </h3>
-                <p className="text-xs font-bold text-slate-400">
-                    安排本周的 3 个行动槽位。
-                </p>
             </div>
-            
-            <div className="mt-6 md:mt-0">
-                <button 
-                    onClick={engine.executeTurn} 
-                    disabled={engine.isProcessing || !isMemberEnough}
-                    className="w-full bg-slate-900 text-white h-14 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-rose-500 hover:shadow-lg hover:shadow-rose-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between px-6 active:scale-95 disabled:bg-slate-300 group"
-                >
-                    <span className="flex items-center gap-2">
-                        {engine.isProcessing ? <Zap className="animate-spin" size={16}/> : <Play size={16} fill="currentColor"/>}
-                        {engine.isProcessing ? 'Executing...' : 'Start Week'}
-                    </span>
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
-                </button>
-                {!isMemberEnough && (
-                    <div className="mt-3 text-[10px] font-bold text-amber-500 flex items-center gap-1.5 bg-amber-50 px-3 py-2 rounded-xl">
-                        <AlertCircle size={12}/> 需要至少3名成员。
-                    </div>
-                )}
-            </div>
+
+            <button 
+                onClick={engine.executeTurn} 
+                disabled={engine.isProcessing || !isMemberEnough}
+                className="flex-1 max-w-[180px] md:max-w-[240px] bg-slate-900 text-white h-12 rounded-xl md:rounded-2xl font-black text-xs uppercase tracking-[0.1em] hover:bg-rose-500 hover:shadow-lg hover:shadow-rose-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95 disabled:bg-slate-300"
+            >
+                {engine.isProcessing ? <Zap className="animate-spin" size={16}/> : <Play size={16} fill="currentColor"/>}
+                <span>{engine.isProcessing ? 'Processing...' : 'Start Week'}</span>
+            </button>
          </div>
 
-         {/* Right: Timeline Slots */}
-         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+         {/* Row 2: Slots Grid */}
+         <div className="grid grid-cols-3 gap-2 md:gap-4">
             {engine.gameState.weeklySchedule.map((action: ScheduleAction | null, i: number) => {
                 const category = action ? ACTION_TO_CATEGORY[action] : null;
                 const theme = category ? getCategoryTheme(category) : null;
@@ -192,15 +178,16 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                     key={i} 
                     onClick={() => !action && document.getElementById('action-drawer')?.scrollIntoView({ behavior: 'smooth' })}
                     className={`
-                        relative group rounded-[2rem] border-2 transition-all duration-300 flex flex-col items-center justify-center p-4 cursor-pointer overflow-hidden min-h-[140px]
+                        relative group rounded-xl md:rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center p-2 cursor-pointer overflow-hidden
+                        h-20 md:h-32
                         ${action && theme 
                             ? `bg-white ${theme.border}` 
                             : 'bg-slate-50 border-dashed border-slate-200 hover:border-slate-400 hover:bg-white'}
                     `}
                 >
-                    {/* Slot Label */}
-                    <div className="absolute top-4 left-4 z-20">
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-wider">
+                    {/* Slot Number */}
+                    <div className="absolute top-1 left-2 md:top-2 md:left-3 z-20">
+                        <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase">
                             0{i+1}
                         </span>
                     </div>
@@ -208,51 +195,53 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                     {action && theme ? (
                         <>
                             {/* Card Content */}
-                            <div className={`w-12 h-12 rounded-2xl ${theme.iconBg} ${theme.iconColor} flex items-center justify-center shadow-lg mb-3 relative z-10`}>
-                                {getCategoryIcon(category!, 20)}
+                            <div className={`w-6 h-6 md:w-10 md:h-10 rounded-lg md:rounded-xl ${theme.iconBg} ${theme.iconColor} flex items-center justify-center shadow-md mb-1 md:mb-2 relative z-10`}>
+                                {getCategoryIcon(category!, 14)} 
                             </div>
-                            <div className="font-black text-sm text-slate-800 text-center leading-tight relative z-10 px-2 line-clamp-2">
+                            <div className="font-black text-[9px] md:text-xs text-slate-800 text-center leading-tight relative z-10 w-full px-1 truncate">
                                 {action}
                             </div>
                             
-                            {/* Remove Button */}
                             <button 
                                 onClick={(e) => { e.stopPropagation(); engine.setScheduleSlot(i, null); }} 
-                                className="absolute top-3 right-3 p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-all opacity-0 group-hover:opacity-100 z-20"
+                                className="absolute top-1 right-1 p-1 text-slate-300 hover:text-rose-500 rounded-full z-20"
                             >
-                                <Trash2 size={14}/>
+                                <Trash2 size={12}/>
                             </button>
 
-                            {/* Background Splash */}
                             <div className={`absolute inset-0 bg-gradient-to-b ${theme.bg} opacity-50`}/>
                         </>
                     ) : (
-                        <div className="flex flex-col items-center gap-2 opacity-40 group-hover:opacity-100 transition-all group-hover:scale-105">
-                            <div className="w-10 h-10 rounded-full border-2 border-slate-300 flex items-center justify-center text-slate-300 group-hover:border-slate-900 group-hover:text-slate-900">
-                                <Plus size={20}/>
-                            </div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-900">Select</span>
+                        <div className="flex flex-col items-center gap-1 opacity-40 group-hover:opacity-100 transition-all">
+                            <Plus size={16} className="text-slate-400 group-hover:text-slate-600"/>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Select</span>
                         </div>
                     )}
                 </div>
                 );
             })}
          </div>
+         
+         {!isMemberEnough && (
+            <div className="text-[10px] font-bold text-amber-500 flex items-center gap-1.5 bg-amber-50 px-3 py-2 rounded-lg justify-center border border-amber-100">
+                <AlertCircle size={12}/> 需要至少 3 名成员才能开始活动
+            </div>
+         )}
       </div>
 
-      {/* 2. ACTION DRAWER */}
-      <div id="action-drawer" className="flex-1 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col overflow-hidden min-h-[400px] relative">
-          {/* Header & Filters */}
-          <div className="px-8 py-6 border-b border-slate-50 flex flex-col gap-4 sticky top-0 bg-white/95 backdrop-blur z-20">
+      {/* 2. ACTION DRAWER (Scrollable Area) */}
+      <div id="action-drawer" className="flex-1 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col overflow-hidden min-h-0 relative">
+          {/* Filters Sticky Header */}
+          <div className="px-4 py-3 md:px-6 md:py-4 border-b border-slate-50 flex flex-col gap-2 sticky top-0 bg-white/95 backdrop-blur z-20 shrink-0">
               <div className="flex items-center gap-2">
-                  <LayoutGrid size={16} className="text-slate-900"/>
-                  <h4 className="font-black text-sm text-slate-900 uppercase tracking-widest">Actions</h4>
+                  <LayoutGrid size={14} className="text-slate-900"/>
+                  <h4 className="font-black text-xs text-slate-900 uppercase tracking-widest">Select Action</h4>
               </div>
               
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 md:gap-2">
                   <button 
                      onClick={() => setActiveCategory('ALL')}
-                     className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${activeCategory === 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}
+                     className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all border ${activeCategory === 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200'}`}
                   >
                      All
                   </button>
@@ -260,17 +249,17 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                       <button 
                           key={cat}
                           onClick={() => setActiveCategory(cat)}
-                          className={`px-3 py-2 rounded-xl text-[10px] font-bold flex items-center gap-1.5 transition-all border ${activeCategory === cat ? 'bg-slate-100 text-slate-900 border-slate-300' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-300'}`}
+                          className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-bold flex items-center gap-1 transition-all border ${activeCategory === cat ? 'bg-slate-100 text-slate-900 border-slate-300' : 'bg-white text-slate-400 border-slate-100'}`}
                       >
-                          {getCategoryIcon(cat, 12)} {cat}
+                          {getCategoryIcon(cat, 10)} {cat}
                       </button>
                   ))}
               </div>
           </div>
 
           {/* Grid Content */}
-          <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-20">
+          <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-slate-50">
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4 pb-20">
                   {currentActions.map(action => (
                       <ActionCard 
                           key={action}

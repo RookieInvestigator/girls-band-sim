@@ -5,7 +5,7 @@ import {
     Sparkles, Zap, Coffee, MessageCircle, Gift, AlertCircle, Lock,
     Activity, User, Crown, Terminal, TrendingUp, Music2, Mic2, Disc, Keyboard,
     Palette, Layers, Smile, LayoutGrid, BarChart3, DoorOpen, XCircle, Clapperboard, Trash2, PieChart,
-    Wind, Cloud, Slash, Megaphone
+    Wind, Cloud, Slash, Megaphone, ChevronLeft, ArrowLeft
 } from 'lucide-react';
 import { Member, InteractionType, SelfActionType, ActionResult, Role } from '../types';
 import { INTERACTION_DATA } from '../data/interactions';
@@ -27,30 +27,30 @@ const StatRow = ({ label, value, icon: Icon, showMax = false }: any) => {
     const widthPct = Math.min(100, (value / maxVal) * 100);
 
     return (
-        <div className="flex items-center gap-4 py-2 group">
+        <div className="flex items-center gap-3 py-1.5 group">
             {/* Label Icon */}
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${rank.bg} ${rank.color} bg-opacity-50`}>
-                <Icon size={16} />
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${rank.bg} ${rank.color} bg-opacity-50`}>
+                <Icon size={14} />
             </div>
 
             {/* Info Area */}
             <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-end mb-1.5">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="flex justify-between items-end mb-1">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                         {label}
                     </span>
-                    <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-black px-1.5 rounded ${rank.bg} ${rank.color}`}>
+                    <div className="flex items-center gap-1.5">
+                        <span className={`text-[9px] font-black px-1 rounded ${rank.bg} ${rank.color}`}>
                             {rank.label}
                         </span>
-                        <span className="text-sm font-black text-slate-700 tabular-nums">
+                        <span className="text-xs font-black text-slate-700 tabular-nums">
                             {Math.floor(value)}
                         </span>
                     </div>
                 </div>
                 
                 {/* Progress Bar */}
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div 
                         className={`h-full rounded-full transition-all duration-1000 ease-out ${rank.bar}`} 
                         style={{ width: `${widthPct}%` }}
@@ -82,7 +82,7 @@ const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, high
         onClick={onClick}
         disabled={disabled || locked}
         className={`
-            relative flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200 w-full group
+            relative flex flex-col items-center justify-center p-2 lg:p-3 rounded-xl border transition-all duration-200 w-full group
             ${locked 
                 ? 'bg-slate-50 border-slate-100 text-slate-300' 
                 : (disabled 
@@ -95,18 +95,18 @@ const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, high
         `}
     >
         <div className={`
-            w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-all
+            w-7 h-7 lg:w-8 lg:h-8 rounded-full flex items-center justify-center mb-1 lg:mb-2 transition-all
             ${locked ? 'bg-slate-100' : (disabled ? 'bg-slate-50' : (isDanger ? 'bg-rose-100 group-hover:bg-white/20 group-hover:text-white' : 'bg-slate-50 group-hover:bg-slate-900 group-hover:text-white'))}
         `}>
             {locked ? <Lock size={14}/> : <Icon size={16}/>}
         </div>
         
-        <span className={`text-[10px] font-bold text-center leading-tight tracking-wide mb-1 ${!disabled && !locked && !isDanger ? 'text-slate-600' : ''}`}>
+        <span className={`text-[9px] lg:text-[10px] font-bold text-center leading-tight tracking-wide mb-0.5 ${!disabled && !locked && !isDanger ? 'text-slate-600' : ''}`}>
             {label}
         </span>
         
         {!locked && !isDanger && (
-            <span className={`text-[9px] font-bold px-1.5 rounded text-slate-400`}>
+            <span className={`text-[9px] font-bold px-1.5 rounded text-slate-400 scale-90 lg:scale-100`}>
                 {cost > 0 ? `¥${cost}` : 'Free'}
             </span>
         )}
@@ -119,7 +119,7 @@ const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
     const specialCount = members.filter(m => m.roles.some(r => !nonSpecialRoles.includes(r))).length;
 
     return (
-        <div className="flex gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-100 justify-between items-center mb-2 mt-auto">
+        <div className="flex gap-1.5 p-2.5 bg-slate-50 rounded-2xl border border-slate-100 justify-between items-center mb-2 mt-auto">
             {rolesToCheck.map(role => {
                 const count = members.filter(m => m.roles.includes(role)).length;
                 let statusColor = 'bg-slate-200 text-slate-400';
@@ -128,17 +128,17 @@ const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
                 else statusColor = 'bg-amber-100 text-amber-600';
 
                 return (
-                    <div key={role} className="flex flex-col items-center gap-1 w-full">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${statusColor}`}>
+                    <div key={role} className="flex flex-col items-center gap-0.5 w-full">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${statusColor}`}>
                             <RoleIcon role={role} size={10}/>
                         </div>
                         <span className="text-[8px] font-black text-slate-400">{count}</span>
                     </div>
                 )
             })}
-            <div className="flex flex-col items-center gap-1 w-full relative">
+            <div className="flex flex-col items-center gap-0.5 w-full relative">
                 <div className="absolute left-0 top-1 bottom-3 w-px bg-slate-200"></div>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${specialCount > 0 ? 'bg-fuchsia-100 text-fuchsia-600' : 'bg-slate-200 text-slate-400'}`}>
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${specialCount > 0 ? 'bg-fuchsia-100 text-fuchsia-600' : 'bg-slate-200 text-slate-400'}`}>
                     <Sparkles size={10}/>
                 </div>
                 <span className="text-[8px] font-black text-slate-400">{specialCount}</span>
@@ -150,6 +150,7 @@ const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
 export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolean }) => {
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
     const [showFireConfirm, setShowFireConfirm] = useState(false);
+    const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false); // Mobile Master-Detail State
 
     const selectedMember = useMemo(() => 
         engine.gameState.members.find((m: Member) => m.id === (selectedMemberId || 'leader')) || engine.gameState.members[0]
@@ -181,8 +182,20 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
         return m.personality;
     };
 
+    const handleMemberClick = (id: string) => {
+        setSelectedMemberId(id);
+        engine.setLastInteraction(null);
+        setIsMobileDetailOpen(true); // Switch to detail view on mobile
+    };
+
+    const handleBackToList = () => {
+        setIsMobileDetailOpen(false);
+    };
+
+    // Calculate dynamic height for mobile to fit within viewport including safe areas
+    // Using dvh ensures it handles address bar resizing
     return (
-        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)] animate-in fade-in duration-500 pb-20 lg:pb-0 relative">
+        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100dvh-140px)] lg:h-[calc(100vh-100px)] animate-in fade-in duration-500 pb-0 relative">
             
             {/* --- CUSTOM CONFIRM MODAL --- */}
             {showFireConfirm && (
@@ -208,6 +221,7 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                                     engine.fireMember(selectedMember); 
                                     setShowFireConfirm(false); 
                                     setSelectedMemberId('leader');
+                                    setIsMobileDetailOpen(false);
                                 }} 
                                 className="flex-1 py-3.5 bg-rose-500 hover:bg-rose-600 font-black rounded-xl text-white transition-colors uppercase tracking-widest text-xs shadow-lg shadow-rose-200"
                             >
@@ -219,7 +233,11 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
             )}
 
             {/* --- LEFT: ROSTER LIST --- */}
-            <div className="lg:w-72 shrink-0 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-full">
+            {/* On mobile: Hidden if Detail is Open */}
+            <div className={`
+                w-full lg:w-72 shrink-0 flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-full
+                ${isMobileDetailOpen ? 'hidden lg:flex' : 'flex'}
+            `}>
                 <div className="px-6 py-5 bg-white z-10 border-b border-slate-100">
                     <h3 className="font-black text-lg text-slate-900 tracking-tight flex justify-between items-center">
                         Members
@@ -235,7 +253,7 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                         return (
                             <button 
                                 key={m.id} 
-                                onClick={() => { setSelectedMemberId(m.id); engine.setLastInteraction(null); }} 
+                                onClick={() => handleMemberClick(m.id)} 
                                 className={`
                                     w-full flex items-center gap-3 p-2.5 rounded-2xl transition-all text-left group border
                                     ${isSelected 
@@ -273,90 +291,114 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                 </div>
             </div>
 
-            {/* --- RIGHT: DATA PANEL --- */}
-            <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-full relative">
+            {/* --- RIGHT: DATA PANEL (MASTER-DETAIL) --- */}
+            {/* On mobile: Hidden if Detail is NOT Open */}
+            <div className={`
+                flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex-col overflow-hidden h-full relative
+                ${isMobileDetailOpen ? 'flex' : 'hidden lg:flex'}
+            `}>
                 
-                {/* 1. HEADER */}
-                <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row gap-6 items-center md:items-start bg-slate-50/30 relative">
+                {/* 1. HEADER - Compact on Mobile */}
+                <div className="p-4 lg:p-8 border-b border-slate-100 flex flex-col gap-4 bg-slate-50/30 relative shrink-0">
                     
-                    {!selectedMember?.isLeader && (
-                        <div className="absolute top-6 right-6 z-20">
+                    {/* Mobile Navigation Bar */}
+                    <div className="flex items-center justify-between lg:hidden mb-1">
+                        <button 
+                            onClick={handleBackToList}
+                            className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors"
+                        >
+                            <div className="p-1.5 bg-white rounded-lg border border-slate-200 shadow-sm">
+                                <ArrowLeft size={16}/>
+                            </div>
+                            <span>Back to List</span>
+                        </button>
+                        
+                        {!selectedMember?.isLeader && (
                             <button 
-                                onClick={(e) => {
-                                    e.preventDefault(); 
-                                    e.stopPropagation();
-                                    setShowFireConfirm(true);
-                                }}
-                                className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-transparent hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all text-slate-300 hover:text-rose-500"
-                                title="解雇成员 / Dismiss Member"
+                                onClick={() => setShowFireConfirm(true)}
+                                className="p-2 text-slate-400 hover:text-rose-500 transition-colors"
                             >
-                                <span className="text-[10px] font-bold uppercase tracking-wider hidden group-hover:inline-block">Dismiss</span>
-                                <Trash2 size={16}/>
+                                <Trash2 size={18}/>
                             </button>
-                        </div>
-                    )}
-
-                    {/* Avatar */}
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-4xl font-black text-white shadow-lg shrink-0">
-                        {getDisplayName(selectedMember)[0]}
+                        )}
                     </div>
-                    
-                    {/* Info */}
-                    <div className="flex-1 min-w-0 text-center md:text-left space-y-2">
-                        <div>
-                            <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                                <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{getDisplayName(selectedMember)}</h2>
-                                {selectedMember?.isLeader && (
-                                    <Crown size={16} className="text-amber-500 fill-amber-500"/>
-                                )}
-                            </div>
-                            <div className="text-xs font-medium text-slate-500 italic">
-                                "{getDisplayDesc(selectedMember)}"
-                            </div>
+
+                    <div className="flex gap-4 lg:gap-6 items-center lg:items-start">
+                        {/* Avatar */}
+                        <div className="w-16 h-16 lg:w-24 lg:h-24 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-3xl lg:text-4xl font-black text-white shadow-lg shrink-0">
+                            {getDisplayName(selectedMember)[0]}
                         </div>
                         
-                        <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                            <span className="px-2.5 py-1 rounded bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                <User size={10}/> {selectedMember?.roles.join(' & ')}
-                            </span>
-                            {selectedMember?.tags.map((t: string) => (
-                                <span key={t} className="px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
-                                    #{t}
+                        {/* Info Block */}
+                        <div className="flex-1 min-w-0">
+                            <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 mb-1">
+                                <h2 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-none truncate">
+                                    {getDisplayName(selectedMember)}
+                                </h2>
+                                {selectedMember?.isLeader && (
+                                    <span className="inline-flex"><Crown size={16} className="text-amber-500 fill-amber-500"/></span>
+                                )}
+                            </div>
+                            
+                            {/* DESCRIPTION RESTORED HERE */}
+                            <div className="text-xs font-medium text-slate-500 italic mb-2 leading-relaxed line-clamp-2 lg:line-clamp-1">
+                                "{getDisplayDesc(selectedMember)}"
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-2">
+                                <span className="px-2 py-0.5 rounded bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <User size={10}/> {selectedMember?.roles.join('/')}
                                 </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Vitals Compact */}
-                    <div className="flex gap-4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
-                        <div className="text-center w-16">
-                            <div className="text-[10px] font-black uppercase text-rose-500 tracking-wider mb-1">羁绊 (Bond)</div>
-                            <div className="flex justify-center items-baseline gap-0.5">
-                                <Heart size={14} className="fill-rose-500 text-rose-500"/>
-                                <span className="text-lg font-black text-slate-800">{selectedMember?.affection}</span>
+                                {selectedMember?.tags.slice(0, 3).map((t: string) => (
+                                    <span key={t} className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+                                        #{t}
+                                    </span>
+                                ))}
                             </div>
                         </div>
-                        <div className="w-px bg-slate-100"/>
-                        <div className="text-center w-12">
-                            <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">压力</div>
-                            <span className={`text-lg font-black ${selectedMember?.stress > 80 ? 'text-rose-500' : 'text-slate-800'}`}>{selectedMember?.stress}</span>
+
+                        {/* Desktop Dismiss Button */}
+                        {!selectedMember?.isLeader && (
+                            <div className="hidden lg:block">
+                                <button 
+                                    onClick={() => setShowFireConfirm(true)}
+                                    className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-transparent hover:border-rose-200 transition-all text-slate-300 hover:text-rose-500"
+                                >
+                                    <span className="text-[10px] font-bold uppercase tracking-wider hidden group-hover:inline-block">Dismiss</span>
+                                    <Trash2 size={16}/>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Vitals - Compact Horizontal Row */}
+                    <div className="flex gap-2 lg:gap-4 bg-white p-2 lg:p-3 rounded-xl border border-slate-100 shadow-sm w-full">
+                        <div className="flex-1 flex flex-col items-center justify-center border-r border-slate-50 last:border-0">
+                            <div className="text-[9px] lg:text-[10px] font-black uppercase text-rose-500 tracking-wider mb-0.5">Bond</div>
+                            <div className="flex items-center gap-1">
+                                <Heart size={12} className="fill-rose-500 text-rose-500"/>
+                                <span className="text-sm lg:text-lg font-black text-slate-800">{selectedMember?.affection}</span>
+                            </div>
                         </div>
-                        <div className="w-px bg-slate-100"/>
-                        <div className="text-center w-12">
-                            <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1">疲劳</div>
-                            <span className={`text-lg font-black ${selectedMember?.fatigue > 80 ? 'text-amber-500' : 'text-slate-800'}`}>{selectedMember?.fatigue}</span>
+                        <div className="flex-1 flex flex-col items-center justify-center border-r border-slate-50 last:border-0">
+                            <div className="text-[9px] lg:text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-0.5">Stress</div>
+                            <span className={`text-sm lg:text-lg font-black ${selectedMember?.stress > 80 ? 'text-rose-500' : 'text-slate-800'}`}>{selectedMember?.stress}</span>
+                        </div>
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            <div className="text-[9px] lg:text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-0.5">Fatigue</div>
+                            <span className={`text-sm lg:text-lg font-black ${selectedMember?.fatigue > 80 ? 'text-amber-500' : 'text-slate-800'}`}>{selectedMember?.fatigue}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. STATS GRID (DATA CENTRIC) */}
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 relative">
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:gap-12">
+                {/* 2. STATS GRID (DATA CENTRIC) - Scrollable */}
+                <div className="flex-1 overflow-y-auto p-4 lg:p-8 relative bg-white">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-12 pb-4">
                         {/* Column 1: Performance */}
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                <Activity size={16} className="text-slate-400"/>
-                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Live Stage</h4>
+                                <Activity size={14} className="text-slate-400"/>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Stage</h4>
                             </div>
                             <div className="space-y-1">
                                 <StatRow label="乐感" value={selectedMember?.musicality} icon={Music} />
@@ -366,10 +408,10 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                         </div>
 
                         {/* Column 2: Creative & Mind */}
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                <Brain size={16} className="text-slate-400"/>
-                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Mind & Style</h4>
+                                <Brain size={14} className="text-slate-400"/>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Mind & Style</h4>
                             </div>
                             <div className="space-y-1">
                                 <StatRow label="想象力" value={selectedMember?.creativity} icon={Sparkles} />
@@ -379,10 +421,10 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                         </div>
 
                         {/* Column 3: Production */}
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                <Disc size={16} className="text-slate-400"/>
-                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Studio Work</h4>
+                                <Disc size={14} className="text-slate-400"/>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Studio Work</h4>
                             </div>
                             <div className="space-y-1">
                                 <StatRow label="作曲" value={selectedMember?.composing} icon={PenTool} />
@@ -393,9 +435,10 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                     </div>
                 </div>
 
-                {/* 3. INTERACTION FOOTER */}
-                <div className="p-6 bg-slate-50 border-t border-slate-200">
-                    <div className="flex items-center justify-between mb-4">
+                {/* 3. INTERACTION FOOTER - Fixed/Bottom */}
+                <div className="p-4 lg:p-6 bg-slate-50 border-t border-slate-200 shrink-0 z-10">
+                    {/* Interaction Header */}
+                    <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                             <Zap size={14} className="text-slate-400"/>
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</span>
@@ -403,28 +446,29 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                         <div className="flex items-center gap-1">
                             <span className="text-[10px] font-bold text-slate-400 uppercase mr-1">Energy</span>
                             {[1, 2].map(i => (
-                                <div key={i} className={`w-2 h-2 rounded-full transition-all ${selectedMember?.interactionsLeft >= i ? 'bg-slate-900' : 'bg-slate-200'}`}/>
+                                <div key={i} className={`w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full transition-all ${selectedMember?.interactionsLeft >= i ? 'bg-slate-900' : 'bg-slate-200'}`}/>
                             ))}
                         </div>
                     </div>
 
                     {/* Result Overlay Inline */}
                     {engine.lastInteraction && (
-                        <div className="mb-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm animate-in slide-in-from-bottom-2 flex items-start gap-4">
-                            <div className={`p-2 rounded-full shrink-0 ${engine.lastInteraction.result === ActionResult.GreatSuccess ? 'bg-amber-100 text-amber-500' : (engine.lastInteraction.result === ActionResult.Failure ? 'bg-slate-100 text-slate-400' : 'bg-rose-100 text-rose-500')}`}>
-                                {engine.lastInteraction.result === ActionResult.GreatSuccess ? <Sparkles size={18}/> : (engine.lastInteraction.result === ActionResult.Failure ? <Frown size={18}/> : <Heart size={18}/>)}
+                        <div className="mb-3 bg-white p-3 lg:p-4 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-bottom-2 flex items-start gap-3">
+                            <div className={`p-1.5 lg:p-2 rounded-full shrink-0 ${engine.lastInteraction.result === ActionResult.GreatSuccess ? 'bg-amber-100 text-amber-500' : (engine.lastInteraction.result === ActionResult.Failure ? 'bg-slate-100 text-slate-400' : 'bg-rose-100 text-rose-500')}`}>
+                                {engine.lastInteraction.result === ActionResult.GreatSuccess ? <Sparkles size={16}/> : (engine.lastInteraction.result === ActionResult.Failure ? <Frown size={16}/> : <Heart size={16}/>)}
                             </div>
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{engine.lastInteraction.result}</span>
-                                    <button onClick={() => engine.setLastInteraction(null)} className="text-slate-400 hover:text-slate-600"><XIcon size={14}/></button>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-center mb-0.5">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{engine.lastInteraction.result}</span>
+                                    <button onClick={() => engine.setLastInteraction(null)} className="text-slate-400 hover:text-slate-600"><XIcon size={12}/></button>
                                 </div>
-                                <p className="text-sm font-bold text-slate-800 leading-snug">{engine.lastInteraction.log}</p>
+                                <p className="text-xs lg:text-sm font-bold text-slate-800 leading-snug line-clamp-2">{engine.lastInteraction.log}</p>
                             </div>
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    {/* Action Grid */}
+                    <div className="grid grid-cols-5 gap-2 lg:gap-3">
                         {selectedMember?.isLeader ? (
                             Object.values(SelfActionType).map((t) => (
                                 <ActionButton 
