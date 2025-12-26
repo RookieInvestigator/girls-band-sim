@@ -1,5 +1,5 @@
 
-import { GameEvent } from '../types';
+import { GameEvent, ScheduleAction } from '../types';
 
 export const CAREER_EVENTS: GameEvent[] = [
   {
@@ -94,8 +94,8 @@ export const CAREER_EVENTS: GameEvent[] = [
   {
     id: 'car_mv_location',
     title: 'MV取景地之争',
-    description: '终于要拍MV了！但是对于取景地，大家产生了分歧。废弃工厂还是阳光海滩？',
-    condition: (state) => state.money >= 5000 && state.actionCounts['MusicVideoShoot'] >= 1,
+    description: '终于要开始筹备MV拍摄了！但是对于取景地，大家产生了分歧。废弃工厂还是阳光海滩？',
+    condition: (state) => state.money >= 5000 && state.fans >= 3000, // Trigger based on potential, not action history
     options: [
       { label: '废弃工厂 (¥1000)', effectDescription: '酷炫、颓废、摇滚！', successChance: 1.0, impact: { money: -1000, stagePresence: 20, fans: 500 } },
       { label: '阳光海滩 (¥5000)', effectDescription: '像是青春偶像剧一样。', successChance: 1.0, impact: { money: -5000, fans: 2000, affectionChange: 20 } },

@@ -219,11 +219,18 @@ export const generateAiSnsPosts = async (state: GameState, weeklyLogs: ActionLog
 
   try {
     const result = await generateWithFallback(prompt, schema);
-    return result.posts.map((p: any) => ({
-      ...p,
-      id: Math.random().toString(36).substr(2, 9),
-      timestamp: `Week ${state.currentWeek}`
-    }));
+    return result.posts.map((p: any) => {
+        // Find member by name to link ID, otherwise generate/fallback
+        const member = state.members.find(m => m.name === p.authorName || m.screenName === p.authorName);
+        const fallbackId = p.type === 'member' ? 'unknown_member' : (p.type === 'rival' ? 'rival' : 'fan');
+        
+        return {
+            ...p,
+            id: Math.random().toString(36).substr(2, 9),
+            authorId: member ? member.id : fallbackId,
+            timestamp: `Week ${state.currentWeek}`
+        };
+    });
   } catch (error) {
     console.error("AI SNS Generation failed after all retries:", error);
     return []; 

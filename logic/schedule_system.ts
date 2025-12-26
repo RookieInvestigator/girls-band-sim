@@ -96,6 +96,7 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
   }
 
   // --- SKILL CHECKS ---
+  const hasPass2 = state.unlockedSkills.includes('pass_2'); // "Street Performance Boost"
   const hasTech8 = state.unlockedSkills.includes('tech_8'); // "Muse": Creation boost
   const hasTech9 = state.unlockedSkills.includes('tech_9'); // "Rhythm in Blood": Practice cost down
   const hasTech10 = state.unlockedSkills.includes('tech_10'); // "Surpassing Legends": Stat cap break
@@ -145,11 +146,6 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
     currentMembers.forEach(m => {
        m.tags.forEach(t => {
            if (TAG_MODIFIERS[t]?.successRate) {
-               // Negative successRate in modifier means lower chance of failure (e.g. -10 means fail rate drops by 10%)
-               // Wait, logic in code: roll < 0.2 ? Failure. 
-               // So successRate mod should reduce the 0.2 threshold.
-               // If successRate is +10 (harder), threshold becomes 0.3.
-               // If successRate is -10 (easier), threshold becomes 0.1.
                successThreshold += (TAG_MODIFIERS[t]!.successRate! / 100);
            }
        });
@@ -215,19 +211,18 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
               if (mod.stressMult) tagStressMult *= mod.stressMult;
               if (mod.fatigueMult) tagFatigueMult *= mod.fatigueMult;
               if (mod.money) actionMoney += mod.money; 
-              if (mod.fans) actionFans += mod.fans; // ADDED: Passive fan gain from tags
+              if (mod.fans) actionFans += mod.fans; 
               
               if (mod.statsBonus) {
-                  // Apply specific stat bonuses from tags
-                  if (mod.statsBonus.musicality) stats.mus += mod.statsBonus.musicality;
-                  if (mod.statsBonus.technique) stats.tec += mod.statsBonus.technique;
-                  if (mod.statsBonus.stagePresence) stats.sta += mod.statsBonus.stagePresence;
-                  if (mod.statsBonus.creativity) stats.cre += mod.statsBonus.creativity;
-                  if (mod.statsBonus.mental) stats.men += mod.statsBonus.mental;
-                  if (mod.statsBonus.composing) stats.cmp += mod.statsBonus.composing;
-                  if (mod.statsBonus.lyrics) stats.lyr += mod.statsBonus.lyrics;
-                  if (mod.statsBonus.arrangement) stats.arr += mod.statsBonus.arrangement;
-                  if (mod.statsBonus.design) stats.dsg += mod.statsBonus.design;
+                  if (mod.statsBonus.musicality) stats.mus += mod.statsBonus.musicality * 0.5; // Nerfed tag bonus slightly
+                  if (mod.statsBonus.technique) stats.tec += mod.statsBonus.technique * 0.5;
+                  if (mod.statsBonus.stagePresence) stats.sta += mod.statsBonus.stagePresence * 0.5;
+                  if (mod.statsBonus.creativity) stats.cre += mod.statsBonus.creativity * 0.5;
+                  if (mod.statsBonus.mental) stats.men += mod.statsBonus.mental * 0.5;
+                  if (mod.statsBonus.composing) stats.cmp += mod.statsBonus.composing * 0.5;
+                  if (mod.statsBonus.lyrics) stats.lyr += mod.statsBonus.lyrics * 0.5;
+                  if (mod.statsBonus.arrangement) stats.arr += mod.statsBonus.arrangement * 0.5;
+                  if (mod.statsBonus.design) stats.dsg += mod.statsBonus.design * 0.5;
                   if (mod.statsBonus.affection) m.affection = Math.min(100, m.affection + mod.statsBonus.affection);
               }
           }
@@ -238,184 +233,191 @@ export const processTurn = (state: GameState): { newState: GameState; actionLogs
           tagGrowthMult *= 0.5; 
       }
 
-      // --- STAT LOGIC ---
+      // --- STAT LOGIC (REBALANCED FOR 52 WEEKS) ---
+      // General nerf: Most growth values reduced by ~50-60%
       switch(action) {
         // --- SOLO / BASIC ---
         case ScheduleAction.InstrumentPractice: 
-          stats.tec += 1.5; stats.fat += 5; stats.str += 3; break; 
+          stats.tec += 0.6; stats.fat += 5; stats.str += 3; break; 
         case ScheduleAction.VocalPractice:
-          stats.mus += 1.5; stats.fat += 5; stats.str += 3; break; 
+          stats.mus += 0.6; stats.fat += 5; stats.str += 3; break; 
         case ScheduleAction.SoloExpression:
-            stats.sta += 1.5; stats.fat += 5; stats.str += 3; break; 
+            stats.sta += 0.6; stats.fat += 5; stats.str += 3; break; 
         case ScheduleAction.SelfRecording:
-            stats.tec += 1.0; stats.arr += 1.0; stats.str += 5; stats.fat += 5; break; 
-        case ScheduleAction.PhysicalTraining: // NEW
-            stats.sta += 1.2; stats.men += 0.8; stats.fat += 15; stats.str -= 5; break;
-        case ScheduleAction.ImageTraining: // NEW
-            stats.tec += 0.8; stats.mus += 0.5; stats.men += 0.5; stats.fat += 2; break;
+            stats.tec += 0.4; stats.arr += 0.4; stats.str += 5; stats.fat += 5; break; 
+        case ScheduleAction.PhysicalTraining: 
+            stats.sta += 0.5; stats.men += 0.4; stats.fat += 15; stats.str -= 5; break;
+        case ScheduleAction.ImageTraining: 
+            stats.tec += 0.3; stats.mus += 0.2; stats.men += 0.2; stats.fat += 2; break;
 
         // --- STUDY ---
-        case ScheduleAction.ObservationNote: // Renamed
-            stats.cre += 2.0; stats.lyr += 0.5; stats.fat += 5; break; 
+        case ScheduleAction.ObservationNote: 
+            stats.cre += 0.8; stats.lyr += 0.2; stats.fat += 5; break; 
         case ScheduleAction.MusicTheory:
-            stats.cmp += 1.5; stats.mus += 0.5; stats.fat += 5; stats.str += 2; break; 
+            stats.cmp += 0.6; stats.mus += 0.2; stats.fat += 5; stats.str += 2; break; 
         case ScheduleAction.LyricsWorkshop:
-            stats.lyr += 1.5; stats.cre += 0.5; stats.fat += 5; break;
+            stats.lyr += 0.6; stats.cre += 0.2; stats.fat += 5; break;
         case ScheduleAction.ListenAnalysis:
-            stats.arr += 1.5; stats.mus += 0.5; stats.fat += 5; break;
+            stats.arr += 0.6; stats.mus += 0.2; stats.fat += 5; break;
         case ScheduleAction.DesignWork:
-            stats.dsg += 1.5; stats.cre += 0.5; stats.fat += 5; 
-            if (currentProject) songQualityBoost += m.design * 0.04 * actionMultiplier * creationBonus; 
+            stats.dsg += 0.6; stats.cre += 0.2; stats.fat += 5; 
+            if (currentProject) songQualityBoost += m.design * 0.02 * actionMultiplier * creationBonus; 
             break;
         case ScheduleAction.LiveHouseStudy:
-            stats.mus += 1.2; stats.sta += 1.2; stats.fat += 5; break; 
+            stats.mus += 0.5; stats.sta += 0.5; stats.fat += 5; break; 
         case ScheduleAction.VocalLesson:
-            stats.mus += 2.5; stats.tec += 1.0; stats.fat += 10; stats.str += 5; break;
+            stats.mus += 1.2; stats.tec += 0.5; stats.fat += 10; stats.str += 5; break;
         case ScheduleAction.InstrumentLesson:
-            stats.tec += 2.5; stats.mus += 1.0; stats.fat += 10; stats.str += 5; break;
+            stats.tec += 1.2; stats.mus += 0.5; stats.fat += 10; stats.str += 5; break;
 
         // --- BAND ---
         case ScheduleAction.BandEnsemble: 
-          stats.arr += 0.5; stats.tec += 0.3; stats.mus += 0.3; stats.fat += 8; stats.str += 5; 
-          chemistryDelta += 0.8 * actionMultiplier; 
+          stats.arr += 0.2; stats.tec += 0.1; stats.mus += 0.1; stats.fat += 8; stats.str += 5; 
+          chemistryDelta += 0.4 * actionMultiplier; 
           break;
         case ScheduleAction.BandRehearsal: 
-          stats.tec += 0.5; stats.sta += 0.5; stats.fat += 10; stats.str += 8; 
-          chemistryDelta += 1.2 * actionMultiplier; 
+          stats.tec += 0.2; stats.sta += 0.2; stats.fat += 10; stats.str += 8; 
+          chemistryDelta += 0.6 * actionMultiplier; 
           break;
-        case ScheduleAction.MeetingReview: // NEW
-            stats.tec += 0.5; stats.str += 10; stats.fat += 5;
-            chemistryDelta += 2.0 * actionMultiplier; // High chemistry
+        case ScheduleAction.MeetingReview: 
+            stats.tec += 0.2; stats.str += 10; stats.fat += 5;
+            chemistryDelta += 1.0 * actionMultiplier; 
             break;
-        case ScheduleAction.AcousticSession: // NEW
-            stats.mus += 1.0; stats.arr += 0.8; stats.fat += 5; stats.str -= 5;
-            chemistryDelta += 1.0 * actionMultiplier;
+        case ScheduleAction.AcousticSession: 
+            stats.mus += 0.4; stats.arr += 0.3; stats.fat += 5; stats.str -= 5;
+            chemistryDelta += 0.5 * actionMultiplier;
             break;
         case ScheduleAction.RentStudio:
-            stats.tec += 1.0; stats.mus += 1.0; stats.arr += 0.5; stats.fat += 15; stats.str += 10;
-            chemistryDelta += 2.5 * actionMultiplier;
-            if (currentProject) songQualityBoost += 5 * actionMultiplier * creationBonus;
+            stats.tec += 0.4; stats.mus += 0.4; stats.arr += 0.2; stats.fat += 15; stats.str += 10;
+            chemistryDelta += 1.2 * actionMultiplier;
+            if (currentProject) songQualityBoost += 3 * actionMultiplier * creationBonus;
             break;
         case ScheduleAction.TrainingCamp:
-            stats.tec += 1.5; stats.mus += 1.5; stats.sta += 1.5; stats.fat += 25; stats.str -= 10;
+            stats.tec += 0.7; stats.mus += 0.7; stats.sta += 0.7; stats.fat += 25; stats.str -= 10;
             m.affection = Math.min(100, m.affection + 5);
-            chemistryDelta += 3.0 * actionMultiplier;
+            chemistryDelta += 1.5 * actionMultiplier;
             break;
 
         // --- CREATION ACTIONS ---
         case ScheduleAction.Songwriting:
-          stats.cre += 0.5; stats.cmp += 0.3; stats.lyr += 0.3; stats.fat += 8; stats.str += 8; 
-          songProgress += (m.creativity * 0.12 + m.composing * 0.08 + m.lyrics * 0.08 + m.arrangement * 0.05) * actionMultiplier * creationBonus;
+          stats.cre += 0.3; stats.cmp += 0.2; stats.lyr += 0.2; stats.fat += 8; stats.str += 8; 
+          songProgress += (m.creativity * 0.1 + m.composing * 0.06 + m.lyrics * 0.06 + m.arrangement * 0.04) * actionMultiplier * creationBonus;
           break;
         case ScheduleAction.DemoProduction:
-            stats.arr += 1.5; stats.cmp += 0.5; stats.fat += 10; stats.str += 5;
-            if (currentProject) songProgress += (m.arrangement * 0.15 + m.composing * 0.05) * actionMultiplier * creationBonus;
+            stats.arr += 0.6; stats.cmp += 0.2; stats.fat += 10; stats.str += 5;
+            if (currentProject) songProgress += (m.arrangement * 0.12 + m.composing * 0.04) * actionMultiplier * creationBonus;
             break;
         case ScheduleAction.LyricsPolishing:
-            stats.lyr += 1.5; stats.men += 0.5; stats.fat += 5; stats.str += 5;
+            stats.lyr += 0.6; stats.men += 0.2; stats.fat += 5; stats.str += 5;
             if (currentProject) {
-                songProgress += m.lyrics * 0.08 * actionMultiplier * creationBonus;
-                songQualityBoost += m.lyrics * 0.05 * actionMultiplier * creationBonus;
+                songProgress += m.lyrics * 0.06 * actionMultiplier * creationBonus;
+                songQualityBoost += m.lyrics * 0.04 * actionMultiplier * creationBonus;
             }
             break;
         case ScheduleAction.ComposeJam:
-            stats.cmp += 0.5; stats.arr += 0.5; 
-            stats.cre += 1.5; // Jam heavily boosts Creativity
+            stats.cmp += 0.3; stats.arr += 0.3; 
+            stats.cre += 0.6; 
             stats.fat += 12; stats.str += 5;
-            chemistryDelta += 1.2 * actionMultiplier;
+            chemistryDelta += 0.6 * actionMultiplier;
             if (currentProject) {
-                songQualityBoost += (m.composing * 0.05 + m.arrangement * 0.05) * actionMultiplier * creationBonus;
+                songQualityBoost += (m.composing * 0.04 + m.arrangement * 0.04) * actionMultiplier * creationBonus;
             }
             break;
         case ScheduleAction.Recording:
-          stats.tec += 0.5; stats.fat += 15; stats.str += 15; 
+          stats.tec += 0.2; stats.fat += 15; stats.str += 15; 
           if (currentProject) {
-              songQualityBoost += (m.technique * 0.08 + m.arrangement * 0.15) * actionMultiplier * creationBonus;
-              songProgress += 10 * actionMultiplier * creationBonus; 
+              songQualityBoost += (m.technique * 0.06 + m.arrangement * 0.1) * actionMultiplier * creationBonus;
+              songProgress += 8 * actionMultiplier * creationBonus; 
           }
           break;
         case ScheduleAction.Mastering:
-            stats.tec += 0.5; stats.fat += 10;
+            stats.tec += 0.2; stats.fat += 10;
             if (currentProject) {
-                songQualityBoost += 8 * actionMultiplier * creationBonus; 
+                songQualityBoost += 5 * actionMultiplier * creationBonus; 
             }
             break;
 
         // --- PROMOTION ---
         case ScheduleAction.StreetLive: 
-          actionFans += 200 * actionMultiplier; 
-          actionMoney += 500; 
-          stats.sta += 1.5; // Street live boosts Presence/Aura
+          let streetFans = 120 * actionMultiplier;
+          let streetMoney = 500;
+          if (hasPass2) {
+              streetFans *= 1.3;
+              streetMoney += 200;
+          }
+          actionFans += streetFans; 
+          actionMoney += streetMoney; 
+          stats.sta += 0.6; 
           stats.fat += 15; stats.str += 10; 
-          chemistryDelta += 0.5 * actionMultiplier;
+          chemistryDelta += 0.3 * actionMultiplier;
           break;
         case ScheduleAction.FlyerDistribution:
-            actionFans += 60 * actionMultiplier;
-            actionMoney += 200; stats.men += 0.2; stats.fat += 10; stats.str += 5; break; 
+            actionFans += 40 * actionMultiplier;
+            actionMoney += 200; stats.men += 0.1; stats.fat += 10; stats.str += 5; break; 
         case ScheduleAction.SocialMediaLive:
-            actionFans += 120 * actionMultiplier;
-            stats.sta += 0.2; stats.fat += 5; stats.str += 5; break;
+            actionFans += 80 * actionMultiplier;
+            stats.sta += 0.1; stats.fat += 5; stats.str += 5; break;
         case ScheduleAction.LiveStream:
-            actionFans += 600 * actionMultiplier;
-            stats.sta += 0.5; stats.fat += 15; stats.str += 20; break;
+            actionFans += 400 * actionMultiplier;
+            stats.sta += 0.2; stats.fat += 15; stats.str += 20; break;
         case ScheduleAction.PhotoSession:
-            actionFans += 800 * actionMultiplier;
-            stats.sta += 0.8; stats.fat += 20; stats.str += 15; break;
+            actionFans += 500 * actionMultiplier;
+            stats.sta += 0.4; stats.fat += 20; stats.str += 15; break;
         case ScheduleAction.MusicVideoShoot:
-          actionFans += 3500 * actionMultiplier;
-          stats.sta += 0.5; stats.fat += 25; stats.str += 20; break; 
+          actionFans += 2500 * actionMultiplier;
+          stats.sta += 0.2; stats.fat += 25; stats.str += 20; break; 
         case ScheduleAction.CharityLive:
-            actionFans += 300 * actionMultiplier;
-            stats.men += 0.5; stats.fat += 15; stats.str -= 5;
-            chemistryDelta += 0.5 * actionMultiplier;
+            actionFans += 200 * actionMultiplier;
+            stats.men += 0.2; stats.fat += 15; stats.str -= 5;
+            chemistryDelta += 0.3 * actionMultiplier;
             break;
         case ScheduleAction.RadioInterview:
-            actionFans += 400 * actionMultiplier;
-            stats.men += 0.2; stats.fat += 5; break;
+            actionFans += 250 * actionMultiplier;
+            stats.men += 0.1; stats.fat += 5; break;
 
         // --- LEISURE ---
-        case ScheduleAction.SugarIntake: // Renamed
-            stats.men += 1.0; stats.str -= 20; stats.fat -= 10; break; 
+        case ScheduleAction.SugarIntake:
+            stats.men += 0.5; stats.str -= 20; stats.fat -= 10; break; 
         case ScheduleAction.TeaTime: 
           stats.fat -= 50; stats.str -= 60; m.affection = Math.min(100, m.affection + 4); 
-          chemistryDelta += 0.8 * actionMultiplier; 
+          chemistryDelta += 0.4 * actionMultiplier; 
           break;
         case ScheduleAction.GameCenter:
             stats.fat -= 30; stats.str -= 50; m.affection = Math.min(100, m.affection + 3);
-            chemistryDelta += 1.0 * actionMultiplier;
+            chemistryDelta += 0.5 * actionMultiplier;
             break;
         case ScheduleAction.GroupTrip:
             stats.fat -= 80; stats.str -= 80; m.affection = Math.min(100, m.affection + 10);
-            chemistryDelta += 3.0 * actionMultiplier; break;
+            chemistryDelta += 1.5 * actionMultiplier; break;
         case ScheduleAction.StyleMakeover:
-            stats.dsg += 2.0; stats.sta += 1.0; stats.str -= 10; break; 
+            stats.dsg += 1.0; stats.sta += 0.5; stats.str -= 10; break; 
         case ScheduleAction.EquipmentCare:
-             stats.tec += 0.2; stats.fat += 5; break;
+             stats.tec += 0.1; stats.fat += 5; break;
         case ScheduleAction.PartTimeJob:
             actionMoney += 1500; stats.fat += 10; stats.str += 8; break; 
 
         // --- SPECIAL ---
         case ScheduleAction.SchoolFestival:
-            actionFans += 5000 * actionMultiplier;
-            stats.sta += 2.0; stats.fat += 30; m.affection = Math.min(100, m.affection + 8);
-            chemistryDelta += 2.0 * actionMultiplier;
+            actionFans += 3000 * actionMultiplier;
+            stats.sta += 1.0; stats.fat += 30; m.affection = Math.min(100, m.affection + 8);
+            chemistryDelta += 1.0 * actionMultiplier;
             break;
         case ScheduleAction.FireworksDate:
             stats.fat -= 40; stats.str -= 60; m.affection = Math.min(100, m.affection + 20);
-            chemistryDelta += 1.5 * actionMultiplier;
+            chemistryDelta += 0.8 * actionMultiplier;
             break;
         case ScheduleAction.ThemePark:
-            stats.fat -= 20; stats.str -= 80; stats.cre += 1.0; m.affection = Math.min(100, m.affection + 15);
-            chemistryDelta += 2.0 * actionMultiplier;
+            stats.fat -= 20; stats.str -= 80; stats.cre += 0.5; m.affection = Math.min(100, m.affection + 15);
+            chemistryDelta += 1.0 * actionMultiplier;
             break;
         case ScheduleAction.ChristmasParty:
             stats.fat -= 50; stats.str -= 50; m.affection = Math.min(100, m.affection + 10);
-            stats.men += 2.0;
+            stats.men += 1.0;
             break;
         case ScheduleAction.GraduationTrip:
             stats.fat -= 90; stats.str -= 90; m.affection = Math.min(100, m.affection + 30);
-            stats.men += 5.0; stats.cre += 2.0;
-            chemistryDelta += 5.0 * actionMultiplier;
+            stats.men += 2.0; stats.cre += 1.0;
+            chemistryDelta += 2.0 * actionMultiplier;
             break;
 
         default:

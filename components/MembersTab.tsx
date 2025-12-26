@@ -115,14 +115,8 @@ const ActionButton = ({ icon: Icon, label, cost, onClick, disabled, locked, high
 
 const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
     const rolesToCheck = [Role.Vocal, Role.Guitar, Role.Bass, Role.Drums, Role.Keyboard];
-    
-    // Non-Special Roles: The Standard 5 + Producer
-    // Anyone who has a role NOT in this list is counted as Special.
     const nonSpecialRoles = [Role.Vocal, Role.Guitar, Role.Bass, Role.Drums, Role.Keyboard, Role.Producer];
-    
-    const specialCount = members.filter(m => 
-        m.roles.some(r => !nonSpecialRoles.includes(r))
-    ).length;
+    const specialCount = members.filter(m => m.roles.some(r => !nonSpecialRoles.includes(r))).length;
 
     return (
         <div className="flex gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-100 justify-between items-center mb-2 mt-auto">
@@ -142,8 +136,6 @@ const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
                     </div>
                 )
             })}
-            
-            {/* Special Role Indicator */}
             <div className="flex flex-col items-center gap-1 w-full relative">
                 <div className="absolute left-0 top-1 bottom-3 w-px bg-slate-200"></div>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${specialCount > 0 ? 'bg-fuchsia-100 text-fuchsia-600' : 'bg-slate-200 text-slate-400'}`}>
@@ -155,7 +147,7 @@ const RoleCompositionIndicator = ({ members }: { members: Member[] }) => {
     );
 };
 
-export const MembersTab = ({ engine }: { engine: any }) => {
+export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolean }) => {
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
     const [showFireConfirm, setShowFireConfirm] = useState(false);
 
@@ -179,6 +171,16 @@ export const MembersTab = ({ engine }: { engine: any }) => {
         }
     };
 
+    const getDisplayName = (m: Member) => {
+        if (showNeta && m.netaName) return m.netaName;
+        return m.name;
+    };
+
+    const getDisplayDesc = (m: Member) => {
+        if (showNeta && m.netaDesc) return m.netaDesc;
+        return m.personality;
+    };
+
     return (
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)] animate-in fade-in duration-500 pb-20 lg:pb-0 relative">
             
@@ -191,7 +193,7 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                         </div>
                         <h3 className="font-black text-2xl text-slate-900 mb-2">解雇确认</h3>
                         <p className="text-sm font-bold text-slate-500 mb-8 leading-relaxed">
-                            确定要让 <span className="text-slate-900">{selectedMember.name}</span> 离开乐队吗？<br/>
+                            确定要让 <span className="text-slate-900">{getDisplayName(selectedMember)}</span> 离开乐队吗？<br/>
                             <span className="text-xs text-rose-500 mt-1 block">此操作不可撤销，且可能影响团队士气。</span>
                         </p>
                         <div className="flex gap-3">
@@ -205,7 +207,6 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                                 onClick={() => { 
                                     engine.fireMember(selectedMember); 
                                     setShowFireConfirm(false); 
-                                    // Reset selection to leader if current is fired (handled in engine but safe here)
                                     setSelectedMemberId('leader');
                                 }} 
                                 className="flex-1 py-3.5 bg-rose-500 hover:bg-rose-600 font-black rounded-xl text-white transition-colors uppercase tracking-widest text-xs shadow-lg shadow-rose-200"
@@ -246,10 +247,10 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                                     w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-colors
                                     ${isSelected ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}
                                 `}>
-                                    {m.name[0]}
+                                    {getDisplayName(m)[0]}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-bold text-sm truncate">{m.name}</div>
+                                    <div className="font-bold text-sm truncate">{getDisplayName(m)}</div>
                                     <div className={`text-[10px] uppercase tracking-wider flex items-center gap-1 mt-0.5 ${isSelected ? 'text-slate-400' : 'text-slate-400'}`}>
                                         <RoleIcon role={m.roles[0]} size={10}/> {m.roles[0]}
                                     </div>
@@ -267,7 +268,6 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                     </button>
                 </div>
 
-                {/* Role Indicator moved to bottom */}
                 <div className="px-3 pb-3">
                     <RoleCompositionIndicator members={engine.gameState.members} />
                 </div>
@@ -279,7 +279,6 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                 {/* 1. HEADER */}
                 <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row gap-6 items-center md:items-start bg-slate-50/30 relative">
                     
-                    {/* NEW Dismiss Button Location - Top Right of Header, visible */}
                     {!selectedMember?.isLeader && (
                         <div className="absolute top-6 right-6 z-20">
                             <button 
@@ -299,20 +298,20 @@ export const MembersTab = ({ engine }: { engine: any }) => {
 
                     {/* Avatar */}
                     <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-4xl font-black text-white shadow-lg shrink-0">
-                        {selectedMember?.name[0]}
+                        {getDisplayName(selectedMember)[0]}
                     </div>
                     
                     {/* Info */}
                     <div className="flex-1 min-w-0 text-center md:text-left space-y-2">
                         <div>
                             <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                                <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{selectedMember?.name}</h2>
+                                <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{getDisplayName(selectedMember)}</h2>
                                 {selectedMember?.isLeader && (
                                     <Crown size={16} className="text-amber-500 fill-amber-500"/>
                                 )}
                             </div>
                             <div className="text-xs font-medium text-slate-500 italic">
-                                "{selectedMember?.personality}"
+                                "{getDisplayDesc(selectedMember)}"
                             </div>
                         </div>
                         
@@ -353,7 +352,6 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                 {/* 2. STATS GRID (DATA CENTRIC) */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 relative">
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:gap-12">
-                        
                         {/* Column 1: Performance */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
@@ -392,7 +390,6 @@ export const MembersTab = ({ engine }: { engine: any }) => {
                                 <StatRow label="编曲" value={selectedMember?.arrangement} icon={Layers} />
                             </div>
                         </div>
-
                     </div>
                 </div>
 

@@ -57,13 +57,44 @@ export const processEventChoice = (
                arrangement: Math.min(100, newM.arrangement + (impact.arrangement || 0)),
                design: Math.min(100, newM.design + (impact.design || 0)),
            };
+           
+           // Role Transformation (Replace)
            if (impact.newRole) {
                if (!newM.originalRoles) newM.originalRoles = [...newM.roles];
                newM.roles = [impact.newRole];
            }
+           
+           // Role Transformation (Add)
+           if (impact.addRole) {
+               if (!newM.roles.includes(impact.addRole)) {
+                   newM.roles = [...newM.roles, impact.addRole];
+               }
+           }
+
            if (impact.restoreOriginalRole && newM.originalRoles) {
                newM.roles = [...newM.originalRoles];
                newM.originalRoles = undefined;
+           }
+
+           // Tag Transformation (e.g. Black Sakiko)
+           if (impact.removeTags) {
+               newM.tags = newM.tags.filter(t => !impact.removeTags?.includes(t));
+           }
+           if (impact.addTags) {
+               // Prevent duplicates
+               const tagsToAdd = impact.addTags.filter(t => !newM.tags.includes(t));
+               newM.tags = [...newM.tags, ...tagsToAdd];
+           }
+
+           // Flavor Text Transformation
+           if (impact.newDescription) {
+               newM.personality = impact.newDescription;
+           }
+           if (impact.newName) {
+               newM.name = impact.newName;
+           }
+           if (impact.newNetaName) {
+               newM.netaName = impact.newNetaName;
            }
         }
         return newM;
@@ -101,6 +132,12 @@ export const processEventChoice = (
         });
     }
     
+    // Add completed event to history
+    let completedEvents = [...state.completedEvents];
+    if (activeEvent && activeEvent.id && !completedEvents.includes(activeEvent.id)) {
+        completedEvents.push(activeEvent.id);
+    }
+
     const finalFans = Math.max(0, state.fans + (impact.fans || 0));
     const finalRawChemistry = state.rawChemistry + chemistryChange;
     const newTeamStats = calculateBandStats(updatedMembers, state.songs, finalRawChemistry, finalFans, state.unlockedSkills);
@@ -116,7 +153,8 @@ export const processEventChoice = (
         teamStats: newTeamStats,
         rival: newRival,
         skillPoints: state.skillPoints + (impact.skillPoints || 0),
-        futureEvents: newFutureEvents
+        futureEvents: newFutureEvents,
+        completedEvents: completedEvents // Update completed events
     };
 
     return { newState, outcome: resultOutcome };

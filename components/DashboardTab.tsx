@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { 
     Music, Star, Zap, Disc, Sword, Activity, Sparkles, Book, Lock, Smile, Coffee, 
     ChevronRight, Check, Users, Coins, TrendingUp, Crown, ArrowRight, Radio, 
-    Megaphone, Newspaper, Command, LayoutGrid, Heart, Mic2, BarChart3
+    Megaphone, Newspaper, Command, LayoutGrid, Heart, Mic2, BarChart3, PenTool
 } from 'lucide-react';
 import { BandState } from '../types';
 import { SKILL_TREE } from '../data/skills';
@@ -292,9 +292,32 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
                                 <h4 className="text-2xl font-black text-slate-900 tracking-tight truncate leading-none mb-1">
                                     {gameState.songs[gameState.songs.length-1].title}
                                 </h4>
-                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
-                                    {gameState.songs[gameState.songs.length-1].genre}
+                                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                                    <span className="bg-slate-200 px-1.5 rounded">{gameState.songs[gameState.songs.length-1].genre}</span>
+                                    {gameState.songs[gameState.songs.length-1].lyricTheme && <span>• {gameState.songs[gameState.songs.length-1].lyricTheme}</span>}
+                                </div>
+                                
+                                <p className="text-[10px] font-medium text-slate-500 line-clamp-2 mb-3 leading-relaxed">
+                                    "{gameState.songs[gameState.songs.length-1].description}"
                                 </p>
+
+                                {gameState.songs[gameState.songs.length-1].credits && (
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 mb-2 bg-slate-200/50 inline-flex px-2 py-1 rounded">
+                                        <PenTool size={10}/>
+                                        <span>Composed by {gameState.songs[gameState.songs.length-1].credits.composer} / Lyrics by {gameState.songs[gameState.songs.length-1].credits.lyricist}</span>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3 mt-2">
+                                    <div className="flex items-center gap-1 text-[10px] font-bold bg-white/80 px-2 py-1 rounded shadow-sm">
+                                        <Star size={10} className="text-amber-500 fill-amber-500"/>
+                                        <span>Quality: {Math.floor(gameState.songs[gameState.songs.length-1].quality)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[10px] font-bold bg-white/80 px-2 py-1 rounded shadow-sm">
+                                        <Heart size={10} className="text-rose-500 fill-rose-500"/>
+                                        <span>Pop: {gameState.songs[gameState.songs.length-1].popularity}</span>
+                                    </div>
+                                </div>
                             </div>
                         </>
                     ) : (
@@ -306,23 +329,47 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
                 </div>
 
                 {/* 6. RIVAL (Col 6) */}
-                <div className="md:col-span-6 relative h-auto rounded-[2rem] overflow-hidden group cursor-pointer border border-slate-200 min-h-[180px]">
+                <div className="md:col-span-6 relative h-auto rounded-[2rem] overflow-hidden group cursor-pointer border border-slate-200 min-h-[220px]">
                     <div className="absolute inset-0 bg-slate-900 group-hover:scale-105 transition-transform duration-700"/>
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"/>
                     
                     {gameState.rival.isUnlocked ? (
-                        <div className="absolute inset-0 flex items-center justify-between px-8">
-                            <div className="z-10">
-                                <div className="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em] mb-1">Rival Band</div>
-                                <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase">{gameState.rival.name}</h3>
-                            </div>
-                            <div className="z-10 flex flex-col items-end">
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Relation</div>
-                                <div className={`text-4xl font-black ${gameState.rival.relation > 60 ? 'text-emerald-400' : 'text-rose-500'}`}>
-                                    {gameState.rival.relation}%
+                        <div className="absolute inset-0 flex flex-col p-8">
+                            {/* Header */}
+                            <div className="flex justify-between items-start z-10 mb-4">
+                                <div>
+                                    <div className="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em] mb-1 flex items-center gap-2">
+                                        <Sword size={12}/> Rival Band
+                                    </div>
+                                    <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none mb-1">{gameState.rival.name}</h3>
+                                    <span className="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700 uppercase tracking-wider">
+                                        {gameState.rival.style}
+                                    </span>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Relation</div>
+                                    <div className={`text-4xl font-black ${gameState.rival.relation > 60 ? 'text-emerald-400' : 'text-rose-500'}`}>
+                                        {gameState.rival.relation}%
+                                    </div>
                                 </div>
                             </div>
-                            <Sword size={180} className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white/5 rotate-12"/>
+
+                            {/* Description */}
+                            <p className="relative z-10 text-xs text-slate-400 font-medium leading-relaxed line-clamp-2 max-w-md mb-auto bg-slate-900/50 p-2 rounded-lg backdrop-blur-sm border border-white/5">
+                                "{gameState.rival.description}"
+                            </p>
+
+                            {/* Footer Stats */}
+                            <div className="relative z-10 mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                    <Users size={14} className="text-slate-500"/>
+                                    <span className="text-xl font-black text-slate-200">{gameState.rival.fans.toLocaleString()}</span>
+                                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Followers</span>
+                                </div>
+                            </div>
+
+                            {/* Background Art */}
+                            <Sword size={240} className="absolute -bottom-10 -right-10 text-white/5 rotate-12"/>
                         </div>
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center gap-4 text-slate-600">

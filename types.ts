@@ -205,6 +205,7 @@ export interface Impact {
   arrangement?: number;
   design?: number;
   newRole?: Role; 
+  addRole?: Role; // NEW: Add a role without replacing existing ones
   songProgress?: number;
   quality?: number;
   rivalFans?: number;
@@ -219,11 +220,19 @@ export interface Impact {
   scheduleEventId?: string;
   scheduleEventDelay?: number;
   restoreOriginalRole?: boolean;
+  // Tag Manipulation
+  addTags?: string[];
+  removeTags?: string[];
+  // Description / Personality Change
+  newDescription?: string;
+  newName?: string; // For Neta/Transformation
+  newNetaName?: string;
 }
 
 export interface Member {
   id: string;
   name: string;
+  netaName?: string; // Original inspiration name
   roles: Role[];
   originalRoles?: Role[]; 
   musicality: number;    
@@ -235,6 +244,7 @@ export interface Member {
   stress: number;
   affection: number;     
   personality: string;
+  netaDesc?: string; // Original inspiration description
   tags: string[];        
   isLeader?: boolean;
   interactionsLeft: number;
@@ -448,12 +458,17 @@ export interface GameState {
   bandState: BandState;
   actionCounts: Record<string, number>;
   currentNews: string[];
-  rawChemistry: number; // Internal tracker for accumulated chemistry
+  rawChemistry: number; 
+  completedEvents: string[]; // NEW: Track unique events
 }
 
 export interface EventOption {
   label: string;
   effectDescription: string;
+  // NEW FIELDS for Neta Mode
+  netaLabel?: string; 
+  netaEffectDescription?: string;
+  
   failDescription?: string;
   requiredTag?: string; 
   successChance?: number; 
@@ -466,6 +481,8 @@ export interface GameEvent {
   id: string;
   title: string;
   description: string;
+  netaTitle?: string; // NEW
+  netaDescription?: string; // NEW
   options: EventOption[];
   isNamingEvent?: boolean;
   requiredRole?: Role; 

@@ -2,32 +2,173 @@
 import { GameEvent } from '../types';
 
 export const RIVAL_EVENTS: GameEvent[] = [
+  // --- UNLOCK EVENT (WEEK 4 FORCE) ---
   {
     id: 'rival_encounter_ex_member',
     title: '宿命的重逢',
-    description: '在LiveHouse的后台走廊，你遇到了正在备场的超人气新人乐队【[RIVAL_NAME]】。站在中间的主唱摘下墨镜，竟然是你曾经在轻音部的搭档！“哎呀，这不是那个发誓要超越我的前队长吗？”',
+    description: '在LiveHouse的后台走廊，你遇到了正在备场的超人气新人乐队【[RIVAL_NAME]】。站在中间的主唱摘下墨镜，那双眼睛死死地盯着你。\n\n“终于见到你了……我一直在等这一天。别误会，我不是来叙旧的。我是来亲手埋葬过去的。”',
     condition: (state) => state.currentWeek >= 4 && !state.rival.isUnlocked,
     options: [
       { 
-        label: '笑着打招呼：“好久不见。”', 
-        effectDescription: '展现了强者的从容。对方愣了一下，露出了复杂的表情。', 
+        label: '正面回击：“我也正有此意。”', 
+        effectDescription: '火花四溅！两人之间的空气仿佛凝固了。', 
         successChance: 1.0, 
-        impact: { unlockRival: true, mental: 10, rivalRelation: 10 } 
+        impact: { unlockRival: true, mental: 10, rivalRelation: 10, stability: 10 } 
       },
       { 
-        label: '冷冷地无视走过', 
-        effectDescription: '擦肩而过的一瞬间，火药味弥漫。', 
+        label: '冷笑：“你现在的水平还不够格。”', 
+        effectDescription: '被你的傲慢激怒，她露出了扭曲的笑容。“很好，保持这股劲头，别让我失望。”', 
         successChance: 1.0, 
-        impact: { unlockRival: true, stressChange: 10, rivalRelation: -20, stagePresence: 5 } 
+        impact: { unlockRival: true, stressChange: 10, rivalRelation: -10, stagePresence: 10 } 
       },
       { 
-        label: '向现任队友介绍：“这是最强的对手。”', 
-        effectDescription: '队友们感受到了你的斗志，士气大振！', 
+        label: '沉默地递给她一瓶水', 
+        effectDescription: '“……啧。” 她拍开了你的手，但耳根似乎有点红。“不需要你的施舍。”', 
         successChance: 1.0, 
-        impact: { unlockRival: true, affectionChange: 15, stability: 10, rivalRelation: 0 } 
+        impact: { unlockRival: true, affectionChange: 5, rivalRelation: 20 } 
       }
     ]
   },
+
+  // --- NEW FRENEMY EVENTS (Love/Hate) ---
+  {
+    id: 'rival_rainy_station',
+    title: '只有一把伞',
+    description: '突降暴雨，你被困在车站。这时，一把黑伞撑在了你头顶。转头一看，是【[RIVAL_NAME]】的吉他手，一脸不耐烦。\n\n“别误会，我只是不想看到对手淋成落汤鸡的样子，太丢人了。”',
+    condition: (state) => state.rival.isUnlocked && Math.random() < 0.15,
+    options: [
+      { 
+        label: '“那就恭敬不如从命了。”', 
+        effectDescription: '两人并肩走在雨中，肩膀偶尔碰到一起，气氛微妙地安静。', 
+        successChance: 1.0, 
+        impact: { rivalRelation: 10, stressChange: -10, mental: 10 } 
+      },
+      { 
+        label: '“我宁愿淋雨！”', 
+        effectDescription: '你冲进雨幕。身后传来一声叹息：“笨蛋……”', 
+        successChance: 1.0, 
+        impact: { rivalRelation: 5, fatigue: 10, mental: 20 } 
+      },
+      { 
+        label: '“作为交换，请你喝热饮。”', 
+        effectDescription: '“……我要热可可。加两份糖。”', 
+        successChance: 1.0, 
+        impact: { money: -500, rivalRelation: 15, affectionChange: 5 } 
+      }
+    ]
+  },
+  {
+    id: 'rival_secret_fan',
+    title: '隐藏的粉丝？',
+    description: '你在SNS上发现了一个经常点赞你们动态的小号，ID是“讨厌青椒”。虽然没有头像，但发布的照片里偶尔会露出熟悉的指甲油颜色——那是【[RIVAL_NAME]】贝斯手的标志性配色。',
+    condition: (state) => state.rival.isUnlocked && state.fans > 1000,
+    options: [
+      { 
+        label: '看破不说破，默默回关', 
+        effectDescription: '对方立刻吓得三天没发动态。', 
+        successChance: 1.0, 
+        impact: { rivalRelation: 10, mental: 5 } 
+      },
+      { 
+        label: '私信：“下次Live要给你留票吗？”', 
+        effectDescription: '秒回：“谁稀罕啊！只是手滑点赞而已！”', 
+        successChance: 1.0, 
+        impact: { rivalRelation: 10, stressChange: -20 } 
+      },
+      { 
+        label: '在MC环节公开感谢“讨厌青椒”桑', 
+        effectDescription: '听说那天【[RIVAL_NAME]】的贝斯手在后台脸红得像番茄。', 
+        successChance: 0.5, 
+        impact: { fans: 200, rivalRelation: 10 },
+        failDescription: '被当成是在阴阳怪气了。',
+        failImpact: { rivalRelation: -20 }
+      }
+    ]
+  },
+  {
+    id: 'rival_sick_visit',
+    title: '劲敌的探病',
+    description: '你在Live结束后因为过劳晕倒了。醒来时发现自己在休息室，桌上放着一袋高级营养品和一张字条：\n“在打败你之前，不准死。——笨蛋”',
+    condition: (state) => state.rival.isUnlocked && state.members.some(m => m.fatigue > 80),
+    options: [
+      { 
+        label: '发SNS感谢：“收到了傲娇的礼物。”', 
+        effectDescription: '引发了两家粉丝的疯狂嗑CP（划掉）热议。', 
+        successChance: 0.8, 
+        impact: { fans: 500, rivalRelation: 15, stressChange: -20 },
+        failImpact: { rivalRelation: -30 }
+      },
+      { 
+        label: '把空袋子留着做纪念', 
+        effectDescription: '喝完感觉充满了力量！', 
+        successChance: 1.0, 
+        impact: { fatigue: -50, mental: 30 } 
+      },
+      { 
+        label: '下次送回去双倍的回礼', 
+        effectDescription: '这种奇怪的胜负欲也是羁绊的一种。', 
+        successChance: 1.0, 
+        impact: { money: -2000, rivalRelation: 20, stability: 10 } 
+      }
+    ]
+  },
+  {
+    id: 'rival_cover_song',
+    title: '挑衅般的翻唱',
+    description: '【[RIVAL_NAME]】在视频网站上传了翻唱你们成名曲的视频。编曲极其华丽，技巧炫目，视频结尾主唱对着镜头做了一个抹脖子的动作，眼神却充满了笑意。',
+    condition: (state) => state.rival.isUnlocked && state.songs.length >= 2,
+    options: [
+      { 
+        label: '翻唱回去！', 
+        effectDescription: '把她们的歌改成我们的风格！互蹭热度！', 
+        successChance: 0.9, 
+        impact: { fans: 2000, technique: 20, rivalRelation: 10 },
+        failImpact: { fans: 200, stressChange: 20 }
+      },
+      { 
+        label: '点赞并转发：“唱得不错，下次教你。”', 
+        effectDescription: '充满余裕的前辈风范（虽然其实很慌）。', 
+        successChance: 1.0, 
+        impact: { rivalRelation: -10, stagePresence: 15, mental: 10 } 
+      },
+      { 
+        label: '反复观看视频分析差距', 
+        effectDescription: '虽然很不甘心，但她们确实很强。', 
+        successChance: 1.0, 
+        impact: { technique: 10, arrangement: 15, stressChange: 10 } 
+      }
+    ]
+  },
+  {
+    id: 'rival_studio_clash',
+    title: '录音棚争夺战',
+    description: '预定的录音棚搞错了排期，你们和【[RIVAL_NAME]】同时到达了门口。双方互不相让，空气中弥漫着火药味。',
+    condition: (state) => state.rival.isUnlocked && state.actionCounts['RentStudio'] > 0,
+    options: [
+      { 
+        label: '提议：“那就Battle吧！赢的人用！”', 
+        effectDescription: '即兴Jam对决！最后演变成了互相配合的快乐时光。', 
+        successChance: 0.7, 
+        impact: { chemistry: 50, rivalRelation: 10, technique: 10 }, 
+        failDescription: '技术被碾压了，灰溜溜地让出了录音棚。',
+        failImpact: { mental: -30, stressChange: 30 }
+      },
+      { 
+        label: '“挤一挤？或者我们先去吃饭？”', 
+        effectDescription: '对方队长脸红了：“谁、谁要和你们挤啊！我们去隔壁小房间！”', 
+        successChance: 1.0, 
+        impact: { rivalRelation: 20, money: 0 } 
+      },
+      { 
+        label: '展示预定短信，据理力争', 
+        effectDescription: '虽然赢了道理，但对方临走时的眼神很可怕。', 
+        successChance: 1.0, 
+        impact: { rivalRelation: -20, mental: 10 } 
+      }
+    ]
+  },
+
+  // --- EXISTING EVENTS ---
   {
     id: 'rival_producer_news',
     title: '金牌制作人的青睐',
@@ -86,7 +227,6 @@ export const RIVAL_EVENTS: GameEvent[] = [
       }
     ]
   },
-  // --- FRIENDLY RIVALRY EVENTS ---
   {
     id: 'rival_borrow_amp',
     title: '借来的音箱',
@@ -139,32 +279,6 @@ export const RIVAL_EVENTS: GameEvent[] = [
         effectDescription: '莫名其妙的胜负欲。', 
         successChance: 1.0, 
         impact: { fatigue: 10, rivalRelation: 5 } 
-      }
-    ]
-  },
-  {
-    id: 'rival_joint_practice',
-    title: '来自强者的邀请',
-    description: '为了备战即将到来的大型选拔赛，[RIVAL_NAME] 竟然主动发来了合宿邀请！“别误会，我们只是想找个陪练，顺便看看你们有没有长进。”',
-    condition: (state) => state.rival.isUnlocked && state.rival.relation >= 50 && state.money > 2000,
-    options: [
-      { 
-        label: '欣然前往！(¥2000)', 
-        effectDescription: '白天切磋技术，晚上枕头大战。', 
-        successChance: 1.0, 
-        impact: { money: -2000, technique: 30, rivalRelation: 30, affectionChange: 20, fatigue: 40 } 
-      },
-      { 
-        label: '只参加白天的训练', 
-        effectDescription: '保持距离感，只吸收技术。', 
-        successChance: 1.0, 
-        impact: { technique: 15, rivalRelation: 10, fatigue: 20 } 
-      },
-      { 
-        label: '拒绝，我们有自己的节奏', 
-        effectDescription: '“下次见面就是敌人。”', 
-        successChance: 1.0, 
-        impact: { stability: 15, rivalRelation: -10 } 
       }
     ]
   }

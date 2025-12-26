@@ -26,8 +26,21 @@ const STAT_MAPPING: Record<string, string> = {
     design: '设计', rivalFans: '劲敌粉丝', rivalRelation: '劲敌关系', quality: '品质', songProgress: '进度'
 };
 
-export const EventModal = ({ engine }: { engine: any }) => {
+export const EventModal = ({ engine, showNeta }: { engine: any, showNeta: boolean }) => {
     const [customNameInput, setCustomNameInput] = useState('');
+
+    const getMemberName = () => {
+        const m = engine.eventMember;
+        if (!m) return 'Everyone';
+        if (showNeta && m.netaName) return m.netaName;
+        return m.name;
+    }
+
+    const memberName = getMemberName();
+    
+    // Determine which title/desc to show
+    const displayTitle = (showNeta && engine.activeEvent.netaTitle) ? engine.activeEvent.netaTitle : engine.activeEvent.title;
+    const displayDesc = (showNeta && engine.activeEvent.netaDescription) ? engine.activeEvent.netaDescription : engine.activeEvent.description;
 
     return (
         <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl z-[60] flex items-center justify-center p-6 animate-in fade-in duration-500">
@@ -51,6 +64,8 @@ export const EventModal = ({ engine }: { engine: any }) => {
                                 {engine.eventResult.impact && (
                                     <div className="flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
                                         {Object.entries(engine.eventResult.impact).map(([key, val]) => {
+                                            if (key === 'addTags' || key === 'removeTags' || key === 'newDescription' || key === 'newName' || key === 'newNetaName') return null;
+                                            
                                             const label = STAT_MAPPING[key] || key;
                                             let isGood = Number(val) > 0;
                                             if (key === 'stressChange' || key === 'fatigue' || (key === 'money' && Number(val) < 0)) {
@@ -60,6 +75,11 @@ export const EventModal = ({ engine }: { engine: any }) => {
                                             }
                                             return <ImpactBadge key={key} label={label} value={Number(val)} isGood={isGood} />;
                                         })}
+                                        {engine.eventResult.impact.addTags && (
+                                            <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-600 border-purple-200">
+                                                New Tags: {engine.eventResult.impact.addTags.join(', ')}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -72,10 +92,19 @@ export const EventModal = ({ engine }: { engine: any }) => {
                         <div className="flex flex-col items-center w-full">
                             <div className="w-16 h-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full mb-8"/>
                             <div className="uppercase text-xs font-black text-slate-400 tracking-[0.4em] mb-4">Event Triggered</div>
-                            <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight leading-tight text-center">{engine.activeEvent.title}</h3>
-                            <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 mb-10 w-full text-center">
-                                <p className="text-lg md:text-xl text-slate-600 font-medium italic leading-relaxed">
-                                    "{engine.formatText(engine.activeEvent.description, engine.eventMember?.name || 'Everyone')}"
+                            
+                            <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight leading-tight text-center">
+                                {displayTitle}
+                            </h3>
+                            
+                            <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 mb-10 w-full text-center relative overflow-hidden">
+                                {showNeta && engine.activeEvent.netaDescription && (
+                                    <div className="absolute top-0 right-0 bg-amber-100 text-amber-600 text-[9px] font-black px-2 py-1 rounded-bl-xl uppercase tracking-wider">
+                                        Neta Mode
+                                    </div>
+                                )}
+                                <p className="text-lg md:text-xl text-slate-600 font-medium italic leading-relaxed whitespace-pre-wrap">
+                                    "{engine.formatText(displayDesc, memberName)}"
                                 </p>
                             </div>
                             
@@ -93,6 +122,10 @@ export const EventModal = ({ engine }: { engine: any }) => {
                                 {engine.activeEvent.options.map((o: any, i: number) => {
                                     const hasTag = !o.requiredTag || engine.gameState.members.some((m: any) => m.tags.includes(o.requiredTag!));
                                     const isDisabled = !hasTag || (engine.activeEvent?.isNamingEvent && !customNameInput.trim());
+                                    
+                                    const displayLabel = (showNeta && o.netaLabel) ? o.netaLabel : o.label;
+                                    const displayEffect = (showNeta && o.netaEffectDescription) ? o.netaEffectDescription : o.effectDescription;
+
                                     return (
                                         <button 
                                             key={i} 
@@ -105,8 +138,8 @@ export const EventModal = ({ engine }: { engine: any }) => {
                                                 }`}
                                         >
                                             <div>
-                                                <div className={`font-black text-base md:text-lg ${isDisabled ? 'text-slate-300' : 'text-slate-800 group-hover:text-pink-600'}`}>{o.label}</div>
-                                                <div className="text-[10px] font-bold uppercase tracking-widest mt-1 opacity-60">{engine.formatText(o.effectDescription)}</div>
+                                                <div className={`font-black text-base md:text-lg ${isDisabled ? 'text-slate-300' : 'text-slate-800 group-hover:text-pink-600'}`}>{displayLabel}</div>
+                                                <div className="text-[10px] font-bold uppercase tracking-widest mt-1 opacity-60">{engine.formatText(displayEffect, memberName)}</div>
                                             </div>
                                             {!isDisabled && <ChevronRight className="text-slate-300 group-hover:text-pink-500 transition-transform group-hover:translate-x-1" />}
                                         </button>

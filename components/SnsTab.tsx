@@ -49,7 +49,7 @@ export const SnsTab = ({ engine }: { engine: any }) => {
 
                         {engine.gameState.snsPosts.map((p: SNSPost) => {
                             // Logic to strip @ from display ID if present
-                            const displayId = p.authorId.replace(/^@/, '');
+                            const displayId = p.authorId ? p.authorId.replace(/^@/, '') : 'unknown';
                             
                             return (
                             <div key={p.id} className={`p-6 border-b border-slate-100 bg-white hover:bg-slate-50/50 transition-colors ${p.type === 'rival' ? 'bg-[#0F172A] text-white hover:bg-[#1E293B] border-slate-800' : ''} ${p.type === 'system' ? 'bg-slate-50' : ''}`}>

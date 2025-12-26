@@ -12,25 +12,27 @@ const getHarmonicMean = (values: number[]) => {
     return values.length / reciprocalSum;
 };
 
-// Geometric Mean: Good for "Synergy" stats (e.g. Adaptation). Requires multiple factors to be good.
-const getGeometricMean = (values: number[]) => {
-    if (values.length === 0) return 0;
-    const validValues = values.map(v => Math.max(1, v));
-    const product = validValues.reduce((acc, v) => acc * v, 1);
-    return Math.pow(product, 1 / values.length);
-};
-
 // SoftMax-ish: Good for "Star Power" (e.g. Aura). The best member defines the ceiling, others contribute marginally.
 const getSoftMaxBase = (values: number[]) => {
     if (values.length === 0) return 0;
     const maxVal = Math.max(...values);
     const sum = values.reduce((a, b) => a + b, 0);
     // Formula: Max + (Average of the rest) * 0.3
-    // Simplified: Max + (Sum - Max) / (Count - 1 || 1) * 0.3
     if (values.length === 1) return maxVal;
     const avgOthers = (sum - maxVal) / (values.length - 1);
     return maxVal + (avgOthers * 0.35);
 };
+
+// Helper to identify Special Roles (Non-standard rock instruments)
+const SPECIAL_ROLES = [
+    Role.Violin, Role.Saxophone, Role.DJ, Role.Accordion, 
+    Role.Harp, Role.Shamisen, Role.Rapper
+];
+
+const INSTRUMENT_ROLES = [
+    Role.Guitar, Role.Bass, Role.Drums, Role.Keyboard, 
+    ...SPECIAL_ROLES
+];
 
 // --- EXPORTED CALCULATION FUNCTION ---
 export const calculateBandStats = (members: Member[], songs: Song[], rawChemistry: number, fans: number, unlockedSkills: string[] = []): BandStats => {
@@ -45,109 +47,137 @@ export const calculateBandStats = (members: Member[], songs: Song[], rawChemistr
           };
       }
 
+      // --- HELPERS ---
       const getStats = (prop: keyof Member) => members.map(m => m[prop] as number);
       const getAvg = (prop: keyof Member) => members.reduce((sum, m) => sum + (m[prop] as number), 0) / members.length;
       const getMax = (prop: keyof Member) => Math.max(...members.map(m => m[prop] as number));
       const hasRole = (r: Role) => members.some(m => m.roles.includes(r));
+      const getMembersByRole = (r: Role) => members.filter(m => m.roles.includes(r));
+
+      // Groupings
+      const guitars = getMembersByRole(Role.Guitar);
+      const drums = getMembersByRole(Role.Drums);
+      const basses = getMembersByRole(Role.Bass);
+      const keyboards = getMembersByRole(Role.Keyboard);
+      const djs = getMembersByRole(Role.DJ);
+      const producers = getMembersByRole(Role.Producer);
+      const vocal = members.find(m => m.roles.includes(Role.Vocal));
+      
+      const specialMembers = members.filter(m => m.roles.some(r => SPECIAL_ROLES.includes(r)));
+      const instrumentalists = members.filter(m => m.roles.some(r => INSTRUMENT_ROLES.includes(r)));
 
       // --- 1. REALIZATION RATE (磨合度系数) ---
       const cappedChemistry = Math.min(100, rawChemistry);
-      // Logic: A band needs time (Chemistry) to sound like a unit.
-      let realizationRate = 0.25 + (cappedChemistry / 100) * 0.75; 
+      // REBALANCED: Slower start, higher dependency on Chemistry and Songs
+      let realizationRate = 0.2 + (cappedChemistry / 120) * 0.6; 
       
-      // Experience Bonus (Song Count) - Practice makes perfect
-      const expBonus = Math.min(0.25, songs.length * 0.04); 
+      // Experience Bonus (Song Count)
+      const expBonus = Math.min(0.2, songs.length * 0.02); 
       realizationRate += expBonus;
-      realizationRate = Math.min(1.25, realizationRate); // Can exceed 100%
+      realizationRate = Math.min(1.0, realizationRate); 
 
       // --- 2. STAT CALCULATION WITH COMPLEX FORMULAS ---
 
       // === Performance (演奏) ===
-      // Precision: Harmonic Mean of Technique (Woodbucket theory) + Mental stability.
-      // If one person has low technique, Precision tanks.
+      
+      // Precision: 
+      // Old: Harmonic Mean(40%) + Guitar(30%) + Mental(30%)
+      // New: Harmonic Mean(30%) + Guitar(40%) + Instrument Mental(30%)
+      // Rationale: Guitar technique is crucial for tightness. Mental of instrumentalists matters most for precision.
       const techHarmonic = getHarmonicMean(getStats('technique'));
-      const mentalMin = Math.min(...getStats('mental')); // Weakest mental state affects precision
-      let precisionBase = (techHarmonic * 0.7) + (mentalMin * 0.3);
+      const avgGuitarTech = guitars.length > 0 ? guitars.reduce((s, m) => s + m.technique, 0) / guitars.length : getAvg('technique') * 0.8;
+      const avgInstMental = instrumentalists.length > 0 ? instrumentalists.reduce((s, m) => s + m.mental, 0) / instrumentalists.length : getAvg('mental');
+      
+      let precisionBase = (techHarmonic * 0.3) + (avgGuitarTech * 0.4) + (avgInstMental * 0.3);
       let precision = precisionBase * realizationRate;
 
-      // Tone: Vocal/Solo Musicality + Gear Quality (Money/Tags implied) + Mental.
-      // Weighted towards Vocal but supported by average musicality.
+      // Tone: 
+      // Logic: Vocal(40%) + Avg(20%) + Special Roles(40%).
+      // Special Role: Weighted by Musicality (60%) and Creativity (40%) -> Imagination affects Tone!
       let toneBase = 0;
-      const vocal = members.find(m => m.roles.includes(Role.Vocal));
-      if (vocal) {
-          toneBase = vocal.musicality * 0.5 + getAvg('musicality') * 0.3 + getAvg('mental') * 0.2;
+      let weightUsed = 0;
+
+      if (vocal) { toneBase += vocal.musicality * 0.4; weightUsed += 0.4; }
+      else { toneBase += getAvg('musicality') * 0.4; weightUsed += 0.4; }
+
+      toneBase += getAvg('musicality') * 0.2; weightUsed += 0.2;
+
+      if (specialMembers.length > 0) {
+          const specMus = specialMembers.reduce((s, m) => s + m.musicality, 0) / specialMembers.length;
+          const specCre = specialMembers.reduce((s, m) => s + m.creativity, 0) / specialMembers.length;
+          // Creativity affects Tone for special instruments (Expression/Style)
+          const specScore = (specMus * 0.6) + (specCre * 0.4); 
+          toneBase += specScore * 0.4;
+          weightUsed += 0.4;
       } else {
-          toneBase = getAvg('musicality') * 0.6; // No vocal penalty
+          // Redistribute remaining weight if no special roles
+          const remaining = 1.0 - weightUsed;
+          toneBase += getAvg('musicality') * remaining;
       }
       let tone = toneBase * realizationRate;
 
-      // Rhythm: Geometric Mean of Drum & Bass. They must lock in.
-      // If no Drum or Bass, this stat suffers greatly.
-      const drum = members.find(m => m.roles.includes(Role.Drums));
-      const bass = members.find(m => m.roles.includes(Role.Bass));
-      let rhythmBase = 0;
-      if (drum && bass) {
-          rhythmBase = Math.sqrt(drum.technique * bass.technique);
-      } else if (drum) {
-          rhythmBase = drum.technique * 0.6;
-      } else if (bass) {
-          rhythmBase = bass.technique * 0.4;
-      } else {
-          rhythmBase = getAvg('technique') * 0.2;
-      }
+      // Rhythm: 
+      // Geometric Mean of Drum & Bass.
+      // Weighted: Tech(60%) + Musicality(40%). Groove comes from sense.
+      let drumScore = drums.length > 0 ? (drums[0].technique * 0.6 + drums[0].musicality * 0.4) : getAvg('technique') * 0.5;
+      let bassScore = basses.length > 0 ? (basses[0].technique * 0.6 + basses[0].musicality * 0.4) : getAvg('technique') * 0.5;
+      
+      let rhythmBase = Math.sqrt(drumScore * bassScore);
       let rhythm = rhythmBase * realizationRate;
 
-      // Dynamics: Range between soft and loud. Needs Technique (control) and Presence (impact).
-      // Calculated as Geometric Mean of Avg Tech and Avg Presence.
+      // Dynamics: 
+      // Geometric Mean of Avg Tech and Avg Presence.
+      // Need technique to control volume, presence to sell the impact.
       let dynamicsBase = Math.sqrt(getAvg('technique') * getAvg('stagePresence'));
-      if (members.length < 3) dynamicsBase *= 0.8; // Hard to create dynamics with few instruments
+      if (members.length < 3) dynamicsBase *= 0.8; 
       let dynamics = dynamicsBase * realizationRate;
 
       // === Stage (现场) ===
-      // Aura: SoftMax. The Center defines the ceiling, others contribute marginally.
-      // Also affected by Visuals (Design).
+      
+      // Aura: SoftMax of Presence. Center/Vocal defines ceiling.
       let auraBase = getSoftMaxBase(getStats('stagePresence'));
-      if (!hasRole(Role.Vocal)) auraBase *= 0.7; // Frontman is key
+      if (!hasRole(Role.Vocal)) auraBase *= 0.7; 
       let aura = auraBase * realizationRate;
       
-      // Interaction: Mental (Reading room) + Outgoing Tags? 
-      // Base: Avg Mental. Bonus if Avg Stress is low.
+      // Interaction: 
+      // Avg Mental (50%) + Avg Presence (50%).
       const avgStress = getAvg('stress');
-      let interactionBase = getAvg('mental');
-      if (avgStress > 50) interactionBase *= (1 - (avgStress - 50)/100); // Stress penalty
+      let interactionBase = (getAvg('mental') * 0.5) + (getAvg('stagePresence') * 0.5);
+      if (avgStress > 50) interactionBase *= (1 - (avgStress - 50)/150); // Stress penalty
       let interaction = interactionBase * realizationRate;
       
-      // Visual: Weighted Design + Creativity boost.
-      // Visuals are less dependent on band practice (realization rate).
-      // Logic: Max Design sets the style, Creativity adds flair.
-      let visualBase = getMax('design') * 0.6 + getAvg('design') * 0.4;
+      // Visual: 
+      // Max Design(50%) + Avg Design(30%) + Avg Creativity(20%).
+      // Imagination helps visualize the concept.
+      let visualBase = (getMax('design') * 0.5) + (getAvg('design') * 0.3) + (getAvg('creativity') * 0.2);
       let visual = visualBase * (0.6 + realizationRate * 0.4); 
       
-      // Adaptation: The ability to Jam.
-      // Logic: Geometric Mean of Creativity and Technique. 
-      // High Tech but Low Creativity = Robot (Low Adaptation).
-      // High Creativity but Low Tech = Sloppy (Low Adaptation).
-      let adaptationBase = Math.sqrt(getAvg('creativity') * getAvg('technique'));
-      let adaptation = adaptationBase * realizationRate;
+      // Adaptation: 
+      // Avg Cre(30%) + Avg Tech(20%) + Guitar Mus(25%) + DJ Bonus(25%).
+      // DJ contributes significantly to live remixing/adaptation.
+      let avgGuitarMus = guitars.length > 0 ? guitars.reduce((s, m) => s + m.musicality, 0) / guitars.length : getAvg('musicality');
+      
+      let adaptationScore = (getAvg('creativity') * 0.3) + (getAvg('technique') * 0.2) + (avgGuitarMus * 0.25);
+      
+      if (djs.length > 0) {
+          const djScore = djs.reduce((s, m) => s + (m.creativity + m.technique)/2, 0) / djs.length;
+          adaptationScore += djScore * 0.25;
+      } else {
+          // Redistribute if no DJ
+          adaptationScore += avgGuitarMus * 0.1; // Guitar takes more load
+          adaptationScore += getAvg('creativity') * 0.15;
+      }
+      let adaptation = adaptationScore * realizationRate;
 
       // === Bond (羁绊) ===
-      // Synergy: Directly linked to Chemistry and time together.
       let synergy = cappedChemistry; 
       
-      // Connection: Complex logic per user request.
-      // Base: (Avg Affection * 0.7 + Avg Mental * 0.3)
-      // Modifier: Stress Penalty. 
       const avgAffection = getAvg('affection');
-      const avgMental = getAvg('mental');
+      const connectionMental = getAvg('mental');
       
-      let connectionBase = (avgAffection * 0.7) + (avgMental * 0.3);
-      
-      // Stress Penalty: High Stress KILLS Connection.
-      // Formula: Multiplier = 1.0 - (AvgStress / 200). 
-      // If AvgStress is 100, effective connection is reduced by 50%.
+      let connectionBase = (avgAffection * 0.7) + (connectionMental * 0.3);
       let stressPenalty = Math.max(0.4, 1.0 - (avgStress / 200));
       
-      // Topic: Logarithmic Fan Scale + Design (Visuals drive clicks) + Viral Hits.
       const viralCount = songs.filter(s => s.isViral).length;
       const fanScore = Math.max(0, Math.log10(Math.max(10, fans)) - 1) * 15; 
       let topic = (fanScore * 0.6) + (getAvg('design') * 0.2) + (viralCount * 10);
@@ -160,16 +190,36 @@ export const calculateBandStats = (members: Member[], songs: Song[], rawChemistr
       const potentialWeight = hasSongs ? 0.3 : 0.2;
       const achievementWeight = hasSongs ? 0.7 : 0.0;
 
-      // Narrative: Lyrics * Creativity (Geometric).
+      // PRODUCER BONUS
+      // If a Producer exists, they boost potential directly.
+      const prodMaxComposing = producers.length > 0 ? Math.max(...producers.map(p => p.composing)) : 0;
+      const prodMaxArrangement = producers.length > 0 ? Math.max(...producers.map(p => p.arrangement)) : 0;
+      const prodMaxLyrics = producers.length > 0 ? Math.max(...producers.map(p => p.lyrics)) : 0;
+
+      // 1. Narrative: Lyrics * Creativity
       let lyricPower = Math.sqrt(getMax('lyrics') * getAvg('creativity'));
+      if (producers.length > 0) lyricPower += prodMaxLyrics * 0.15; // Producer helps refine lyrics
       let narrative = (lyricPower * potentialWeight) + (avgSongQuality * achievementWeight);
       
-      // Melody: Composing * Musicality.
-      let compPower = Math.sqrt(getMax('composing') * getAvg('musicality'));
+      // 2. Melody: Composing * Musicality + Key/DJ Bonus
+      let melodyBase = getMax('composing');
+      let melodyMus = getAvg('musicality');
+      
+      // Keyboard/DJ Bonus for Melody
+      const keysAndDJs = [...keyboards, ...djs];
+      if (keysAndDJs.length > 0) {
+          const keyDJMus = Math.max(...keysAndDJs.map(m => m.musicality));
+          melodyMus = (melodyMus * 0.7) + (keyDJMus * 0.3); // They influence the melodic sense
+      }
+      
+      let compPower = Math.sqrt(melodyBase * melodyMus);
+      if (producers.length > 0) compPower += prodMaxComposing * 0.15; // Producer helps composition
+      
       let melody = (compPower * potentialWeight) + (maxSongQuality * achievementWeight);
       
-      // Detail: Arrangement * Technique (Harmonic Mean for precision in details).
+      // 3. Detail: Arrangement * Tech
       let arrangePower = Math.sqrt(getMax('arrangement') * getHarmonicMean(getStats('technique')));
+      if (producers.length > 0) arrangePower += prodMaxArrangement * 0.2; // Producer heavily impacts arrangement detail
       let detail = (arrangePower * potentialWeight) + (avgSongQuality * achievementWeight);
 
       // --- SKILL MODIFIERS (Applied before clamp) ---

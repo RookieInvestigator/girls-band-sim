@@ -1,5 +1,5 @@
 
-import { GameEvent } from '../types';
+import { GameEvent, ScheduleAction } from '../types';
 
 export const URBAN_EVENTS: GameEvent[] = [
   {
@@ -50,7 +50,7 @@ export const URBAN_EVENTS: GameEvent[] = [
     id: 'urb_mv_comment',
     title: 'MV评论区的战争',
     description: '新MV的评论区吵翻天了。一派认为“风格变了，失去了初心”，另一派认为“这是必要的进化”。[NAME] 拿着手机的手在发抖。',
-    condition: (state) => state.songs.length > 0 && state.fans > 1000,
+    condition: (state) => state.songs.length > 0 && state.fans > 1000 && (state.actionCounts[ScheduleAction.MusicVideoShoot] || 0) > 0,
     options: [
       { label: '发布长文解释创作理念', effectDescription: '真诚的态度打动了理智粉。', successChance: 0.8, impact: { fans: 300, stability: 10 }, failImpact: { stressChange: 20 } },
       { label: '用下一首作品说话', effectDescription: '“闭嘴，听歌。”', successChance: 1.0, impact: { technique: 10, composing: 10, mental: 10 } },

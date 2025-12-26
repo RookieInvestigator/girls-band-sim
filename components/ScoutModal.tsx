@@ -2,7 +2,7 @@
 import { Search, X, Loader2, RefreshCw, UserPlus, Sparkles } from 'lucide-react';
 import { MAX_MEMBERS } from '../constants';
 
-export const ScoutModal = ({ engine }: { engine: any }) => {
+export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolean }) => {
     return (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
             <div className="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl relative overflow-hidden ring-1 ring-white/20 font-sans">
@@ -42,6 +42,9 @@ export const ScoutModal = ({ engine }: { engine: any }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {engine.gameState.scoutPool.map((s: any, idx: number) => {
                                 const isUR = s.id.startsWith('ur_');
+                                const displayName = (showNeta && s.netaName) ? s.netaName : s.name;
+                                const displayDesc = (showNeta && s.netaDesc) ? s.netaDesc : s.personality;
+
                                 return (
                                     <div 
                                         key={s.id} 
@@ -58,12 +61,12 @@ export const ScoutModal = ({ engine }: { engine: any }) => {
                                             {/* Header Info */}
                                             <div className="flex items-start gap-5 mb-5">
                                                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg shrink-0 relative overflow-hidden ${isUR ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-slate-900'}`}>
-                                                    {s.name[0]}
+                                                    {displayName[0]}
                                                     {isUR && <Sparkles size={16} className="absolute top-1 right-1 text-white/60 animate-pulse"/>}
                                                 </div>
                                                 <div className="flex-1 min-w-0 pt-1">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className="font-black text-lg text-slate-900 truncate tracking-tight">{s.name}</h4>
+                                                        <h4 className="font-black text-lg text-slate-900 truncate tracking-tight">{displayName}</h4>
                                                         {isUR && <span className="bg-amber-100 text-amber-600 text-[9px] px-1.5 py-0.5 rounded font-black border border-amber-200">UR</span>}
                                                     </div>
                                                     <div className="text-[10px] font-black text-pink-500 uppercase tracking-widest truncate">
@@ -89,7 +92,7 @@ export const ScoutModal = ({ engine }: { engine: any }) => {
                                             {/* Personality */}
                                             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-6 flex-1 group-hover:bg-white group-hover:shadow-inner transition-all">
                                                 <p className="text-xs text-slate-500 font-medium italic leading-relaxed line-clamp-3">
-                                                    "{s.personality}"
+                                                    "{displayDesc}"
                                                 </p>
                                             </div>
 

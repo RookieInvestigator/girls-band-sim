@@ -67,9 +67,9 @@ export const SKILL_TREE: SkillNode[] = [
         effect: { statMult: { stagePresence: 1.1 } }
     },
     {
-        id: 'pass_2', name: '让路人停下脚步', description: '解锁日程：【街头路演】。克服羞耻心，用声音征服街道！',
+        id: 'pass_2', name: '让路人停下脚步', description: '在【街头路演】时，获得的粉丝数和资金增加 30%。',
         cost: 10, x: 0, y: 1, parents: ['pass_1'], category: 'passion',
-        effect: { unlockAction: [ScheduleAction.StreetLive] }
+        effect: { passive: 'street_live_boost' } // MODIFIED: No longer unlockAction, now a boost
     },
     {
         id: 'pass_3', name: '视线，统统给我', description: '演出的【气场】(Aura) 基础数值 +10%。',

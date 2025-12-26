@@ -16,6 +16,42 @@ import { generateWeeklyNews, generateFallbackSNS } from './news_generator';
 import { processEventChoice } from './event_logic';
 import { processInteraction, processSelfAction, processDismissal } from './action_logic';
 
+// --- SCOUT LOGIC ---
+const generateScoutPool = (currentMembers: Member[]): Member[] => {
+    const available = MEMBER_POOL.filter(m => !currentMembers.some(cm => cm.id === m.id));
+    const urCandidates = available.filter(m => m.id.startsWith('ur_'));
+    const normalCandidates = available.filter(m => !m.id.startsWith('ur_'));
+    
+    const pool: Member[] = [];
+    const PICK_COUNT = 3;
+    const UR_RATE = 0.05; // 5% chance per slot to spawn a UR
+
+    for (let i = 0; i < PICK_COUNT; i++) {
+        const roll = Math.random();
+        
+        // Try to pick UR
+        if (roll < UR_RATE && urCandidates.length > 0) {
+            const pickIndex = Math.floor(Math.random() * urCandidates.length);
+            pool.push(urCandidates[pickIndex]);
+            urCandidates.splice(pickIndex, 1); // Remove from temp pool to avoid dupes in same batch
+        } 
+        // Fallback to Normal
+        else if (normalCandidates.length > 0) {
+            const pickIndex = Math.floor(Math.random() * normalCandidates.length);
+            pool.push(normalCandidates[pickIndex]);
+            normalCandidates.splice(pickIndex, 1);
+        } 
+        // If no normals left (unlikely), try UR again
+        else if (urCandidates.length > 0) {
+            const pickIndex = Math.floor(Math.random() * urCandidates.length);
+            pool.push(urCandidates[pickIndex]);
+            urCandidates.splice(pickIndex, 1);
+        }
+    }
+    
+    return pool.sort(() => 0.5 - Math.random()); // Shuffle the final 3 result
+};
+
 export const useGameEngine = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -72,7 +108,8 @@ export const useGameEngine = () => {
     unlockedSkills: ['friend_1'], 
     bandState: BandState.Normal,
     currentNews: [],
-    actionCounts: {}
+    actionCounts: {},
+    completedEvents: [] // NEW
   });
 
   const [isEventOpen, setIsEventOpen] = useState(false);
@@ -132,6 +169,9 @@ export const useGameEngine = () => {
     const initialNews = generateWeeklyNews(randomRival, 1);
     const initialMembers = [leader];
     const initialStats = calculateBandStats(initialMembers, [], 0, 0, ['friend_1']);
+    
+    // Initial scout generation with weighted logic
+    const initialScoutPool = generateScoutPool(initialMembers);
 
     setGameState(prev => ({
       ...prev,
@@ -139,9 +179,10 @@ export const useGameEngine = () => {
       members: initialMembers,
       teamStats: initialStats,
       rawChemistry: 0,
-      scoutPool: [...MEMBER_POOL].sort(() => 0.5 - Math.random()).slice(0, 3),
+      scoutPool: initialScoutPool,
       rival: randomRival,
-      currentNews: initialNews
+      currentNews: initialNews,
+      completedEvents: []
     }));
     setIsStarted(true);
   };
@@ -232,13 +273,18 @@ export const useGameEngine = () => {
             finalState.rival = { ...finalState.rival, fans: finalState.rival.fans + rivalGrowth };
         }
         
-        // AI Rival Init
-        if (finalState.currentWeek === 2 && hasApiKey) {
-            generateAiRivalBand(finalState).then(aiRival => {
+        // AI Rival Init - WEEK 4 TRIGGER
+        // If we have an API key, we try to generate a flavored rival.
+        // We do this BEFORE the event logic below so the event uses the new data.
+        if (finalState.currentWeek === 4 && hasApiKey) {
+            try {
+                const aiRival = await generateAiRivalBand(finalState);
                 if (aiRival) {
-                    setGameState(prev => ({ ...prev, rival: { ...prev.rival, ...aiRival } }));
+                    finalState.rival = { ...finalState.rival, ...aiRival };
                 }
-            });
+            } catch (e) {
+                console.error("AI Rival Gen Failed, using default", e);
+            }
         }
 
         // Songwriting Logic
@@ -462,7 +508,12 @@ export const useGameEngine = () => {
     if (gameState.money < refreshCost) return;
     setIsRefreshingScout(true);
     setTimeout(() => {
-        setGameState(prev => ({ ...prev, money: prev.money - refreshCost, refreshCountThisWeek: prev.refreshCountThisWeek + 1, scoutPool: [...MEMBER_POOL].filter(m => !prev.members.some(ex => ex.id === m.id)).sort(() => 0.5 - Math.random()).slice(0, 3) }));
+        setGameState(prev => ({ 
+            ...prev, 
+            money: prev.money - refreshCost, 
+            refreshCountThisWeek: prev.refreshCountThisWeek + 1, 
+            scoutPool: generateScoutPool(prev.members) // Use weighted generator
+        }));
         setIsRefreshingScout(false);
     }, 800);
   };
@@ -517,15 +568,18 @@ export const useGameEngine = () => {
             return;
         }
     }
-    // Rival Encounter Force
-    if (gameState.currentWeek >= 12 && !gameState.rival.isUnlocked) { 
+    
+    // Rival Encounter Force - TRIGGER AT WEEK 4
+    if (gameState.currentWeek === 4 && !gameState.rival.isUnlocked) { 
         const ev = EVENT_LIBRARY.find(e => e.id === 'rival_encounter_ex_member');
-        if (ev && gameState.eventQueue.length === 0) {
+        if (ev) {
+             // Prioritize this story event
              setGameState(prev => ({ ...prev, eventQueue: [] }));
              setActiveEvent(ev); setEventMember(gameState.members[0]); setIsEventOpen(true);
              return;
         }
     }
+
     // Random Event Generation
     const newEvents: QueuedEvent[] = [];
     const eventCount = 1 + (Math.random() > 0.6 ? 1 : 0);
@@ -534,6 +588,10 @@ export const useGameEngine = () => {
             if (e.isNamingEvent) return false;
             if (['stress_breakdown', 'fatigue_collapse', 'critical_dismissal', 'staff_return_decision'].includes(e.id)) return false; 
             if (e.id === 'rival_encounter_ex_member') return false; 
+            
+            // ONE TIME EVENT CHECK
+            if (gameState.completedEvents.includes(e.id)) return false;
+
             if (newEvents.some(ne => ne.event.id === e.id)) return false;
             if (e.requiredRole && !gameState.members.some(m => m.roles.includes(e.requiredRole!) && !m.isLeader)) return false;
             if (e.requiredTag && !gameState.members.some(m => m.tags.includes(e.requiredTag!))) return false;

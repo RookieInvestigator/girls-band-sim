@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Music, Users, Calendar, MessageCircle, Layout, Disc, Ticket, Star, Mic as MicIcon, Guitar, Zap, PenTool, Coins, Activity, Key, Settings, LogOut, Menu, ArrowRight, PlayCircle, Sparkles, Heart, Crown, Headphones, Trash2
+  Music, Users, Calendar, MessageCircle, Layout, Disc, Ticket, Star, Mic as MicIcon, Guitar, Zap, PenTool, Coins, Activity, Key, Settings, LogOut, Menu, ArrowRight, PlayCircle, Sparkles, Heart, Crown, Headphones, Trash2, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import { useGameEngine } from './logic/game_engine';
 import { Role } from './types';
@@ -21,7 +21,7 @@ import { SkillTreeModal } from './components/SkillTreeModal';
 
 declare var process: { env: { API_KEY: string } };
 
-const DEFAULT_PLAYER_NAME = "七曜 舞禾";
+const DEFAULT_PLAYER_NAME = "七濑舞禾";
 
 const App = () => {
   const engine = useGameEngine();
@@ -33,6 +33,9 @@ const App = () => {
   const [hasEnvKey, setHasEnvKey] = useState(false);
   const [hasStoredKey, setHasStoredKey] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  
+  // Neta Name Toggle
+  const [showNetaNames, setShowNetaNames] = useState(false);
 
   useEffect(() => {
       // Check if env key is present and not empty
@@ -94,10 +97,31 @@ const App = () => {
                 <Settings size={20} />
             </button>
 
-            <h3 className="font-black text-2xl mb-2 flex items-center gap-2 text-slate-900 uppercase tracking-tighter italic">
-                <Key size={24} className="text-pink-500"/> API 设置
+            <h3 className="font-black text-2xl mb-6 flex items-center gap-2 text-slate-900 uppercase tracking-tighter italic">
+                <Settings size={24} className="text-slate-900"/> 设置
             </h3>
-            <p className="text-xs font-bold text-slate-500 mb-6 leading-relaxed">
+
+            {/* --- Neta Name Toggle --- */}
+            <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                        <Sparkles size={18} className="text-amber-500"/>
+                        <span className="font-black text-sm text-slate-800">原典名显示 (Neta Mode)</span>
+                    </div>
+                    <button onClick={() => setShowNetaNames(!showNetaNames)} className="text-slate-400 hover:text-slate-900 transition-colors">
+                        {showNetaNames ? <ToggleRight size={32} className="text-rose-500 fill-rose-50"/> : <ToggleLeft size={32}/>}
+                    </button>
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
+                    开启后，传说级角色将显示其致敬的原型角色名（如：鲸溶子 -> 丰川祥子）。
+                </p>
+            </div>
+
+            {/* --- API Key Section --- */}
+            <h4 className="font-black text-sm mb-2 flex items-center gap-2 text-slate-900 uppercase tracking-tighter">
+                <Key size={16} className="text-pink-500"/> API 设置
+            </h4>
+            <p className="text-xs font-bold text-slate-500 mb-4 leading-relaxed">
                 本游戏使用 Google Gemini AI 生成动态内容。
                 <br/>
                 <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-pink-500 hover:underline flex items-center gap-1 mt-1 font-black bg-pink-50 inline-block px-2 py-1 rounded">
@@ -113,7 +137,6 @@ const App = () => {
             ) : (
                 <div className="space-y-4 mb-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Gemini API Key</label>
                         <input 
                             type="password" 
                             value={apiKeyInput}
@@ -269,8 +292,8 @@ const App = () => {
       {/* --- OVERLAYS --- */}
       {showSettings && <SettingsModal />}
       {engine.showSkillTree && <SkillTreeModal engine={engine} />}
-      {engine.isEventOpen && engine.activeEvent && <EventModal engine={engine} />}
-      {engine.showScoutModal && <ScoutModal engine={engine} />}
+      {engine.isEventOpen && engine.activeEvent && <EventModal engine={engine} showNeta={showNetaNames} />}
+      {engine.showScoutModal && <ScoutModal engine={engine} showNeta={showNetaNames} />}
       {engine.showTurnResult && engine.turnResultData && <TurnResultModal data={engine.turnResultData} onFinish={engine.finishTurnResult} />}
       {engine.showGigResult && engine.gigResultData && <GigResultModal data={engine.gigResultData} onClose={engine.closeGigResult} />}
       {engine.isGeneratingSong && <AiLoadingModal />}
@@ -340,7 +363,7 @@ const App = () => {
             <div className="max-w-7xl mx-auto w-full p-4 lg:p-8 pb-32 lg:pb-12">
                 {activeTab === 'dashboard' && <DashboardTab engine={engine} />}
                 {activeTab === 'schedule' && <ScheduleTab engine={engine} />}
-                {activeTab === 'members' && <MembersTab engine={engine} />}
+                {activeTab === 'members' && <MembersTab engine={engine} showNeta={showNetaNames} />}
                 {activeTab === 'songs' && <SongsTab engine={engine} />}
                 {activeTab === 'sns' && <SnsTab engine={engine} />}
                 {activeTab === 'gigs' && <GigTab engine={engine} />}
