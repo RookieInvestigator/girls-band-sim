@@ -1,5 +1,5 @@
 
-import { Lock, Star, CheckCircle2, MapPin, Ticket, Users, AlertCircle, ArrowRight, Music, Trophy, Crown, Sparkles } from 'lucide-react';
+import { Lock, Star, CheckCircle2, MapPin, Ticket, AlertCircle, ArrowRight, Music } from 'lucide-react';
 import { GIG_DEFINITIONS } from '../data/gigs';
 
 export const GigTab = ({ engine }: { engine: any }) => {
@@ -7,12 +7,14 @@ export const GigTab = ({ engine }: { engine: any }) => {
   const memberCount = gameState.members.length;
   const isMemberEnough = memberCount >= 3; 
 
+  // Removed h-[calc(...)] and overflow-y-auto constraints
+  // The page will now scroll naturally via the main container
   return (
-    <div className="flex flex-col h-[calc(100dvh-140px)] lg:h-full animate-in fade-in slide-in-from-bottom-4 duration-500 pb-0">
+    <div className="flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
       
-      {/* Header - Transparent & Airy */}
-      <div className="px-2 py-4 shrink-0 flex items-center justify-between mb-2">
-         <div className="flex items-center gap-3">
+      {/* Header - Simplified margin/padding for cleaner flow */}
+      <div className="py-2 md:py-4 flex items-center justify-between mb-6 px-1">
+         <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-slate-200">
                 <Ticket size={24} />
             </div>
@@ -34,13 +36,13 @@ export const GigTab = ({ engine }: { engine: any }) => {
 
       {/* Mobile Warning */}
       {!isMemberEnough && (
-        <div className="md:hidden mx-2 mb-4 bg-amber-50 text-amber-600 px-4 py-3 rounded-xl text-xs font-bold border border-amber-100 flex items-center gap-2 shadow-sm animate-pulse">
+        <div className="md:hidden mb-6 bg-amber-50 text-amber-600 px-4 py-3 rounded-xl text-xs font-bold border border-amber-100 flex items-center gap-2 shadow-sm animate-pulse">
             <AlertCircle size={16}/> 需要至少 3 名成员才能演出。
         </div>
       )}
 
-      {/* Gigs List - Refined Cards */}
-      <div className="flex-1 overflow-y-auto px-2 pb-24 lg:pb-10 custom-scrollbar space-y-4">
+      {/* Gigs List - Natural Height Growth */}
+      <div className="space-y-6 pb-8">
           {Object.values(GIG_DEFINITIONS).map((gig: any) => {
               const currentFans = gameState.fans;
               const currentWeek = gameState.currentWeek;
@@ -59,10 +61,10 @@ export const GigTab = ({ engine }: { engine: any }) => {
                     key={gig.id} 
                     onClick={() => { if (canPlay) startGig(gig.id); }}
                     className={`
-                        relative group overflow-hidden rounded-[2rem] border-2 transition-all duration-500 w-full
+                        relative group overflow-hidden rounded-[2.5rem] border-2 transition-all duration-500 w-full
                         ${canPlay 
-                            ? 'bg-white border-slate-100 hover:border-rose-200 shadow-lg shadow-slate-100 hover:shadow-xl hover:shadow-rose-100 cursor-pointer transform hover:-translate-y-1' 
-                            : 'bg-slate-50 border-slate-100 opacity-80 cursor-not-allowed grayscale-[0.8]'}
+                            ? 'bg-white border-slate-100 hover:border-rose-200 shadow-sm hover:shadow-2xl hover:shadow-rose-100 cursor-pointer transform hover:-translate-y-1' 
+                            : 'bg-slate-50/50 border-slate-100 opacity-60 cursor-not-allowed grayscale-[0.8]'}
                     `}
                   >
                       {/* Interactive Glow for Available Gigs */}

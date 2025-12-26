@@ -158,11 +158,12 @@ export const useGameEngine = () => {
   const initGame = (role: Role, playerName: string) => {
     const leader: Member = {
       id: 'leader', name: playerName || '你', roles: [role],
-      musicality: 60, technique: 50, stagePresence: 50, creativity: 50, mental: 80, 
+      // Nerfed Leader Stats significantly to allow growth
+      musicality: 40, technique: 35, stagePresence: 35, creativity: 30, mental: 60, 
       fatigue: 0, stress: 0, affection: 100,
       personality: '乐队队长。', tags: ['队长', '可靠'], isLeader: true,
       interactionsLeft: 2,
-      composing: 60, lyrics: 60, arrangement: 50, design: 50
+      composing: 40, lyrics: 40, arrangement: 30, design: 30
     };
     
     const randomRival = generateRivalBand();
@@ -501,7 +502,13 @@ export const useGameEngine = () => {
     if (gameState.members.length >= MAX_MEMBERS) return;
     const newMembers = [...gameState.members, { ...m, interactionsLeft: 2 }];
     const newTeamStats = calculateBandStats(newMembers, gameState.songs, gameState.rawChemistry, gameState.fans, gameState.unlockedSkills);
-    setGameState(prev => ({ ...prev, members: newMembers, teamStats: newTeamStats, scoutPool: prev.scoutPool.filter(sc => sc.id !== m.id) }));
+    // Modified: DO NOT filter scoutPool. Keep the member in the pool so the card stays in the UI.
+    setGameState(prev => ({ 
+        ...prev, 
+        members: newMembers, 
+        teamStats: newTeamStats 
+        // scoutPool: prev.scoutPool.filter(sc => sc.id !== m.id)  <-- REMOVED
+    }));
   };
 
   const refreshScout = () => {

@@ -59,7 +59,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
       disabled={disabled}
       onClick={onClick}
       className={`
-        group relative flex flex-col p-3 md:p-5 rounded-2xl md:rounded-[2rem] border-2 transition-all duration-300 w-full h-28 md:h-44 justify-between overflow-hidden text-left shadow-sm
+        group relative flex flex-col p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 w-full h-24 md:h-36 justify-between overflow-hidden text-left shadow-sm
         ${disabled 
           ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed grayscale-[0.5]' 
           : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-xl hover:-translate-y-1 active:scale-95'
@@ -68,36 +68,36 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
     >
        {/* Top Row: Icon + Price/Status */}
        <div className="flex justify-between items-start w-full relative z-10">
-           <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${!disabled ? theme.iconBg + ' ' + theme.iconColor : 'bg-slate-200 text-slate-400'}`}>
-              {getCategoryIcon(category, 16)}
+           <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${!disabled ? theme.iconBg + ' ' + theme.iconColor : 'bg-slate-200 text-slate-400'}`}>
+              {getCategoryIcon(category, 14)}
            </div>
            
            <div className="flex flex-col items-end gap-1">
                {!disabled && cost > 0 && (
-                   <span className="bg-slate-100 text-slate-600 border border-slate-200 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-lg text-[9px] md:text-[11px] font-black group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-colors">
+                   <span className="bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded text-[9px] font-black group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-colors">
                        ¥{cost}
                    </span>
                )}
                {isSpecial && (
-                   <span className={`text-[9px] md:text-[10px] font-black px-2 py-0.5 rounded-lg border ${isMaxed ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100'}`}>
+                   <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${isMaxed ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-100'}`}>
                        {count}/{limit}
                    </span>
                )}
            </div>
        </div>
        
-       {/* Middle: Content */}
-       <div className="z-10 relative mt-1 md:mt-2 flex-1 flex items-end">
-          <span className={`text-[10px] md:text-base font-black leading-tight md:leading-snug line-clamp-2 w-full ${!disabled ? 'text-slate-800 group-hover:text-slate-900' : 'text-slate-400'}`}>
+       {/* Content */}
+       <div className="z-10 relative mt-1 flex-1 flex items-end">
+          <span className={`text-[10px] md:text-xs lg:text-sm font-black leading-tight line-clamp-2 w-full ${!disabled ? 'text-slate-800 group-hover:text-slate-900' : 'text-slate-400'}`}>
              {action}
           </span>
        </div>
 
-        {/* Bottom: Stat Badge (Desktop only) */}
+        {/* Stat Badge (Desktop) */}
         {!disabled && primaryStat && (
-            <div className="z-10 relative mt-2 hidden md:block">
-                <span className="inline-flex items-center gap-1 bg-slate-100/80 px-2 py-1 rounded-md text-[9px] font-bold text-slate-500 uppercase tracking-wider backdrop-blur-sm border border-slate-200/50">
-                    <ArrowRight size={8} className="text-pink-500"/> {primaryStat}
+            <div className="z-10 relative mt-1 hidden lg:block">
+                <span className="inline-flex items-center gap-1 text-[8px] font-bold text-slate-400 uppercase tracking-wider">
+                    {primaryStat}
                 </span>
             </div>
         )}
@@ -106,7 +106,7 @@ const ActionCard = ({ action, category, unlocked, onClick, count = 0 }: any) => 
        {!disabled && (
            <>
                 <div className={`absolute inset-0 bg-gradient-to-b ${theme.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}/>
-                <div className={`absolute -right-4 -bottom-4 w-20 h-20 md:w-24 md:h-24 rounded-full opacity-10 group-hover:opacity-20 transition-opacity ${theme.iconBg} blur-2xl`}/>
+                <div className={`absolute -right-4 -bottom-4 w-16 h-16 rounded-full opacity-10 group-hover:opacity-20 transition-opacity ${theme.iconBg} blur-2xl`}/>
            </>
        )}
     </button>
@@ -138,37 +138,35 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
     : categorizedActions[activeCategory] || [];
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100dvh-140px)] lg:h-full animate-in fade-in duration-500 pb-0 lg:pb-0">
+    <div className="flex flex-col gap-4 animate-in fade-in duration-500 w-full pb-8">
       
-      {/* 1. COMPACT DASHBOARD (Top) */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-4 md:p-6 shrink-0 flex flex-col gap-4">
+      {/* 1. COMPACT DASHBOARD (Top) - Reduced Height & Padding */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-4 shrink-0 flex flex-col gap-3">
          
-         {/* Row 1: Status & Start Button */}
-         <div className="flex items-center gap-4 justify-between">
-            <div className="flex flex-col">
-                <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current</span>
-                    <span className="bg-rose-50 text-rose-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Week {engine.gameState.currentWeek}
-                    </span>
+         {/* Row 1: Header & Controls */}
+         <div className="flex items-center gap-3 justify-between">
+            <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-slate-200 shrink-0">
+                    <Calendar size={18} />
                 </div>
-                <h3 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight leading-none">
-                    Schedule
-                </h3>
+                <div>
+                    <h3 className="text-lg font-black text-slate-900 leading-none tracking-tight">Schedule</h3>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Week {engine.gameState.currentWeek}</div>
+                </div>
             </div>
 
             <button 
                 onClick={engine.executeTurn} 
                 disabled={engine.isProcessing || !isMemberEnough}
-                className="flex-1 max-w-[180px] md:max-w-[240px] bg-slate-900 text-white h-12 rounded-xl md:rounded-2xl font-black text-xs uppercase tracking-[0.1em] hover:bg-rose-500 hover:shadow-lg hover:shadow-rose-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-95 disabled:bg-slate-300"
+                className="px-6 h-10 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-rose-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 active:scale-95 shadow-md"
             >
-                {engine.isProcessing ? <Zap className="animate-spin" size={16}/> : <Play size={16} fill="currentColor"/>}
-                <span>{engine.isProcessing ? 'Processing...' : 'Start Week'}</span>
+                {engine.isProcessing ? <Zap className="animate-spin" size={14}/> : <Play size={14} fill="currentColor"/>}
+                <span>{engine.isProcessing ? 'Processing' : 'Start'}</span>
             </button>
          </div>
 
-         {/* Row 2: Slots Grid */}
-         <div className="grid grid-cols-3 gap-2 md:gap-4">
+         {/* Row 2: Slots Grid - Significantly reduced height */}
+         <div className="grid grid-cols-3 gap-2">
             {engine.gameState.weeklySchedule.map((action: ScheduleAction | null, i: number) => {
                 const category = action ? ACTION_TO_CATEGORY[action] : null;
                 const theme = category ? getCategoryTheme(category) : null;
@@ -178,16 +176,16 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                     key={i} 
                     onClick={() => !action && document.getElementById('action-drawer')?.scrollIntoView({ behavior: 'smooth' })}
                     className={`
-                        relative group rounded-xl md:rounded-2xl border-2 transition-all duration-200 flex flex-col items-center justify-center p-2 cursor-pointer overflow-hidden
-                        h-20 md:h-32
+                        relative group rounded-xl border-2 transition-all duration-200 flex flex-col items-center justify-center p-1 cursor-pointer overflow-hidden
+                        h-16 md:h-24
                         ${action && theme 
                             ? `bg-white ${theme.border}` 
                             : 'bg-slate-50 border-dashed border-slate-200 hover:border-slate-400 hover:bg-white'}
                     `}
                 >
                     {/* Slot Number */}
-                    <div className="absolute top-1 left-2 md:top-2 md:left-3 z-20">
-                        <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase">
+                    <div className="absolute top-1 left-2 z-20">
+                        <span className="text-[8px] font-black text-slate-300 uppercase">
                             0{i+1}
                         </span>
                     </div>
@@ -195,10 +193,10 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                     {action && theme ? (
                         <>
                             {/* Card Content */}
-                            <div className={`w-6 h-6 md:w-10 md:h-10 rounded-lg md:rounded-xl ${theme.iconBg} ${theme.iconColor} flex items-center justify-center shadow-md mb-1 md:mb-2 relative z-10`}>
+                            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg ${theme.iconBg} ${theme.iconColor} flex items-center justify-center shadow-sm mb-1 relative z-10 scale-75 md:scale-100 origin-bottom`}>
                                 {getCategoryIcon(category!, 14)} 
                             </div>
-                            <div className="font-black text-[9px] md:text-xs text-slate-800 text-center leading-tight relative z-10 w-full px-1 truncate">
+                            <div className="font-black text-[9px] md:text-[10px] text-slate-800 text-center leading-tight relative z-10 w-full px-1 truncate">
                                 {action}
                             </div>
                             
@@ -209,11 +207,11 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                                 <Trash2 size={12}/>
                             </button>
 
-                            <div className={`absolute inset-0 bg-gradient-to-b ${theme.bg} opacity-50`}/>
+                            <div className={`absolute inset-0 bg-gradient-to-b ${theme.bg} opacity-30`}/>
                         </>
                     ) : (
                         <div className="flex flex-col items-center gap-1 opacity-40 group-hover:opacity-100 transition-all">
-                            <Plus size={16} className="text-slate-400 group-hover:text-slate-600"/>
+                            <Plus size={14} className="text-slate-400 group-hover:text-slate-600"/>
                             <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">Select</span>
                         </div>
                     )}
@@ -223,25 +221,25 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
          </div>
          
          {!isMemberEnough && (
-            <div className="text-[10px] font-bold text-amber-500 flex items-center gap-1.5 bg-amber-50 px-3 py-2 rounded-lg justify-center border border-amber-100">
-                <AlertCircle size={12}/> 需要至少 3 名成员才能开始活动
+            <div className="text-[10px] font-bold text-amber-500 flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-lg justify-center border border-amber-100">
+                <AlertCircle size={12}/> 需 3 名成员
             </div>
          )}
       </div>
 
-      {/* 2. ACTION DRAWER (Scrollable Area) */}
-      <div id="action-drawer" className="flex-1 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col overflow-hidden min-h-0 relative">
-          {/* Filters Sticky Header */}
-          <div className="px-4 py-3 md:px-6 md:py-4 border-b border-slate-50 flex flex-col gap-2 sticky top-0 bg-white/95 backdrop-blur z-20 shrink-0">
-              <div className="flex items-center gap-2">
-                  <LayoutGrid size={14} className="text-slate-900"/>
-                  <h4 className="font-black text-xs text-slate-900 uppercase tracking-widest">Select Action</h4>
-              </div>
-              
-              <div className="flex flex-wrap gap-1.5 md:gap-2">
+      {/* 2. ACTION LIST (Natural Flow) */}
+      <div id="action-drawer" className="flex-1 flex flex-col min-h-0 relative">
+          
+          {/* Sticky Filters Header */}
+          <div className="sticky top-0 z-30 py-2 bg-[#F8FAFC]/95 backdrop-blur-sm -mx-2 px-2 md:mx-0 md:px-0">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-2 flex flex-wrap gap-1.5 md:gap-2">
+                  <div className="flex items-center gap-2 pr-2 border-r border-slate-100 mr-1 hidden md:flex">
+                      <LayoutGrid size={14} className="text-slate-400"/>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter</span>
+                  </div>
                   <button 
                      onClick={() => setActiveCategory('ALL')}
-                     className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all border ${activeCategory === 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200'}`}
+                     className={`px-2.5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all border ${activeCategory === 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200'}`}
                   >
                      All
                   </button>
@@ -249,7 +247,7 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
                       <button 
                           key={cat}
                           onClick={() => setActiveCategory(cat)}
-                          className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-bold flex items-center gap-1 transition-all border ${activeCategory === cat ? 'bg-slate-100 text-slate-900 border-slate-300' : 'bg-white text-slate-400 border-slate-100'}`}
+                          className={`px-2.5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-bold flex items-center gap-1 transition-all border ${activeCategory === cat ? 'bg-slate-100 text-slate-900 border-slate-300' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'}`}
                       >
                           {getCategoryIcon(cat, 10)} {cat}
                       </button>
@@ -257,20 +255,18 @@ export const ScheduleTab = ({ engine }: { engine: any }) => {
               </div>
           </div>
 
-          {/* Grid Content */}
-          <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-slate-50">
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4 pb-20">
-                  {currentActions.map(action => (
-                      <ActionCard 
-                          key={action}
-                          action={action}
-                          category={ACTION_TO_CATEGORY[action]}
-                          unlocked={engine.isActionUnlocked(action)}
-                          count={engine.gameState.actionCounts[action]}
-                          onClick={() => handleSelectAction(action)}
-                      />
-                  ))}
-              </div>
+          {/* Grid Content - Auto Height */}
+          <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pb-8">
+              {currentActions.map(action => (
+                  <ActionCard 
+                      key={action}
+                      action={action}
+                      category={ACTION_TO_CATEGORY[action]}
+                      unlocked={engine.isActionUnlocked(action)}
+                      count={engine.gameState.actionCounts[action]}
+                      onClick={() => handleSelectAction(action)}
+                  />
+              ))}
           </div>
       </div>
     </div>

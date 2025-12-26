@@ -1,6 +1,7 @@
 
-import { Search, X, Loader2, RefreshCw, UserPlus, Sparkles } from 'lucide-react';
+import { Search, X, Loader2, RefreshCw, UserPlus, Sparkles, CheckCircle2 } from 'lucide-react';
 import { MAX_MEMBERS } from '../constants';
+import { Member } from '../types';
 
 export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolean }) => {
     return (
@@ -40,10 +41,11 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                            {engine.gameState.scoutPool.map((s: any, idx: number) => {
+                            {engine.gameState.scoutPool.map((s: Member, idx: number) => {
                                 const isUR = s.id.startsWith('ur_');
                                 const displayName = (showNeta && s.netaName) ? s.netaName : s.name;
                                 const displayDesc = (showNeta && s.netaDesc) ? s.netaDesc : s.personality;
+                                const isRecruited = engine.gameState.members.some((m: Member) => m.id === s.id);
 
                                 return (
                                     <div 
@@ -51,12 +53,19 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                                         className={`
                                             group relative flex flex-col rounded-[2rem] border transition-all duration-300 overflow-hidden bg-white
                                             ${isUR ? 'border-amber-200 shadow-lg shadow-amber-100/50 hover:shadow-amber-200 ring-1 ring-amber-100' : 'border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:border-pink-200 hover:-translate-y-1'}
+                                            ${isRecruited ? 'opacity-70 grayscale-[0.8] hover:grayscale-0' : ''}
                                         `}
                                         style={{animation: `fadeIn 0.4s ease-out ${idx * 0.1}s backwards`}}
                                     >
                                         {/* UR Background Effect */}
                                         {isUR && <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-amber-100/40 to-transparent rounded-bl-full pointer-events-none"/>}
                                         
+                                        {isRecruited && (
+                                            <div className="absolute top-4 right-4 z-20 bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-md rotate-3">
+                                                <CheckCircle2 size={12}/> Recruited
+                                            </div>
+                                        )}
+
                                         <div className="p-6 relative z-10 flex flex-col h-full">
                                             {/* Header Info */}
                                             <div className="flex items-start gap-5 mb-5">
@@ -99,24 +108,28 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                                             {/* Recruit Button */}
                                             <button 
                                                 onClick={() => engine.recruitMember(s)} 
-                                                disabled={engine.gameState.members.length >= MAX_MEMBERS} 
+                                                disabled={isRecruited || engine.gameState.members.length >= MAX_MEMBERS} 
                                                 className={`
                                                     w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all active:scale-95
-                                                    ${engine.gameState.members.length >= MAX_MEMBERS
-                                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                                                        : isUR 
-                                                            ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200 hover:shadow-xl hover:from-amber-400 hover:to-orange-500'
-                                                            : 'bg-slate-900 text-white hover:bg-pink-500 shadow-lg shadow-slate-200 hover:shadow-pink-200'
+                                                    ${isRecruited 
+                                                        ? 'bg-emerald-50 text-emerald-500 border border-emerald-100 cursor-default'
+                                                        : (engine.gameState.members.length >= MAX_MEMBERS
+                                                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                                                            : isUR 
+                                                                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200 hover:shadow-xl hover:from-amber-400 hover:to-orange-500'
+                                                                : 'bg-slate-900 text-white hover:bg-pink-500 shadow-lg shadow-slate-200 hover:shadow-pink-200')
                                                     }
                                                 `}
                                             >
-                                                {engine.gameState.members.length >= MAX_MEMBERS ? (
+                                                {isRecruited ? (
+                                                    '已签约'
+                                                ) : (engine.gameState.members.length >= MAX_MEMBERS ? (
                                                     '名额已满'
                                                 ) : (
                                                     <>
                                                         <UserPlus size={16}/> 签约
                                                     </>
-                                                )}
+                                                ))}
                                             </button>
                                         </div>
                                     </div>

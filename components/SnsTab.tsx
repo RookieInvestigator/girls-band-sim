@@ -6,11 +6,12 @@ export const SnsTab = ({ engine }: { engine: any }) => {
     const isOffline = !engine.hasApiKey;
 
     return (
-        <div className="max-w-2xl mx-auto h-full pb-20 lg:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 flex flex-col h-full overflow-hidden relative">
+        <div className="max-w-2xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 lg:pb-0">
+            {/* Main Container - Natural Height */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 flex flex-col relative min-h-[500px]">
                 
-                {/* Header - Moved Badge to left */}
-                <div className="p-6 border-b border-slate-50 bg-white/90 backdrop-blur sticky top-0 z-20 flex items-center justify-between shrink-0">
+                {/* Sticky Header */}
+                <div className="p-6 border-b border-slate-50 bg-white/95 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between rounded-t-[2.5rem]">
                     <div className="flex items-center gap-4">
                         <h3 className="font-black text-xl text-slate-900 flex items-center gap-3 tracking-tight">
                             <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-sky-200">
@@ -32,12 +33,10 @@ export const SnsTab = ({ engine }: { engine: any }) => {
                             )}
                         </div>
                     </div>
-                    {/* Right side empty for floating bar */}
-                    <div className="w-24"></div> 
                 </div>
 
-                {/* Feed */}
-                <div className="flex-1 overflow-y-auto p-0 bg-slate-50">
+                {/* Feed - Natural Flow */}
+                <div className="flex-1 p-0 bg-slate-50 rounded-b-[2.5rem]">
                         {isOffline && (
                             <div className="p-4 m-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3 text-amber-700 text-xs font-bold">
                                 <div className="p-1.5 bg-amber-200 rounded-full"><WifiOff size={14}/></div>
@@ -48,11 +47,10 @@ export const SnsTab = ({ engine }: { engine: any }) => {
                         )}
 
                         {engine.gameState.snsPosts.map((p: SNSPost) => {
-                            // Logic to strip @ from display ID if present
                             const displayId = p.authorId ? p.authorId.replace(/^@/, '') : 'unknown';
                             
                             return (
-                            <div key={p.id} className={`p-6 border-b border-slate-100 bg-white hover:bg-slate-50/50 transition-colors ${p.type === 'rival' ? 'bg-[#0F172A] text-white hover:bg-[#1E293B] border-slate-800' : ''} ${p.type === 'system' ? 'bg-slate-50' : ''}`}>
+                            <div key={p.id} className={`p-6 border-b border-slate-100 bg-white hover:bg-slate-50/50 transition-colors last:rounded-b-[2.5rem] ${p.type === 'rival' ? 'bg-[#0F172A] text-white hover:bg-[#1E293B] border-slate-800' : ''} ${p.type === 'system' ? 'bg-slate-50' : ''}`}>
                                 
                                 {/* System Post Special Style */}
                                 {p.type === 'system' ? (
