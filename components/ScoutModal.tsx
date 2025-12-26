@@ -5,13 +5,13 @@ import { Member } from '../types';
 
 export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolean }) => {
     return (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[85vh] flex flex-col shadow-2xl relative overflow-hidden ring-1 ring-white/20 font-sans">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center p-4 animate-in fade-in duration-300 font-sans">
+            <div className="bg-white rounded-[2rem] w-full max-w-5xl h-full md:h-auto md:max-h-[85vh] flex flex-col shadow-2xl relative overflow-hidden ring-1 ring-white/20">
                 
                 {/* Clean Header matching app style */}
-                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white z-30 shrink-0">
+                <div className="px-6 md:px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white z-30 shrink-0">
                     <div>
-                        <h3 className="text-2xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
+                        <h3 className="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-3 tracking-tight">
                             <div className="p-2.5 bg-slate-900 rounded-xl text-white shadow-lg shadow-slate-200">
                                 <Search size={20}/>
                             </div>
@@ -30,7 +30,7 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                 </div>
                 
                 {/* Content Grid */}
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50 relative min-h-[300px]">
+                <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50 relative min-h-[300px]">
                     {engine.isRefreshingScout ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 animate-in fade-in duration-300 z-10 bg-slate-50/80 backdrop-blur-sm">
                             <div className="relative">
@@ -40,7 +40,7 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                             <p className="font-bold text-xs tracking-[0.2em] uppercase mt-6 text-slate-500">正在搜寻目标...</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 pb-8">
                             {engine.gameState.scoutPool.map((s: Member, idx: number) => {
                                 const isUR = s.id.startsWith('ur_');
                                 const displayName = (showNeta && s.netaName) ? s.netaName : s.name;
@@ -66,10 +66,10 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                                             </div>
                                         )}
 
-                                        <div className="p-6 relative z-10 flex flex-col h-full">
+                                        <div className="p-5 md:p-6 relative z-10 flex flex-col h-full">
                                             {/* Header Info */}
-                                            <div className="flex items-start gap-5 mb-5">
-                                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg shrink-0 relative overflow-hidden ${isUR ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-slate-900'}`}>
+                                            <div className="flex items-start gap-4 mb-4">
+                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-lg shrink-0 relative overflow-hidden ${isUR ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-slate-900'}`}>
                                                     {displayName[0]}
                                                     {isUR && <Sparkles size={16} className="absolute top-1 right-1 text-white/60 animate-pulse"/>}
                                                 </div>
@@ -90,7 +90,7 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                                             </div>
 
                                             {/* Tags */}
-                                            <div className="flex flex-wrap gap-1.5 mb-5">
+                                            <div className="flex flex-wrap gap-1.5 mb-4">
                                                 {s.tags.map((t: string) => (
                                                     <span key={t} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors ${isUR ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-slate-50 text-slate-600 border-slate-100 group-hover:bg-pink-50 group-hover:text-pink-600 group-hover:border-pink-100'}`}>
                                                         #{t}
@@ -140,11 +140,11 @@ export const ScoutModal = ({ engine, showNeta }: { engine: any, showNeta: boolea
                 </div>
                 
                 {/* Footer */}
-                <div className="p-6 border-t border-slate-100 flex justify-center bg-white z-30 shrink-0">
+                <div className="p-4 md:p-6 border-t border-slate-100 flex justify-center bg-white z-30 shrink-0">
                     <button 
                         onClick={engine.refreshScout} 
                         disabled={engine.isRefreshingScout || engine.gameState.money < engine.refreshCost} 
-                        className="px-8 py-3.5 rounded-full border-2 border-slate-100 text-xs font-black text-slate-600 uppercase tracking-widest hover:border-pink-500 hover:text-pink-500 hover:bg-pink-50 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 bg-white shadow-sm"
+                        className="w-full md:w-auto px-8 py-3.5 rounded-full border-2 border-slate-100 text-xs font-black text-slate-600 uppercase tracking-widest hover:border-pink-500 hover:text-pink-500 hover:bg-pink-50 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 bg-white shadow-sm"
                     >
                         <RefreshCw size={14} className={engine.isRefreshingScout ? 'animate-spin' : ''}/> 
                         刷新海报列表 <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-500 ml-1 font-bold">¥{engine.refreshCost}</span>

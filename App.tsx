@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Music, Users, Calendar, MessageCircle, Layout, Disc, Ticket, Star, Mic as MicIcon, Guitar, Zap, PenTool, Coins, Activity, Key, Settings, LogOut, Menu, ArrowRight, PlayCircle, Sparkles, Heart, Crown, Headphones, Trash2, ToggleLeft, ToggleRight
+  Music, Users, Calendar, MessageCircle, Layout, Disc, Ticket, Star, Coins, Settings
 } from 'lucide-react';
 import { useGameEngine } from './logic/game_engine';
-import { Role } from './types';
 import { TurnResultModal } from './components/TurnResultModal';
 import { DashboardTab } from './components/DashboardTab';
 import { ScheduleTab } from './components/ScheduleTab';
@@ -18,6 +17,8 @@ import { ScoutModal } from './components/ScoutModal';
 import { EventModal } from './components/EventModal';
 import { AiLoadingModal } from './components/AiLoadingModal';
 import { SkillTreeModal } from './components/SkillTreeModal';
+import { SettingsModal } from './components/SettingsModal';
+import { WelcomeScreen } from './components/WelcomeScreen';
 
 declare var process: { env: { API_KEY: string } };
 
@@ -86,86 +87,6 @@ const App = () => {
     { id: 'sns', icon: MessageCircle, label: 'SNS' },
   ];
 
-  // --- SETTINGS MODAL COMPONENT ---
-  const SettingsModal = () => (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-6 animate-in fade-in duration-200">
-        <div className="bg-white p-8 rounded-[2rem] w-full max-w-md shadow-2xl border border-slate-100 relative overflow-hidden">
-            <button 
-                onClick={() => setShowSettings(false)}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
-            >
-                <Settings size={20} />
-            </button>
-
-            <h3 className="font-black text-2xl mb-6 flex items-center gap-2 text-slate-900 uppercase tracking-tighter italic">
-                <Settings size={24} className="text-slate-900"/> 设置
-            </h3>
-
-            {/* --- Neta Name Toggle --- */}
-            <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                        <Sparkles size={18} className="text-amber-500"/>
-                        <span className="font-black text-sm text-slate-800">原典名显示 (Neta Mode)</span>
-                    </div>
-                    <button onClick={() => setShowNetaNames(!showNetaNames)} className="text-slate-400 hover:text-slate-900 transition-colors">
-                        {showNetaNames ? <ToggleRight size={32} className="text-rose-500 fill-rose-50"/> : <ToggleLeft size={32}/>}
-                    </button>
-                </div>
-                <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
-                    开启后，传说级角色将显示其致敬的原型角色名（如：鲸溶子 -> 丰川祥子）。
-                </p>
-            </div>
-
-            {/* --- API Key Section --- */}
-            <h4 className="font-black text-sm mb-2 flex items-center gap-2 text-slate-900 uppercase tracking-tighter">
-                <Key size={16} className="text-pink-500"/> API 设置
-            </h4>
-            <p className="text-xs font-bold text-slate-500 mb-4 leading-relaxed">
-                本游戏使用 Google Gemini AI 生成动态内容。
-                <br/>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-pink-500 hover:underline flex items-center gap-1 mt-1 font-black bg-pink-50 inline-block px-2 py-1 rounded">
-                    获取免费 API Key <ArrowRight size={10}/>
-                </a>
-            </p>
-            
-            {hasEnvKey ? (
-                <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-sm font-bold flex items-center gap-3 mb-6 border-2 border-emerald-100 border-dashed">
-                    <div className="p-2 bg-white rounded-full shadow-sm"><Zap size={16} fill="currentColor"/></div>
-                    API Key 已通过环境变量注入!
-                </div>
-            ) : (
-                <div className="space-y-4 mb-6">
-                    <div className="space-y-2">
-                        <input 
-                            type="password" 
-                            value={apiKeyInput}
-                            onChange={handleApiKeyChange}
-                            placeholder="在此粘贴您的 Key..."
-                            className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-mono outline-none focus:border-pink-500 focus:bg-white transition-all font-bold"
-                        />
-                    </div>
-                    {hasStoredKey && (
-                        <button 
-                            onClick={clearApiKey}
-                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 px-3 py-2 rounded-lg transition-colors w-full justify-center border border-rose-100"
-                        >
-                            <Trash2 size={12}/> 清除保存的 Key
-                        </button>
-                    )}
-                </div>
-            )}
-            
-            <button 
-                onClick={() => setShowSettings(false)}
-                className="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-pink-500 hover:-translate-y-1 transition-all shadow-xl shadow-slate-200 active:translate-y-0 active:shadow-none border-2 border-transparent"
-            >
-                保存并关闭
-            </button>
-        </div>
-    </div>
-  );
-
   // --- GIG OVERLAY ---
   if (engine.gameState.activeGig) {
       return (
@@ -177,111 +98,29 @@ const App = () => {
       );
   }
 
-  // --- WELCOME SCREEN (CLEAN URBAN MAGAZINE THEME) ---
+  // --- WELCOME SCREEN ---
   if (!engine.isStarted) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 font-sans relative overflow-hidden selection:bg-pink-100 selection:text-pink-600">
-        
-        {/* Background - Very subtle */}
-        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-white to-transparent pointer-events-none"/>
-        
-        {/* Settings Button */}
-        <button 
-            onClick={() => setShowSettings(true)}
-            className="absolute top-6 right-6 p-3 rounded-2xl bg-white text-slate-400 hover:text-slate-900 border border-slate-100 hover:border-slate-300 transition-all z-50 shadow-sm"
-        >
-            <Settings size={20} />
-        </button>
-
-        <div className="w-full max-w-5xl bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100 p-8 md:p-16 flex flex-col md:flex-row gap-12 md:gap-20 items-center relative overflow-hidden animate-in fade-in zoom-in duration-700">
-            
-            {/* Decorative Side Strip */}
-            <div className="absolute left-0 top-0 bottom-0 w-3 bg-rose-500 hidden md:block"/>
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-slate-50 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none opacity-50"/>
-
-            {/* Left: Brand & Intro */}
-            <div className="flex-1 space-y-8 relative z-10 text-center md:text-left w-full">
-                <div className="space-y-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
-                        <Star size={10} fill="currentColor"/>
-                        Band Simulator v1.0
-                    </div>
-                    <h1 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter leading-[0.9] italic">
-                        GIRLS'<br/>
-                        <span className="text-rose-500">BAND</span> LIFE
-                    </h1>
-                    <p className="text-slate-400 text-sm font-bold tracking-widest uppercase mt-4">
-                        从零开始的都市乐队物语
-                    </p>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">
-                        Artist Name
-                    </label>
-                    <div className="relative group max-w-sm mx-auto md:mx-0">
-                        <input 
-                            type="text" 
-                            value={playerNameInput}
-                            onChange={(e) => setPlayerNameInput(e.target.value)}
-                            placeholder={DEFAULT_PLAYER_NAME} 
-                            className="w-full bg-slate-50 border-2 border-slate-100 text-slate-900 font-bold text-lg py-4 px-6 rounded-2xl outline-none focus:border-rose-500 focus:bg-white transition-all placeholder:text-slate-300"
-                        />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none">
-                            <PenTool size={16}/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Right: Role Select */}
-            <div className="flex-1 w-full relative z-10">
-                <div className="flex items-center gap-3 mb-6 justify-center md:justify-start">
-                    <div className="h-px w-8 bg-slate-200"/>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Position</span>
-                    <div className="h-px w-full bg-slate-200 flex-1"/>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    {[
-                        { id: Role.Vocal, icon: MicIcon, label: 'Vocal', desc: '主唱 / 核心', bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100', hover: 'hover:border-rose-300' },
-                        { id: Role.Guitar, icon: Guitar, label: 'Guitar', desc: '吉他 / 旋律', bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-100', hover: 'hover:border-sky-300' },
-                        { id: Role.Bass, icon: Zap, label: 'Bass', desc: '贝斯 / 节奏', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', hover: 'hover:border-amber-300' },
-                        { id: Role.Drums, icon: Disc, label: 'Drums', desc: '鼓手 / 支柱', bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100', hover: 'hover:border-indigo-300' }
-                    ].map((role) => (
-                        <button
-                            key={role.id}
-                            onClick={() => {
-                                const finalName = playerNameInput.trim() || DEFAULT_PLAYER_NAME;
-                                engine.initGame(role.id, finalName)
-                            }}
-                            className={`group relative p-5 rounded-3xl border-2 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-100 bg-white ${role.border} ${role.hover}`}
-                        >
-                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-3 transition-colors ${role.bg} ${role.text} group-hover:scale-110 duration-300`}>
-                                <role.icon size={20}/>
-                            </div>
-                            <div>
-                                <div className="font-black text-slate-900 text-lg tracking-tight">{role.label}</div>
-                                <div className="text-[10px] font-bold text-slate-400 mt-0.5">{role.desc}</div>
-                            </div>
-                            <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                                <ArrowRight size={16} className="text-slate-300"/>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-        </div>
-
-        {/* Footer Credit */}
-        <div className="absolute bottom-6 text-[10px] font-bold text-slate-300 uppercase tracking-widest">
-            Tokyo Urban Story © 2024
-        </div>
-
-        {/* Render Settings Modal if open */}
-        {showSettings && <SettingsModal />}
-      </div>
+        <>
+            <WelcomeScreen 
+                engine={engine}
+                playerNameInput={playerNameInput}
+                setPlayerNameInput={setPlayerNameInput}
+                onOpenSettings={() => setShowSettings(true)}
+                defaultPlayerName={DEFAULT_PLAYER_NAME}
+            />
+            <SettingsModal 
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+                showNetaNames={showNetaNames}
+                setShowNetaNames={setShowNetaNames}
+                hasEnvKey={hasEnvKey}
+                hasStoredKey={hasStoredKey}
+                apiKeyInput={apiKeyInput}
+                handleApiKeyChange={handleApiKeyChange}
+                clearApiKey={clearApiKey}
+            />
+        </>
     );
   }
 
@@ -290,7 +129,17 @@ const App = () => {
     <div className="h-screen bg-[#F8FAFC] font-sans text-slate-900 flex overflow-hidden relative selection:bg-pink-100 selection:text-pink-600">
       
       {/* --- OVERLAYS --- */}
-      {showSettings && <SettingsModal />}
+      <SettingsModal 
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          showNetaNames={showNetaNames}
+          setShowNetaNames={setShowNetaNames}
+          hasEnvKey={hasEnvKey}
+          hasStoredKey={hasStoredKey}
+          apiKeyInput={apiKeyInput}
+          handleApiKeyChange={handleApiKeyChange}
+          clearApiKey={clearApiKey}
+      />
       {engine.showSkillTree && <SkillTreeModal engine={engine} />}
       {engine.isEventOpen && engine.activeEvent && <EventModal engine={engine} showNeta={showNetaNames} />}
       {engine.showScoutModal && <ScoutModal engine={engine} showNeta={showNetaNames} />}
@@ -342,17 +191,21 @@ const App = () => {
           
           {/* --- HEADER (Sticky) --- */}
           <header className="shrink-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-sm">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 md:gap-4">
+                  {/* Mobile Settings Trigger */}
+                  <button onClick={() => setShowSettings(true)} className="lg:hidden p-1 text-slate-400 hover:text-slate-900 transition-colors">
+                      <Settings size={20} />
+                  </button>
                   <div className="lg:hidden text-slate-900 font-black tracking-tight text-lg">BAND<span className="text-pink-500">SIM</span></div>
                   <div className="hidden lg:block font-black text-slate-900 tracking-tighter text-lg">
                       <span className="text-pink-500 mr-1">#</span>Week {engine.gameState.currentWeek}
                   </div>
               </div>
-              <div className="flex gap-4">
-                  <div className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+              <div className="flex gap-2 md:gap-4">
+                  <div className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-slate-600 bg-slate-100 px-2 md:px-3 py-1.5 rounded-xl border border-slate-200">
                       <Users size={14} className="text-pink-500"/> {engine.gameState.fans > 1000 ? (engine.gameState.fans/1000).toFixed(1) + 'k' : engine.gameState.fans}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                  <div className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-slate-600 bg-slate-100 px-2 md:px-3 py-1.5 rounded-xl border border-slate-200">
                       <Coins size={14} className="text-amber-500"/> ¥{engine.gameState.money > 1000 ? (engine.gameState.money/1000).toFixed(1) + 'k' : engine.gameState.money}
                   </div>
               </div>

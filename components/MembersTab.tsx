@@ -2,10 +2,10 @@
 import React, { useState, useMemo } from 'react';
 import { 
     Search, Heart, Music, Guitar, Star, Brain, PenTool, FileText, 
-    Sparkles, Zap, Coffee, MessageCircle, Gift, AlertCircle, Lock,
-    Activity, User, Crown, Terminal, Mic2, Disc, Keyboard,
-    Palette, Layers, Smile, DoorOpen, Clapperboard, Trash2,
-    Wind, Cloud, Slash, Megaphone, ArrowLeft, Music2, UserMinus
+    Sparkles, Zap, Clapperboard, Lock, Mic2, Disc, Keyboard,
+    Palette, Layers, Smile, DoorOpen, Trash2,
+    Wind, Cloud, Slash, Megaphone, ArrowLeft, Music2, UserMinus, User,
+    Crown, Activity
 } from 'lucide-react';
 import { Member, InteractionType, SelfActionType, ActionResult, Role } from '../types';
 import { INTERACTION_DATA } from '../data/interactions';
@@ -34,14 +34,13 @@ const StatRow = ({ label, value, icon: Icon, showMax = false }: any) => {
             <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
                 <div className="flex justify-between items-center leading-none">
                     <span className="text-xs font-bold text-slate-500">{label}</span>
-                    <div className="relative flex items-center justify-end group/badge">
-                        {/* Value Tooltip (Hidden by default, shown on hover) */}
-                        <span className="absolute right-full mr-2 opacity-0 group-hover/badge:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] font-bold px-1.5 py-0.5 rounded pointer-events-none tabular-nums shadow-sm z-10 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                        {/* Value restored for mobile accessibility, subtle style */}
+                        <span className="text-[10px] font-bold text-slate-300 tabular-nums">
                             {Math.floor(value)}
                         </span>
-                        
                         {/* Rank Badge */}
-                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded cursor-help ${rank.bg} ${rank.color}`}>
+                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${rank.bg} ${rank.color}`}>
                             {rank.label}
                         </span>
                     </div>
@@ -157,14 +156,17 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
         setSelectedMemberId(id);
         engine.setLastInteraction(null);
         setIsMobileDetailOpen(true); 
+        // Scroll to top of window to ensure visibility on mobile
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleBackToList = () => {
         setIsMobileDetailOpen(false);
     };
 
+    // Important: Removed 'h-full' and 'overflow-hidden' from containers to allow natural scrolling on mobile
     return (
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 animate-in fade-in duration-500 pb-0 relative items-start h-full">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 animate-in fade-in duration-500 pb-0 relative items-start">
             
             {/* --- CUSTOM CONFIRM MODAL --- */}
             {showFireConfirm && (
@@ -257,13 +259,14 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
             </div>
 
             {/* --- RIGHT: DATA PANEL (MASTER-DETAIL) --- */}
+            {/* Removed internal scrolling constraints to allow page scroll */}
             <div className={`
-                flex-1 bg-white rounded-[2.5rem] border border-slate-200 shadow-sm flex-col relative min-w-0 overflow-hidden
+                flex-1 bg-white rounded-[2.5rem] border border-slate-200 shadow-sm flex-col relative
                 ${isMobileDetailOpen ? 'flex' : 'hidden lg:flex'}
             `}>
                 
                 {/* 1. HEADER (Breathing Room) */}
-                <div className="px-8 py-8 border-b border-slate-100 flex flex-col gap-6 bg-slate-50/30 relative shrink-0">
+                <div className="px-6 md:px-8 py-8 border-b border-slate-100 flex flex-col gap-6 bg-slate-50/30 relative shrink-0 rounded-t-[2.5rem]">
                     
                     {/* Mobile Nav */}
                     <div className="flex items-center justify-between lg:hidden mb-1">
@@ -342,8 +345,8 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                     </div>
                 </div>
 
-                {/* 2. STATS GRID (Spacious) */}
-                <div className="p-8 relative bg-white flex-1 min-h-0 overflow-y-auto">
+                {/* 2. STATS GRID (Spacious) - Removed internal scroll */}
+                <div className="p-6 md:p-8 bg-white relative">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10">
                         {/* Live */}
                         <div className="space-y-4">
@@ -393,7 +396,7 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                 </div>
 
                 {/* 3. INTERACTION FOOTER (Action Tiles) */}
-                <div className="px-8 py-6 bg-slate-50 border-t border-slate-200 shrink-0">
+                <div className="px-6 md:px-8 py-6 bg-slate-50 border-t border-slate-200 shrink-0 rounded-b-[2.5rem]">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <Zap size={16} className="text-slate-400"/>
