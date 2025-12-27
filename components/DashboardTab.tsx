@@ -3,14 +3,48 @@ import { useState, useMemo } from 'react';
 import { 
     Music, Star, Zap, Disc, Sword, Activity, Sparkles, Book, Lock, Smile, Coffee, 
     ChevronRight, Check, Users, Coins, TrendingUp, Crown, ArrowRight, Radio, 
-    Megaphone, Newspaper, Command, LayoutGrid, Heart, Mic2, BarChart3, PenTool
+    Megaphone, Newspaper, Command, LayoutGrid, Heart, Mic2, BarChart3, PenTool,
+    Skull, Flame, Sun, Moon, Cloud, Umbrella, Anchor, X, Hexagon,
+    Bird, Cat, Dog, Fish, Rabbit, Bug,
+    Flower, Leaf, TreeDeciduous, Droplets, Snowflake, Wind,
+    Gem, Gift, GlassWater, Headphones, Key, Map, Rocket, Trophy, Watch,
+    Atom, Award, Compass, Cookie, Feather, Ghost, Globe, GraduationCap, IceCream,
+    Infinity, Joystick, Lightbulb, Magnet, Medal, Palette, Plane, Puzzle, Scissors,
+    Shirt, Speaker, Ticket, Wand, Banana, Cherry, Pizza, Candy, Bike
 } from 'lucide-react';
 import { BandState } from '../types';
 import { SKILL_TREE } from '../data/skills';
 
+// --- ICON MAP FOR PICKER (Expanded) ---
+const BAND_ICONS: Record<string, any> = {
+    // Basics
+    'crown': Crown, 'music': Music, 'zap': Zap, 'star': Star, 'heart': Heart,
+    'skull': Skull, 'flame': Flame, 'sun': Sun, 'moon': Moon, 'cloud': Cloud,
+    'umbrella': Umbrella, 'anchor': Anchor, 'mic': Mic2, 'disc': Disc, 'sword': Sword,
+    
+    // Animals
+    'bird': Bird, 'cat': Cat, 'dog': Dog, 'fish': Fish, 'rabbit': Rabbit, 'bug': Bug,
+    
+    // Nature
+    'flower': Flower, 'leaf': Leaf, 'tree': TreeDeciduous, 'water': Droplets, 'snow': Snowflake, 'wind': Wind,
+    
+    // Objects
+    'gem': Gem, 'gift': Gift, 'glass': GlassWater, 'headphones': Headphones, 'key': Key, 'map': Map,
+    'rocket': Rocket, 'trophy': Trophy, 'watch': Watch,
+    
+    // Abstract / Misc
+    'atom': Atom, 'award': Award, 'coffee': Coffee, 'compass': Compass, 'cookie': Cookie,
+    'feather': Feather, 'ghost': Ghost, 'globe': Globe, 'grad': GraduationCap, 'icecream': IceCream,
+    'infinity': Infinity, 'joystick': Joystick, 'lightbulb': Lightbulb, 'magnet': Magnet,
+    'medal': Medal, 'palette': Palette, 'plane': Plane, 'puzzle': Puzzle, 'scissors': Scissors,
+    'shirt': Shirt, 'smile': Smile, 'speaker': Speaker, 'ticket': Ticket, 'wand': Wand,
+    'banana': Banana, 'cherry': Cherry, 'pizza': Pizza, 'candy': Candy, 'bike': Bike
+};
+
 export const DashboardTab = ({ engine }: { engine: any }) => {
-    const { gameState, setBandState, setShowSkillTree } = engine;
+    const { gameState, setBandState, setShowSkillTree, updateBandIcon } = engine;
     const stats = gameState.teamStats;
+    const [showIconPicker, setShowIconPicker] = useState(false);
 
     const isStateUnlocked = (s: BandState) => {
         if (s === BandState.Normal) return true;
@@ -25,6 +59,9 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
             default: return { label: 'NORMAL', desc: '标准平衡', bg: 'bg-slate-900', text: 'text-white' };
         }
     };
+
+    // Current Band Icon
+    const BandIcon = BAND_ICONS[gameState.bandIconId || 'crown'] || Crown;
 
     // Progress to Budokan (100,000 fans)
     const rawProgress = (gameState.fans / 100000) * 100;
@@ -60,86 +97,124 @@ export const DashboardTab = ({ engine }: { engine: any }) => {
     );
 
     return (
-        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 font-sans h-full">
+        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500 font-sans h-full relative">
             
-            {/* --- HEADER (Floating Capsule) --- */}
-            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-50 to-white pointer-events-none"/>
-                
-                <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
-                    <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-slate-200">
-                        <Crown size={24} className="text-pink-500 fill-pink-500"/>
+            {/* --- ICON PICKER MODAL --- */}
+            {showIconPicker && (
+                <div className="absolute top-24 left-6 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 animate-in zoom-in-95 duration-200 w-72">
+                    <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-black uppercase tracking-widest text-slate-400">Select Icon</span>
+                        <button onClick={() => setShowIconPicker(false)} className="text-slate-400 hover:text-slate-600"><X size={16}/></button>
                     </div>
-                    <div>
-                        <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                            <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider border border-slate-200">
-                                Week {gameState.currentWeek}
-                            </span>
-                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider text-white ${gameState.bandState === BandState.Serious ? 'bg-amber-500' : (gameState.bandState === BandState.Relaxed ? 'bg-emerald-500' : 'bg-slate-400')}`}>
-                                {gameState.bandState}
-                            </span>
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 leading-[0.9]">
-                            {gameState.bandName || 'NO NAME'}
-                        </h1>
+                    <div className="grid grid-cols-5 gap-2 max-h-[320px] overflow-y-auto pr-1 scrollbar-hide">
+                        {Object.entries(BAND_ICONS).map(([key, IconComponent]) => (
+                            <button
+                                key={key}
+                                onClick={() => { updateBandIcon(key); setShowIconPicker(false); }}
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${gameState.bandIconId === key ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
+                                title={key}
+                            >
+                                <IconComponent size={20}/>
+                            </button>
+                        ))}
                     </div>
                 </div>
+            )}
 
-                <div className="relative z-10 flex items-center gap-6 bg-slate-50 px-6 py-3 rounded-2xl border border-slate-100">
-                    <div className="text-center">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Rating</div>
-                        <div className="text-3xl font-black italic text-slate-900 leading-none">{stats.totalRating}</div>
+            {/* --- HEADER (Editorial Style) --- */}
+            <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group min-h-[140px] flex items-center">
+                {/* Decorative Elements */}
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-slate-50 rounded-full pointer-events-none"/>
+                <div className="absolute right-20 bottom-[-20px] w-20 h-20 bg-rose-50 rounded-full pointer-events-none"/>
+                
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8 w-full">
+                    
+                    <div className="flex items-center gap-6 w-full md:w-auto">
+                        {/* Logo Mark */}
+                        <button 
+                            onClick={() => setShowIconPicker(!showIconPicker)}
+                            className="w-20 h-20 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-2xl hover:scale-105 hover:rotate-3 transition-all shrink-0 active:scale-95 group/icon relative"
+                        >
+                            <BandIcon size={36} className="text-white group-hover/icon:text-rose-400 transition-colors"/>
+                            <div className="absolute top-0 left-0 w-full h-1 bg-white/20"/>
+                        </button>
+                        
+                        {/* Typography */}
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-1">Artist Profile</span>
+                            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] truncate max-w-2xl">
+                                {gameState.bandName || 'NO NAME'}
+                            </h1>
+                        </div>
                     </div>
-                    <div className="w-px h-8 bg-slate-200"/>
-                    <div className="text-center">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Fans</div>
-                        <div className="text-xl font-black text-slate-900 leading-none">{gameState.fans > 1000 ? (gameState.fans/1000).toFixed(1) + 'k' : gameState.fans}</div>
+
+                    {/* Rating Stamp */}
+                    <div className="relative shrink-0 group/rating cursor-default">
+                        <div className="absolute inset-0 bg-rose-500 blur-2xl opacity-20 group-hover/rating:opacity-30 transition-opacity"/>
+                        <div className="relative w-24 h-24 flex items-center justify-center">
+                            <svg className="absolute inset-0 w-full h-full text-slate-900 animate-[spin_10s_linear_infinite] opacity-10" viewBox="0 0 100 100">
+                                <path id="curve" d="M 20 50 A 30 30 0 1 1 80 50 A 30 30 0 1 1 20 50" fill="transparent" />
+                                <text width="100%">
+                                    <textPath href="#curve" className="text-[10px] font-black uppercase tracking-widest fill-current">
+                                        Band Rank System • Band Rank System •
+                                    </textPath>
+                                </text>
+                            </svg>
+                            <div className="text-5xl font-black text-rose-500 italic tracking-tighter drop-shadow-sm">
+                                {stats.totalRating}
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
                 
-                {/* 1. HERO CARD (Col 8) */}
-                <div className="md:col-span-8 bg-slate-900 text-white rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden flex flex-col justify-between min-h-[360px] group shadow-2xl">
-                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-rose-600/20 via-purple-900/40 to-transparent rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none animate-pulse"/>
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay"/>
+                {/* 1. HERO CARD (Budokan) */}
+                <div className="md:col-span-8 bg-slate-900 text-white rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden flex flex-col justify-between min-h-[320px] group shadow-2xl">
+                    {/* Background Art */}
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-purple-600/30 via-rose-600/10 to-transparent rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none animate-pulse"/>
+                    <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-600/20 to-transparent rounded-full -ml-20 -mb-20 blur-3xl pointer-events-none"/>
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"/>
                     
-                    {/* Top Row */}
+                    {/* Top Row: Clean Label */}
                     <div className="relative z-10 flex justify-between items-start">
-                        <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5 flex items-center gap-2">
-                            <Crown size={12} className="text-rose-400 fill-rose-400"/> 
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-100">Target: Budokan</span>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em] mb-1">Next Goal</span>
+                            <div className="text-2xl font-black italic tracking-tighter uppercase text-white flex items-center gap-2">
+                                <Crown size={20} className="text-amber-400 fill-amber-400"/>
+                                {gameState.fans >= 100000 ? 'WORLD TOUR' : 'BUDOKAN'}
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Next Goal</div>
-                            <div className="text-lg font-black italic">{gameState.fans >= 100000 ? 'WORLD TOUR' : '100,000 Fans'}</div>
+                        <div className="bg-white/5 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                            {Math.floor(rawProgress)}% Complete
                         </div>
                     </div>
 
-                    {/* Middle: Big Number */}
-                    <div className="relative z-10 flex flex-col justify-center flex-1 my-6">
-                        <div className="flex items-baseline gap-2 md:gap-4 flex-wrap">
-                            <div className="text-6xl md:text-8xl font-black tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-slate-500 drop-shadow-sm">
+                    {/* Middle: Big Number - Optimized to prevent clipping */}
+                    <div className="relative z-10 flex flex-col justify-center flex-1 my-4">
+                        <div className="flex items-baseline flex-wrap">
+                            {/* Added pr-4 to prevent right-side clipping of italic fonts */}
+                            <div className="text-7xl md:text-9xl font-black tracking-tighter leading-none text-white drop-shadow-2xl pr-4 -ml-1">
                                 {gameState.fans.toLocaleString()}
                             </div>
-                            <span className="text-xl md:text-2xl font-black text-rose-500 tracking-widest uppercase">Fans</span>
+                            <span className="text-xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-amber-400 tracking-[0.2em] uppercase self-end mb-2 md:mb-4">
+                                Fans
+                            </span>
                         </div>
-                        <p className="text-xs md:text-sm text-slate-400 font-medium max-w-md mt-2 leading-relaxed">
-                            距离武道馆还有 <span className="text-white font-bold">{Math.max(0, 100000 - gameState.fans).toLocaleString()}</span> 名粉丝。保持势头，继续前进！
-                        </p>
                     </div>
 
-                    {/* Bottom: Progress */}
+                    {/* Bottom: Progress Bar */}
                     <div className="relative z-10 mt-auto">
-                        <div className="flex justify-between items-end mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-                            <span>Road to Legend</span>
-                            <span className="text-white">{Math.floor(rawProgress)}%</span>
-                        </div>
-                        <div className="h-5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/10 p-1 shadow-inner">
-                            <div className="h-full rounded-full bg-gradient-to-r from-rose-500 via-pink-500 to-amber-400 relative overflow-hidden transition-all duration-1000" style={{width: `${progress}%`}}>
+                        <div className="h-4 w-full bg-slate-800 rounded-full overflow-hidden border border-white/10 p-0.5 shadow-inner">
+                            <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 relative overflow-hidden transition-all duration-1000" style={{width: `${progress}%`}}>
                                 <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"/>
                             </div>
+                        </div>
+                        <div className="flex justify-between mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                            <span>0</span>
+                            <span>Target: 100,000</span>
                         </div>
                     </div>
                 </div>

@@ -32,7 +32,7 @@ export const VOCALS: Member[] = [
   },
   {
       id: 'n_20', name: '石川 瑠璃', roles: [Role.Vocal],
-      musicality: 70, technique: 40, stagePresence: 70, creativity: 30, mental: 40,
+      musicality: 60, technique: 40, stagePresence: 70, creativity: 30, mental: 40,
       fatigue: 0, stress: 20, affection: 70, personality: '拥有宝石般眼眸的混血儿，拥有天使般的歌喉和纯真无邪的性格。',
       tags: ['天然', '偶像'], interactionsLeft: 2, composing: 20, lyrics: 20, arrangement: 10, design: 40,
       favoriteGenres: [MusicGenre.Pop, MusicGenre.Ballad], favoriteLyricThemes: [LyricTheme.Fantasy, LyricTheme.Love],
@@ -52,10 +52,19 @@ export const VOCALS: Member[] = [
       id: 'n_22', name: '戌亥 篝', roles: [Role.Vocal, Role.Guitar],
       musicality: 50, technique: 40, stagePresence: 30, creativity: 55, mental: 60,
       fatigue: 0, stress: 0, affection: 90, personality: '喜欢在河边弹唱民谣的森系女孩，声音有种让时间静止的治愈感。',
-      tags: ['治愈', '吟游诗人'], interactionsLeft: 2, composing: 50, lyrics: 50, arrangement: 20, design: 30,
+      tags: ['治愈', '吟游诗人'], interactionsLeft: 2, composing: 50, lyrics: 50, arrangement: 15, design: 30,
       favoriteGenres: [MusicGenre.Folk, MusicGenre.Ballad], favoriteLyricThemes: [LyricTheme.Poetic, LyricTheme.Youth],
       screenName: 'Bonfire @camp_songs',
       snsStyle: '野营、篝火和木吉他的照片，给人一种暖洋洋的感觉。'
+  },
+  {
+      id: 'n_37', name: '豪德寺 炎', roles: [Role.Vocal],
+      musicality: 45, technique: 30, stagePresence: 80, creativity: 25, mental: 75,
+      fatigue: 0, stress: 10, affection: 50, personality: '前暴走族总长，嗓音沙哑充满爆发力。虽然看起来很凶，但对认可的伙伴极度护短。',
+      tags: ['不良', '大姐头', '热血'], interactionsLeft: 2, composing: 10, lyrics: 40, arrangement: 10, design: 40,
+      favoriteGenres: [MusicGenre.Punk, MusicGenre.Hardcore], favoriteLyricThemes: [LyricTheme.Rebellion, LyricTheme.Youth],
+      screenName: 'Blaze @onigami',
+      snsStyle: '全是和机车的合影，或者用全是汉字的句子鼓励队友。'
   },
 
   // --- Standard Vocals ---

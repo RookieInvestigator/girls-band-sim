@@ -48,6 +48,24 @@ export const SPECIALISTS: Member[] = [
       screenName: 'Hiiro @red_string',
       snsStyle: '每天发几十条关于练习的内容，偶尔夹杂着一些“想要独占”的危险发言。'
   },
+  {
+      id: 'n_36', name: '风雅 千鸟', roles: [Role.Saxophone],
+      musicality: 65, technique: 65, stagePresence: 40, creativity: 70, mental: 35,
+      fatigue: 0, stress: 20, affection: 30, personality: '总是使用最新型的电子管乐器 (EWI)，看起来像个科幻电影里的未来人。气息控制力惊人。',
+      tags: ['未来人', '电波', '器材党'], interactionsLeft: 2, composing: 50, lyrics: 20, arrangement: 70, design: 60,
+      favoriteGenres: [MusicGenre.Electronic, MusicGenre.Jazz], favoriteLyricThemes: [LyricTheme.SciFi],
+      screenName: 'Wind_Digital @ewi_future',
+      snsStyle: '发布充满赛博朋克感的霓虹灯照片和电子合成音色试听。'
+  },
+  {
+      id: 'n_39', name: '眠井 寐', roles: [Role.DJ],
+      musicality: 60, technique: 40, stagePresence: 20, creativity: 60, mental: 70,
+      fatigue: 0, stress: 0, affection: 40, personality: '总是抱着抱枕的Lo-Fi女孩，能在站着的时候睡着，但混音时绝不出错。',
+      tags: ['随性', '治愈', '家里蹲'], interactionsLeft: 2, composing: 50, lyrics: 10, arrangement: 60, design: 30,
+      favoriteGenres: [MusicGenre.IndieRock, MusicGenre.Electronic], favoriteLyricThemes: [LyricTheme.Youth],
+      screenName: 'Sleepy @lofi_study',
+      snsStyle: '没有任何文字，只有Lo-Fi HipHop直播间的截图。'
+  },
 
   // --- Standard Specialists ---
   { 

@@ -48,6 +48,24 @@ export const KEYBOARDS: Member[] = [
       screenName: 'Uta @free_piano',
       snsStyle: '发一些即兴演奏的片段，配文通常是“不想练琴”。'
   },
+  {
+      id: 'n_32', name: '零度以下P', roles: [Role.Keyboard, Role.Producer],
+      musicality: 50, technique: 45, stagePresence: 20, creativity: 80, mental: 30,
+      fatigue: 0, stress: 40, affection: 15, personality: '知名的Vocaloid职人，随身带着平板电脑。',
+      tags: ['技术宅', 'VocaloidP', '三无'], interactionsLeft: 2, composing: 80, lyrics: 60, arrangement: 75, design: 50,
+      favoriteGenres: [MusicGenre.Denpa, MusicGenre.Electronic], favoriteLyricThemes: [LyricTheme.SciFi, LyricTheme.Dark],
+      screenName: '零度以下P @zero_synth',
+      snsStyle: '只发新歌的工程文件截图，或者“新曲投稿了”的链接，非常高冷。'
+  },
+  {
+      id: 'n_38', name: '一色 論', roles: [Role.Producer, Role.Keyboard],
+      musicality: 60, technique: 50, stagePresence: 40, creativity: 75, mental: 60,
+      fatigue: 0, stress: 10, affection: 30, personality: '总是穿着白大褂的理科狂人，把音乐视为化学实验，追求“究极的反应”。',
+      tags: ['怪人', '学霸', '技术宅'], interactionsLeft: 2, composing: 70, lyrics: 30, arrangement: 80, design: 20,
+      favoriteGenres: [MusicGenre.Techno, MusicGenre.MathRock], favoriteLyricThemes: [LyricTheme.SciFi, LyricTheme.Philosophy],
+      screenName: 'Dr.Isshiki @sound_lab',
+      snsStyle: '发布一些复杂的合成器连线图。”。'
+  },
 
   // --- Standard Keyboards ---
   { 

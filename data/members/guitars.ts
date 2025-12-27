@@ -48,6 +48,15 @@ export const GUITARS: Member[] = [
       screenName: 'Ito @handmade_life',
       snsStyle: '分享自己制作的可爱玩偶和刺绣过程。'
   },
+  {
+      id: 'n_34', name: '绯月 罗瑟', roles: [Role.Guitar],
+      musicality: 65, technique: 75, stagePresence: 60, creativity: 40, mental: 40,
+      fatigue: 0, stress: 20, affection: 20, personality: '使用七弦吉他的大小姐，热爱红茶与新古典主义金属，认为超高速演奏是优雅的体现。',
+      tags: ['大小姐', '完美主义', '视觉系'], interactionsLeft: 2, composing: 50, lyrics: 30, arrangement: 60, design: 50,
+      favoriteGenres: [MusicGenre.SymphonicMetal, MusicGenre.Classic], favoriteLyricThemes: [LyricTheme.Classic, LyricTheme.Fantasy],
+      screenName: 'Rose @scarlet_moon',
+      snsStyle: '用词极其考究，经常发布精致的茶具和凶残的吉他Solo视频。'
+  },
 
   // --- Standard Guitars ---
   { 

@@ -37,6 +37,7 @@ export const TAG_MODIFIERS: Record<string, {
     '无情': { successRate: 20, statsBonus: { technique: 0.8, affection: -10.0 } }, 
 
     // === NEW SPECIAL TAGS ===
+    'VocaloidP': { statsBonus: { composing: 1.2, arrangement: 1.0, affection: -0.5 }, fans: 40, stressMult: 1.1 },
     '和风': { statsBonus: { technique: 0.4, design: 0.4 }, fans: 15 },
     '吟游诗人': { fatigueMult: 0.7, statsBonus: { mental: 0.3 }, fans: 10 },
     '贵族': { money: 1000, stressMult: 1.8, statsBonus: { design: 0.5 } }, 
@@ -122,6 +123,7 @@ export const TAG_BAND_MODIFIERS: Record<string, Partial<BandStats>> = {
     '无情': { precision: 1.5, technique: 1.3, stability: 1.4 }, 
 
     // === NEW SPECIAL TAGS ===
+    'VocaloidP': { melody: 1.4, detail: 1.3, topic: 1.2, interaction: 0.7 },
     '和风': { visual: 1.25, tone: 1.2, technique: 1.1 },
     '吟游诗人': { narrative: 1.3, connection: 1.1 },
     '贵族': { visual: 1.3, aura: 1.3, connection: 0.8 },

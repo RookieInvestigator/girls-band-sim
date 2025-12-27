@@ -1,11 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { 
     Search, Heart, Music, Guitar, Star, Brain, PenTool, FileText, 
     Sparkles, Zap, Clapperboard, Lock, Mic2, Disc, Keyboard,
     Palette, Layers, Smile, DoorOpen, Trash2,
     Wind, Cloud, Slash, Megaphone, ArrowLeft, Music2, UserMinus, User,
-    Crown, Activity
+    Crown, Activity, Camera, Upload
 } from 'lucide-react';
 import { Member, InteractionType, SelfActionType, ActionResult, Role } from '../types';
 import { INTERACTION_DATA } from '../data/interactions';
@@ -48,6 +48,34 @@ const StatRow = ({ label, value, icon: Icon, showMax = false }: any) => {
                 <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full transition-all duration-1000 ease-out ${rank.bar}`} style={{ width: `${widthPct}%` }}/>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// --- NEW COMPONENT: VITAL CARD ---
+const VitalCard = ({ label, value, icon: Icon, color, max = 100 }: any) => {
+    const pct = Math.min(100, (value / max) * 100);
+    
+    // Color schemes
+    const schemes: Record<string, any> = {
+        rose: { bg: 'bg-rose-50', text: 'text-rose-600', bar: 'bg-rose-500', border: 'border-rose-100' },
+        indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600', bar: 'bg-indigo-500', border: 'border-indigo-100' },
+        amber: { bg: 'bg-amber-50', text: 'text-amber-600', bar: 'bg-amber-500', border: 'border-amber-100' }
+    };
+    const s = schemes[color] || schemes.rose;
+
+    return (
+        <div className={`flex flex-col gap-1.5 p-2.5 rounded-2xl border ${s.bg} ${s.border} w-full`}>
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1.5">
+                    <Icon size={12} className={s.text}/>
+                    <span className={`text-[10px] font-black uppercase tracking-wider ${s.text} opacity-80`}>{label}</span>
+                </div>
+                <span className={`text-xs font-black ${s.text}`}>{value}</span>
+            </div>
+            <div className="h-1.5 w-full bg-white/60 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-700 ${s.bar}`} style={{width: `${pct}%`}}/>
             </div>
         </div>
     );
@@ -137,6 +165,7 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
     const [showFireConfirm, setShowFireConfirm] = useState(false);
     const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false); 
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const selectedMember = useMemo(() => 
         engine.gameState.members.find((m: Member) => m.id === (selectedMemberId || 'leader')) || engine.gameState.members[0]
@@ -162,6 +191,23 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
 
     const handleBackToList = () => {
         setIsMobileDetailOpen(false);
+    };
+
+    const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && selectedMember) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (typeof reader.result === 'string') {
+                    engine.updateMemberAvatar(selectedMember.id, reader.result);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const triggerUpload = () => {
+        fileInputRef.current?.click();
     };
 
     // Important: Removed 'h-full' and 'overflow-hidden' from containers to allow natural scrolling on mobile
@@ -232,11 +278,20 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                                         : 'bg-white border-transparent hover:border-slate-200 text-slate-500 hover:text-slate-900 hover:shadow-sm'}
                                 `}
                             >
+                                <div className="relative">
+                                    {m.avatarUrl ? (
+                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
+                                            <img src={m.avatarUrl} alt={m.name} className="w-full h-full object-cover" />
+                                        </div>
+                                    ) : (
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm bg-white/10 text-current border border-white/10`}>
+                                            {m.name[0]}
+                                        </div>
+                                    )}
+                                    {m.isLeader && <div className="absolute -top-1 -right-1 text-amber-400"><Crown size={12} fill="currentColor"/></div>}
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                        <div className="font-bold text-sm truncate">{getDisplayName(m)}</div>
-                                        {m.isLeader && <Crown size={12} className="text-amber-400 fill-amber-400"/>}
-                                    </div>
+                                    <div className="font-bold text-sm truncate">{getDisplayName(m)}</div>
                                     <div className={`text-[10px] uppercase tracking-wider flex items-center gap-1 ${isSelected ? 'text-slate-400' : 'text-slate-400'}`}>
                                         <RoleIcon role={m.roles[0]} size={12}/> {m.roles[0]}
                                     </div>
@@ -265,81 +320,91 @@ export const MembersTab = ({ engine, showNeta }: { engine: any, showNeta: boolea
                 ${isMobileDetailOpen ? 'flex' : 'hidden lg:flex'}
             `}>
                 
-                {/* 1. HEADER (Breathing Room) */}
-                <div className="px-6 md:px-8 py-8 border-b border-slate-100 flex flex-col gap-6 bg-slate-50/30 relative shrink-0 rounded-t-[2.5rem]">
+                {/* 1. HEADER (Redesigned) */}
+                <div className="p-6 md:p-8 pb-0 flex flex-col gap-6 relative shrink-0">
                     
-                    {/* Mobile Nav */}
-                    <div className="flex items-center justify-between lg:hidden mb-1">
+                    {/* Top Controls (Back Only on Mobile) */}
+                    <div className="flex items-center justify-between mb-2 lg:hidden">
                         <button onClick={handleBackToList} className="flex items-center gap-2 text-sm font-bold text-slate-500">
                             <ArrowLeft size={16}/> Back
                         </button>
-                        {!selectedMember?.isLeader && (
-                            <button onClick={() => setShowFireConfirm(true)} className="p-2 text-slate-400 hover:text-rose-500">
-                                <Trash2 size={18}/>
-                            </button>
-                        )}
                     </div>
 
-                    <div className="flex flex-col lg:flex-row justify-between items-start gap-6">
-                        <div className="flex-1 min-w-0 space-y-3">
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none truncate">
+                    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                        {/* Avatar Section */}
+                        <div 
+                            className="relative group shrink-0 cursor-pointer w-32 h-32 md:w-36 md:h-36 mx-auto md:mx-0"
+                            onClick={triggerUpload}
+                        >
+                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+                            <div className="w-full h-full rounded-[2rem] overflow-hidden shadow-xl border-4 border-white bg-slate-100 relative ring-1 ring-slate-100">
+                                {selectedMember?.avatarUrl ? (
+                                    <img src={selectedMember.avatarUrl} alt={selectedMember.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
+                                        <span className="text-5xl font-black opacity-20">{selectedMember?.name[0]}</span>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white backdrop-blur-[2px]">
+                                    <Camera size={24}/>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Info Section */}
+                        <div className="flex-1 flex flex-col justify-center text-center md:text-left w-full relative">
+                            
+                            {/* Name Row */}
+                            <div className="flex flex-col md:flex-row items-center md:items-baseline gap-2 md:gap-3 mb-2 justify-center md:justify-start">
+                                <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">
                                     {getDisplayName(selectedMember)}
                                 </h2>
                                 {selectedMember?.isLeader && (
-                                    <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-100">
-                                        <Crown size={10} className="fill-amber-500"/> LEADER
+                                    <span className="bg-amber-100 text-amber-600 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border border-amber-200">
+                                        Leader
                                     </span>
                                 )}
                             </div>
-                            
-                            <div className="flex flex-wrap gap-2">
-                                <span className="px-3 py-1 rounded-lg bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                                    <User size={12}/> {selectedMember?.roles.join('/')}
+
+                            {/* Tags & Role Row */}
+                            <div className="flex flex-wrap gap-2 mb-4 justify-center md:justify-start items-center">
+                                {/* Role Pill */}
+                                <span className="px-3 py-1 rounded-full bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                                    <RoleIcon role={selectedMember?.roles[0]} size={10}/>
+                                    {selectedMember?.roles.join(' / ')}
                                 </span>
+
+                                {/* Other Tags */}
                                 {selectedMember?.tags.map((t: string) => (
-                                    <span key={t} className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+                                    <span key={t} className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                                         #{t}
                                     </span>
                                 ))}
                             </div>
 
-                            <div className="text-sm text-slate-500 font-medium italic leading-relaxed line-clamp-2 max-w-2xl pt-1">
+                            {/* Description */}
+                            <div className="text-sm text-slate-500 font-medium leading-relaxed line-clamp-2 max-w-xl mx-auto md:mx-0 mb-4">
                                 "{getDisplayDesc(selectedMember)}"
                             </div>
-                        </div>
 
-                        <div className="flex gap-4">
-                            {/* Vitals - Larger, Cleaner Card */}
-                            <div className="flex items-center gap-6 shrink-0 bg-white px-6 py-4 rounded-2xl border border-slate-100 shadow-sm w-full lg:w-auto justify-around lg:justify-start">
-                                <div className="flex flex-col items-center gap-1">
-                                    <div className="text-[9px] font-black uppercase text-rose-500 tracking-wider">Bond</div>
-                                    <div className="flex items-center gap-1.5 text-xl font-black text-slate-800">
-                                        <Heart size={16} className="fill-rose-500 text-rose-500"/>{selectedMember?.affection}
-                                    </div>
-                                </div>
-                                <div className="w-px h-8 bg-slate-100"/>
-                                <div className="flex flex-col items-center gap-1">
-                                    <div className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Stress</div>
-                                    <span className={`text-xl font-black ${selectedMember?.stress > 80 ? 'text-rose-500' : 'text-slate-800'}`}>{selectedMember?.stress}</span>
-                                </div>
-                                <div className="w-px h-8 bg-slate-100"/>
-                                <div className="flex flex-col items-center gap-1">
-                                    <div className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Fatigue</div>
-                                    <span className={`text-xl font-black ${selectedMember?.fatigue > 80 ? 'text-amber-500' : 'text-slate-800'}`}>{selectedMember?.fatigue}</span>
-                                </div>
+                            {/* Vitals Row - Visually Enhanced Cards */}
+                            <div className="grid grid-cols-3 gap-3 w-full max-w-md mx-auto md:mx-0 mb-2">
+                                <VitalCard label="羁绊" value={selectedMember?.affection} icon={Heart} color="rose" max={120} />
+                                <VitalCard label="压力" value={selectedMember?.stress} icon={Activity} color="indigo" />
+                                <VitalCard label="疲劳" value={selectedMember?.fatigue} icon={Zap} color="amber" />
                             </div>
 
-                            {/* Dismiss Button Moved Here */}
+                            {/* Dismiss Button - Weakened & Moved to Bottom Right of Header */}
                             {!selectedMember?.isLeader && (
-                                <button 
-                                    onClick={() => setShowFireConfirm(true)}
-                                    className="hidden lg:flex flex-col items-center justify-center w-20 bg-white rounded-2xl border border-slate-100 shadow-sm text-slate-300 hover:text-rose-500 hover:border-rose-100 hover:bg-rose-50 transition-all gap-1"
-                                    title="Dismiss"
-                                >
-                                    <UserMinus size={20}/>
-                                    <span className="text-[8px] font-bold uppercase tracking-widest">Fire</span>
-                                </button>
+                                <div className="absolute right-0 bottom-0 hidden md:block">
+                                    <button 
+                                        onClick={() => setShowFireConfirm(true)}
+                                        className="text-[10px] font-bold text-slate-300 hover:text-rose-400 flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-rose-50"
+                                        title="解雇成员"
+                                    >
+                                        <UserMinus size={12}/> 解雇
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>

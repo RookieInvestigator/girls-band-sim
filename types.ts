@@ -144,7 +144,7 @@ export enum ScheduleAction {
   PhotoSession = '宣发写真拍摄',
 
   // Leisure
-  SugarIntake = '放松：糖分摄入', // Renamed & Moved from TechoTime
+  SugarIntake = '放松：糖分摄入', // Renamed & Moved from Solo
   TeaTime = '练习室茶话会',
   GameCenter = '街机厅团建',
   GroupTrip = '海边采风旅行',
@@ -255,7 +255,8 @@ export interface Member {
   favoriteGenres?: MusicGenre[]; 
   favoriteLyricThemes?: LyricTheme[];
   screenName?: string; 
-  snsStyle?: string;   
+  snsStyle?: string; 
+  avatarUrl?: string; // NEW: Custom avatar support  
 }
 
 export interface BandStats {
@@ -439,6 +440,7 @@ export interface GameState {
   money: number;
   fans: number;
   bandName: string;
+  bandIconId?: string; // NEW: Custom band icon
   teamStats: BandStats;
   members: Member[];
   history: string[];

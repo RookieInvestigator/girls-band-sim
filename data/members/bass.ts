@@ -48,6 +48,15 @@ export const BASSISTS: Member[] = [
       screenName: 'Mint @cool_line',
       snsStyle: '只在有新歌发布时转发，平时没有任何动静。'
   },
+  {
+      id: 'n_35', name: '栗 古', roles: [Role.Bass],
+      musicality: 50, technique: 70, stagePresence: 65, creativity: 30, mental: 40,
+      fatigue: 0, stress: 30, affection: 20, personality: '总是戴着狐狸面具的知名贝斯翻奏UP主。在网上很健谈，现实中却害怕掉马甲。',
+      tags: ['网络歌手', '技术流', '反差萌'], interactionsLeft: 2, composing: 25, lyrics: 10, arrangement: 50, design: 45,
+      favoriteGenres: [MusicGenre.Funk, MusicGenre.PopRock], favoriteLyricThemes: [LyricTheme.Party],
+      screenName: 'Click-B @click_bass',
+      snsStyle: '经常发布高难度的Slap挑战视频，非常在意点赞数和播放量。'
+  },
 
   // --- Standard Bassists ---
   { 

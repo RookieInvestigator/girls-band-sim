@@ -31,7 +31,7 @@ export const DRUMMERS: Member[] = [
       snsStyle: '全是熊猫头套的搞怪自拍，或者讲冷笑话。'
   },
   {
-      id: 'n_27', name: '铁 轮', roles: [Role.Drums],
+      id: 'n_27', name: '井上 轮', roles: [Role.Drums],
       musicality: 35, technique: 60, stagePresence: 45, creativity: 30, mental: 70,
       fatigue: 0, stress: 0, affection: 40, personality: '铁匠铺的女儿，手臂肌肉发达，能连续敲击双踩两小时不累。',
       tags: ['体力怪物', '技术流'], interactionsLeft: 2, composing: 15, lyrics: 10, arrangement: 30, design: 15,
@@ -47,6 +47,15 @@ export const DRUMMERS: Member[] = [
       favoriteGenres: [MusicGenre.Jazz, MusicGenre.Shoegaze], favoriteLyricThemes: [LyricTheme.Absurdist, LyricTheme.Sea],
       screenName: 'Yume @bubble_pop',
       snsStyle: '发一些意识流的短句，或者深夜的街道照片。'
+  },
+  {
+      id: 'n_33', name: '桃井 芙芙', roles: [Role.Drums],
+      musicality: 30, technique: 55, stagePresence: 70, creativity: 40, mental: 60,
+      fatigue: 0, stress: 0, affection: 80, personality: '把架子鼓装饰得像糖果屋一样的原宿系少女。虽然外表可爱，但打鼓的力道大得惊人，擅长重金属双踩。',
+      tags: ['反差萌', '吉祥物', '元气'], interactionsLeft: 2, composing: 20, lyrics: 20, arrangement: 15, design: 80,
+      favoriteGenres: [MusicGenre.PopPunk, MusicGenre.Metal], favoriteLyricThemes: [LyricTheme.Cute, LyricTheme.Party],
+      screenName: 'CottonCandy @pink_drum',
+      snsStyle: '全是粉红色的滤镜、毛绒玩具和暴力的鼓谱。'
   },
 
   // --- Standard Drummers ---

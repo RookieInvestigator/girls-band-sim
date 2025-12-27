@@ -121,6 +121,17 @@ export const useGameEngine = () => {
 
   // --- ACTIONS ---
 
+  const updateMemberAvatar = (memberId: string, url: string) => {
+      setGameState(prev => ({
+          ...prev,
+          members: prev.members.map(m => m.id === memberId ? { ...m, avatarUrl: url } : m)
+      }));
+  };
+
+  const updateBandIcon = (iconId: string) => {
+      setGameState(prev => ({ ...prev, bandIconId: iconId }));
+  };
+
   const unlockSkill = (skillId: string) => {
       const skill = SKILL_TREE.find(s => s.id === skillId);
       if (!skill) return;
@@ -669,6 +680,7 @@ export const useGameEngine = () => {
     unlockSkill, showSkillTree, setShowSkillTree,
     setBandState,
     fireMember,
+    updateMemberAvatar, updateBandIcon,
     hasApiKey, setHasApiKey 
   };
 };
