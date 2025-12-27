@@ -255,8 +255,7 @@ export interface Member {
   favoriteGenres?: MusicGenre[]; 
   favoriteLyricThemes?: LyricTheme[];
   screenName?: string; 
-  snsStyle?: string; 
-  customAvatar?: string; // NEW: User uploaded avatar base64
+  snsStyle?: string;   
 }
 
 export interface BandStats {
@@ -460,7 +459,7 @@ export interface GameState {
   actionCounts: Record<string, number>;
   currentNews: string[];
   rawChemistry: number; 
-  completedEvents: string[]; 
+  completedEvents: string[]; // NEW: Track unique events
 }
 
 export interface EventOption {

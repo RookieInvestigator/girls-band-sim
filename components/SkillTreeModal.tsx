@@ -10,34 +10,38 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
     const COLUMNS = [
         { 
             id: 'friendship', label: 'KIZUNA', sub: '羁绊·心态', icon: Heart, 
-            color: 'text-rose-600', bg: 'bg-rose-50',
-            nodeLocked: 'bg-white text-slate-300',
-            nodeUnlockable: 'bg-white text-rose-600 ring-2 ring-rose-100 shadow-md',
-            nodeUnlocked: 'bg-rose-500 text-white shadow-rose-200 shadow-lg',
+            color: 'text-rose-600', border: 'border-rose-200', bg: 'bg-rose-50',
+            barColor: 'bg-rose-500',
+            nodeLocked: 'bg-white border-slate-200 text-slate-300',
+            nodeUnlockable: 'bg-white border-rose-400 text-rose-600 ring-2 ring-rose-100',
+            nodeUnlocked: 'bg-rose-500 border-rose-500 text-white shadow-rose-200',
             lineActive: '#f43f5e', lineInactive: '#e2e8f0'
         },
         { 
             id: 'passion', label: 'KIRAMEKI', sub: '闪耀·魅力', icon: Flame, 
-            color: 'text-amber-600', bg: 'bg-amber-50',
-            nodeLocked: 'bg-white text-slate-300',
-            nodeUnlockable: 'bg-white text-amber-600 ring-2 ring-amber-100 shadow-md',
-            nodeUnlocked: 'bg-amber-500 text-white shadow-amber-200 shadow-lg',
+            color: 'text-amber-600', border: 'border-amber-200', bg: 'bg-amber-50',
+            barColor: 'bg-amber-500',
+            nodeLocked: 'bg-white border-slate-200 text-slate-300',
+            nodeUnlockable: 'bg-white border-amber-400 text-amber-600 ring-2 ring-amber-100',
+            nodeUnlocked: 'bg-amber-500 border-amber-500 text-white shadow-amber-200',
             lineActive: '#f59e0b', lineInactive: '#e2e8f0'
         },
         { 
             id: 'technique', label: 'OTO', sub: '技艺·实力', icon: Star, 
-            color: 'text-sky-600', bg: 'bg-sky-50',
-            nodeLocked: 'bg-white text-slate-300',
-            nodeUnlockable: 'bg-white text-sky-600 ring-2 ring-sky-100 shadow-md',
-            nodeUnlocked: 'bg-sky-500 text-white shadow-sky-200 shadow-lg',
+            color: 'text-sky-600', border: 'border-sky-200', bg: 'bg-sky-50',
+            barColor: 'bg-sky-500',
+            nodeLocked: 'bg-white border-slate-200 text-slate-300',
+            nodeUnlockable: 'bg-white border-sky-400 text-sky-600 ring-2 ring-sky-100',
+            nodeUnlocked: 'bg-sky-500 border-sky-500 text-white shadow-sky-200',
             lineActive: '#0ea5e9', lineInactive: '#e2e8f0'
         },
         { 
             id: 'commercial', label: 'PRODUCE', sub: '运营·策略', icon: Briefcase, 
-            color: 'text-slate-600', bg: 'bg-slate-50',
-            nodeLocked: 'bg-white text-slate-300',
-            nodeUnlockable: 'bg-white text-slate-600 ring-2 ring-slate-100 shadow-md',
-            nodeUnlocked: 'bg-slate-700 text-white shadow-slate-200 shadow-lg',
+            color: 'text-slate-600', border: 'border-slate-200', bg: 'bg-slate-50',
+            barColor: 'bg-slate-600',
+            nodeLocked: 'bg-white border-slate-200 text-slate-300',
+            nodeUnlockable: 'bg-white border-slate-400 text-slate-600 ring-2 ring-slate-100',
+            nodeUnlocked: 'bg-slate-700 border-slate-700 text-white shadow-slate-200',
             lineActive: '#475569', lineInactive: '#e2e8f0'
         },
     ];
@@ -70,13 +74,13 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
 
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[120] flex items-center justify-center p-4 animate-in fade-in duration-300 font-sans">
-            <div className="bg-white rounded-[3rem] w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl relative overflow-hidden">
+            <div className="bg-white rounded-[2rem] w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl relative overflow-hidden ring-1 ring-white/20">
                 
                 {/* Compact Header */}
-                <div className="px-8 py-6 flex justify-between items-center bg-white z-20 shrink-0 shadow-sm">
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white z-20 shrink-0 shadow-sm">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-slate-900 rounded-xl text-white shadow-lg shadow-slate-200">
-                            <Book size={20}/>
+                        <div className="p-2 bg-slate-900 rounded-xl text-white shadow-lg shadow-slate-200">
+                            <Book size={18}/>
                         </div>
                         <div>
                             <h3 className="text-xl font-black text-slate-900 tracking-tight">队长手记</h3>
@@ -85,13 +89,13 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                     </div>
                     
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-2xl">
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Available PP</span>
                             <span className="text-xl font-black text-rose-500 leading-none">{gameState.skillPoints}</span>
                         </div>
                         <button 
                             onClick={() => engine.setShowSkillTree(false)} 
-                            className="p-3 rounded-full hover:bg-slate-50 text-slate-400 hover:text-slate-900 transition-colors"
+                            className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
                         >
                             <X size={20}/>
                         </button>
@@ -124,7 +128,7 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                     <div key={col.id} className="flex flex-col relative group">
                                         
                                         {/* Column Header */}
-                                        <div className="flex items-center gap-3 mb-6 sticky top-0 z-20 py-3 bg-white/95 backdrop-blur-sm rounded-2xl px-4 shadow-sm">
+                                        <div className="flex items-center gap-3 mb-6 sticky top-0 z-20 py-3 bg-slate-50/95 backdrop-blur-sm rounded-xl border border-slate-100 px-4 shadow-sm">
                                             <div className={`w-8 h-8 rounded-lg ${col.bg} ${col.color} flex items-center justify-center shrink-0`}>
                                                 <col.icon size={16}/>
                                             </div>
@@ -186,17 +190,17 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                                         <button
                                                             onClick={() => setSelectedNodeId(node.id)}
                                                             className={`
-                                                                w-full max-w-[200px] h-full rounded-2xl flex items-center px-3 gap-2 transition-all duration-200 text-left relative overflow-hidden
+                                                                w-full max-w-[200px] h-full rounded-lg flex items-center px-3 gap-2 transition-all duration-200 border-2 text-left relative overflow-hidden
                                                                 ${cardStyle}
-                                                                ${isSelected ? 'transform scale-105 shadow-xl z-20' : 'shadow-sm hover:-translate-y-0.5'}
-                                                                ${isLocked ? 'opacity-60 cursor-default bg-slate-100 shadow-none' : 'cursor-pointer'}
+                                                                ${isSelected ? 'transform scale-105 shadow-md ring-2 ring-offset-1 ring-slate-300 z-20' : 'shadow-sm hover:-translate-y-0.5'}
+                                                                ${isLocked ? 'opacity-60 cursor-default' : 'cursor-pointer'}
                                                             `}
                                                         >
                                                             {/* Background Progress/Fill for Unlocked */}
                                                             {isUnlocked && <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"/>}
 
                                                             {/* Icon State */}
-                                                            <div className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${isUnlocked ? 'bg-white/20' : 'bg-slate-200'}`}>
+                                                            <div className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${isUnlocked ? 'bg-white/20' : 'bg-slate-100'}`}>
                                                                 {isUnlocked ? <Check size={12} strokeWidth={4} className="text-white"/> : (isLocked ? <Lock size={10} className="text-slate-400"/> : <ArrowUp size={12} className={col.color}/>)}
                                                             </div>
 
@@ -224,14 +228,14 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                 </div>
 
                 {/* Compact Inspector Panel */}
-                <div className="bg-white p-6 shrink-0 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative">
+                <div className="bg-white border-t border-slate-200 p-4 shrink-0 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative">
                     <div className="max-w-5xl mx-auto w-full">
                         {selectedNode && selectedColumn ? (
                             <div className="flex flex-row gap-6 items-center justify-between animate-in slide-in-from-bottom-2 duration-300">
                                 {/* Left: Info */}
                                 <div className="flex-1 min-w-0 space-y-1">
                                     <div className="flex items-center gap-2">
-                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${selectedColumn.bg} ${selectedColumn.color}`}>
+                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border ${selectedColumn.border} ${selectedColumn.color} bg-white`}>
                                             {selectedColumn.label}
                                         </span>
                                         <h2 className="text-lg font-black text-slate-900 leading-none tracking-tight truncate">
@@ -246,7 +250,7 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                 {/* Right: Action */}
                                 <div className="shrink-0">
                                     {gameState.unlockedSkills.includes(selectedNode.id) ? (
-                                        <div className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-400 font-black uppercase tracking-widest text-xs flex items-center gap-2 select-none">
+                                        <div className="px-6 py-3 rounded-xl bg-slate-100 text-slate-400 font-black uppercase tracking-widest text-xs border border-slate-200 flex items-center gap-2 select-none">
                                             <Check size={14}/> Learned
                                         </div>
                                     ) : (
@@ -260,10 +264,10 @@ export const SkillTreeModal = ({ engine }: { engine: any }) => {
                                                     onClick={handleUnlock}
                                                     disabled={!isUnlockable}
                                                     className={`
-                                                        px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all min-w-[140px]
+                                                        px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all min-w-[140px]
                                                         ${isUnlockable 
-                                                            ? 'bg-slate-900 text-white hover:bg-rose-500 hover:shadow-lg active:scale-95 cursor-pointer shadow-md' 
-                                                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                            ? 'bg-slate-900 text-white hover:bg-rose-500 hover:shadow-lg active:scale-95 cursor-pointer' 
+                                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                                                         }
                                                     `}
                                                 >
